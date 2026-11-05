@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "grandatlas:block/glowworm_silk_plant"
+  }
+}

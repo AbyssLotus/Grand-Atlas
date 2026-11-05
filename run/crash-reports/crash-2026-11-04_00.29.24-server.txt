@@ -1,0 +1,950 @@
+---- Minecraft Crash Report ----
+// Don't be sad, have a hug! <3
+
+Time: 2026-11-04 00:29:24
+Description: Watching Server
+
+java.lang.Error: ServerWatchdog detected that a single server tick took 60.01 seconds (should be max 0.05) (Watching Server)
+	at java.base/jdk.internal.misc.Unsafe.park(Native Method) ~[?:?] {}
+	at java.base/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:271) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.waitForTasks(BlockableEventLoop.java:160) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.managedBlock(BlockableEventLoop.java:150) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerChunkCache.getChunk(ServerChunkCache.java:169) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:214) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.LevelReader.getChunk(LevelReader.java:134) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:209) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerLevel.setChunkForced(ServerLevel.java:1645) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.changeForceLoad(ForceLoadCommand.java:186) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.lambda$register$1(ForceLoadCommand.java:76) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand$$Lambda/0x000000008fd19bc8.run(Unknown Source) ~[?:?] {}
+	at com.mojang.brigadier.context.ContextChain.runExecutable(ContextChain.java:73) ~[brigadier-1.3.11.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:29) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:13) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction.lambda$bind$0(UnboundEntryAction.java:8) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction$$Lambda/0x000000009018d820.execute(Unknown Source) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.CommandQueueEntry.execute(CommandQueueEntry.java:5) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.ExecutionContext.runCommandQueue(ExecutionContext.java:100) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.executeCommandInContext(Commands.java:419) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performCommand(Commands.java:343) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performPrefixedCommand(Commands.java:319) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer.lambda$runCommand$0(DedicatedServer.java:731) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer$$Lambda/0x00000000901879e8.run(Unknown Source) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:68) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop$$Lambda/0x0000000090187c18.get(Unknown Source) ~[?:?] {}
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.TickTask.run(TickTask.java:18) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:165) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:917) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:190) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:140) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTaskInternal(MinecraftServer.java:900) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTask(MinecraftServer.java:894) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:121) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.waitUntilNextTick(MinecraftServer.java:863) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:763) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:299) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer$$Lambda/0x0000000090020de0.run(Unknown Source) ~[?:?] {}
+	at java.base/java.lang.Thread.runWith(Thread.java:1487) ~[?:?] {}
+	at java.base/java.lang.Thread.run(Thread.java:1474) [?:?] {}
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Server Watchdog
+Stacktrace:
+	at java.base/jdk.internal.misc.Unsafe.park(Native Method) ~[?:?] {}
+	at java.base/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:271) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.waitForTasks(BlockableEventLoop.java:160) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.managedBlock(BlockableEventLoop.java:150) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerChunkCache.getChunk(ServerChunkCache.java:169) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:214) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.LevelReader.getChunk(LevelReader.java:134) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:209) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerLevel.setChunkForced(ServerLevel.java:1645) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.changeForceLoad(ForceLoadCommand.java:186) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.lambda$register$1(ForceLoadCommand.java:76) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand$$Lambda/0x000000008fd19bc8.run(Unknown Source) ~[?:?] {}
+	at com.mojang.brigadier.context.ContextChain.runExecutable(ContextChain.java:73) ~[brigadier-1.3.11.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:29) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:13) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction.lambda$bind$0(UnboundEntryAction.java:8) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction$$Lambda/0x000000009018d820.execute(Unknown Source) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.CommandQueueEntry.execute(CommandQueueEntry.java:5) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.ExecutionContext.runCommandQueue(ExecutionContext.java:100) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.executeCommandInContext(Commands.java:419) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performCommand(Commands.java:343) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performPrefixedCommand(Commands.java:319) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer.lambda$runCommand$0(DedicatedServer.java:731) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer$$Lambda/0x00000000901879e8.run(Unknown Source) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:68) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop$$Lambda/0x0000000090187c18.get(Unknown Source) ~[?:?] {}
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789) ~[?:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.TickTask.run(TickTask.java:18) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:165) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:917) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:190) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:140) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTaskInternal(MinecraftServer.java:900) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTask(MinecraftServer.java:894) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:121) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.waitUntilNextTick(MinecraftServer.java:863) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:763) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:299) ~[minecraft-patched-26.3.0.99.jar:?] {neoforge:access_transformer}
+-- Thread Dump --
+Details:
+	Threads: 
+"RCON Listener #1" prio=8 Id=109 RUNNABLE
+	at java.base@25.0.1/sun.nio.ch.Net.poll(Native Method)
+	at java.base@25.0.1/sun.nio.ch.NioSocketImpl.park(NioSocketImpl.java:190)
+	at java.base@25.0.1/sun.nio.ch.NioSocketImpl.timedAccept(NioSocketImpl.java:706)
+	at java.base@25.0.1/sun.nio.ch.NioSocketImpl.accept(NioSocketImpl.java:748)
+	at java.base@25.0.1/java.net.ServerSocket.implAccept(ServerSocket.java:593)
+	at java.base@25.0.1/java.net.ServerSocket.platformImplAccept(ServerSocket.java:560)
+	at java.base@25.0.1/java.net.ServerSocket.implAccept(ServerSocket.java:536)
+	at java.base@25.0.1/java.net.ServerSocket.implAccept(ServerSocket.java:482)
+	at java.base@25.0.1/java.net.ServerSocket.accept(ServerSocket.java:441)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.rcon.thread.RconThread.run(RconThread.java:39)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+	Number of locked synchronizers = 1
+	- java.util.concurrent.locks.ReentrantLock$NonfairSync@76d02f70
+
+
+"RCON Client /127.0.0.1 #2" prio=8 Id=116 WAITING on java.util.concurrent.CompletableFuture$Signaller@5ce99e53
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.CompletableFuture$Signaller@5ce99e53
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:223)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$Signaller.block(CompletableFuture.java:1885)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.unmanagedBlock(ForkJoinPool.java:4364)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.managedBlock(ForkJoinPool.java:4310)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture.waitingGet(CompletableFuture.java:1919)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture.join(CompletableFuture.java:2138)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.executeBlocking(BlockableEventLoop.java:90)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer.runCommand(DedicatedServer.java:731)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.rcon.thread.RconClient.run(RconClient.java:70)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"main" prio=5 Id=3 WAITING on java.lang.Thread@4dd37e3e
+	at java.base@25.0.1/java.lang.Object.wait0(Native Method)
+	-  waiting on java.lang.Thread@4dd37e3e
+	at java.base@25.0.1/java.lang.Object.wait(Object.java:389)
+	at java.base@25.0.1/java.lang.Thread.join(Thread.java:1887)
+	at java.base@25.0.1/java.lang.Thread.join(Thread.java:1963)
+	at app//net.neoforged.fml.startup.Server.main(Server.java:26)
+	at java.base@25.0.1/java.lang.invoke.LambdaForm$DMH/0x000000008f040800.invokeStatic(LambdaForm$DMH)
+	at java.base@25.0.1/java.lang.invoke.LambdaForm$MH/0x000000008f041c00.invoke(LambdaForm$MH)
+	at java.base@25.0.1/java.lang.invoke.Invokers$Holder.invokeExact_MT(Invokers$Holder)
+	at java.base@25.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invokeImpl(DirectMethodHandleAccessor.java:155)
+	at java.base@25.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base@25.0.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at app//net.neoforged.devlaunch.Main.main(Main.java:57)
+
+
+"IO-Worker-10" prio=5 Id=118 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-11" prio=5 Id=117 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-12" prio=8 Id=119 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-2" prio=5 Id=105 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-4" prio=5 Id=106 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-5" prio=5 Id=108 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-6" prio=8 Id=111 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"IO-Worker-9" prio=8 Id=114 TIMED_WAITING on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.SynchronousQueue$Transferer@5625b4fa
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:408)
+	at java.base@25.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+	at java.base@25.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1015)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"Server thread" prio=8 Id=100 TIMED_WAITING on java.lang.String@76485d86
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.lang.String@76485d86
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:271)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.waitForTasks(BlockableEventLoop.java:160)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.managedBlock(BlockableEventLoop.java:150)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerChunkCache.getChunk(ServerChunkCache.java:169)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:214)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.LevelReader.getChunk(LevelReader.java:134)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.Level.getChunk(Level.java:209)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.level.ServerLevel.setChunkForced(ServerLevel.java:1645)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.changeForceLoad(ForceLoadCommand.java:186)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand.lambda$register$1(ForceLoadCommand.java:76)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.commands.ForceLoadCommand$$Lambda/0x000000008fd19bc8.run(Unknown Source)
+	at app//com.mojang.brigadier.context.ContextChain.runExecutable(ContextChain.java:73)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:29)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.tasks.ExecuteCommand.execute(ExecuteCommand.java:13)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction.lambda$bind$0(UnboundEntryAction.java:8)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.UnboundEntryAction$$Lambda/0x000000009018d820.execute(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.CommandQueueEntry.execute(CommandQueueEntry.java:5)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.execution.ExecutionContext.runCommandQueue(ExecutionContext.java:100)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.executeCommandInContext(Commands.java:419)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performCommand(Commands.java:343)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.commands.Commands.performPrefixedCommand(Commands.java:319)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer.lambda$runCommand$0(DedicatedServer.java:731)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.DedicatedServer$$Lambda/0x00000000901879e8.run(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:68)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop$$Lambda/0x0000000090187c18.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.TickTask.run(TickTask.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:165)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:917)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.doRunTask(MinecraftServer.java:190)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:140)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTaskInternal(MinecraftServer.java:900)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.pollTask(MinecraftServer.java:894)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:121)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.waitUntilNextTick(MinecraftServer.java:863)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:763)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:299)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.MinecraftServer$$Lambda/0x0000000090020de0.run(Unknown Source)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"Attach Listener" daemon prio=5 Id=18 RUNNABLE
+
+
+"FileSystemWatchService" daemon prio=5 Id=78 RUNNABLE (in native)
+	at java.base@25.0.1/sun.nio.fs.WindowsNativeDispatcher.GetQueuedCompletionStatus0(Native Method)
+	at java.base@25.0.1/sun.nio.fs.WindowsNativeDispatcher.GetQueuedCompletionStatus(WindowsNativeDispatcher.java:993)
+	at java.base@25.0.1/sun.nio.fs.WindowsWatchService$Poller.run(WindowsWatchService.java:585)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+	at java.base@25.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:148)
+
+
+"Netty NIO IO #0" daemon prio=8 Id=103 RUNNABLE
+	at java.base@25.0.1/sun.nio.ch.WEPoll.wait(Native Method)
+	at java.base@25.0.1/sun.nio.ch.WEPollSelectorImpl.doSelect(WEPollSelectorImpl.java:108)
+	at java.base@25.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:130)
+	-  locked io.netty.channel.nio.SelectedSelectionKeySet@1b7be769
+	-  locked sun.nio.ch.WEPollSelectorImpl@26b19445
+	at java.base@25.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:142)
+	at app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:62)
+	at app//io.netty.channel.nio.NioIoHandler.select(NioIoHandler.java:668)
+	at app//io.netty.channel.nio.NioIoHandler.run(NioIoHandler.java:434)
+	at app//io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at app//io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at app//io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1204)
+	at app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+	Number of locked synchronizers = 1
+	- java.util.concurrent.locks.ReentrantLock$NonfairSync@12214978
+
+
+"Notification Thread" daemon prio=9 Id=33 RUNNABLE
+
+
+"Reference Handler" daemon prio=10 Id=15 RUNNABLE
+	at java.base@25.0.1/java.lang.ref.Reference.waitForReferencePendingList(Native Method)
+	at java.base@25.0.1/java.lang.ref.Reference.processPendingReferences(Reference.java:246)
+	at java.base@25.0.1/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:208)
+
+
+"Server Watchdog" daemon prio=8 Id=110 RUNNABLE
+	at java.management@25.0.1/sun.management.ThreadImpl.dumpThreads0(Native Method)
+	at java.management@25.0.1/sun.management.ThreadImpl.dumpAllThreads(ThreadImpl.java:505)
+	at java.management@25.0.1/sun.management.ThreadImpl.dumpAllThreads(ThreadImpl.java:493)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.Util.dumpThreadInfo(Util.java:535)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.ServerWatchdog.createWatchdogCrashReport(ServerWatchdog.java:90)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.ServerWatchdog.run(ServerWatchdog.java:57)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"Signal Dispatcher" daemon prio=9 Id=17 RUNNABLE
+
+
+"buildTerrain" daemon prio=5 Id=82 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:68)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:32)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem$$Lambda/0x0000000090110fc0.apply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext.getBiome(MaterialRuleContext.java:111)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.condition.BiomeCondition$1.compute(BiomeCondition.java:39)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext$LazyYCondition.test(MaterialRuleContext.java:315)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=84 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=85 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=86 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=87 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.ZeroBitStorage.get(ZeroBitStorage.java:35)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.PalettedContainer.get(PalettedContainer.java:147)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.PalettedContainer.get(PalettedContainer.java:142)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.LevelChunkSection.getNoiseBiome(LevelChunkSection.java:193)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ChunkAccess.getNoiseBiome(ChunkAccess.java:429)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ProtoChunk.getNoiseBiome(ProtoChunk.java:234)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.LevelReader.getNoiseBiome(LevelReader.java:65)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:68)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:32)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem$$Lambda/0x0000000090110fc0.apply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext.getBiome(MaterialRuleContext.java:111)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.condition.BiomeCondition$1.compute(BiomeCondition.java:39)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext$LazyYCondition.test(MaterialRuleContext.java:315)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=88 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=89 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=90 RUNNABLE
+	at java.base@25.0.1/java.lang.StrictMath.hypot(StrictMath.java:2202)
+	at java.base@25.0.1/java.lang.Math.hypot(Math.java:2775)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.landform.DuneSea.star(DuneSea.java:173)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.landform.DuneSea.dunes(DuneSea.java:123)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.landform.DuneSea.shape(DuneSea.java:78)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.AtlasCore.blend(AtlasCore.java:1087)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.AtlasCore.sample(AtlasCore.java:273)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.AtlasCore.sample(AtlasCore.java:240)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.AtlasCore.sample(AtlasCore.java:235)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.ColumnCache.get(ColumnCache.java:28)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.AtlasCore.column(AtlasCore.java:230)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.Passages.nodeCell(Passages.java:158)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.Passages.edgeCell(Passages.java:199)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.Passages.chunk(Passages.java:764)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.Passages.column(Passages.java:719)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.core.Passages.carve(Passages.java:612)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.world.GrandCaves$Sampler.value(GrandCaves.java:104)
+	at TRANSFORMER/grandatlas@0.9.0/com.seaweed.grandatlas.world.GrandCaves$Sampler.sampleVolume(GrandCaves.java:79)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.densityfunction.op.BinaryFunction$MinSampler.sampleVolume(BinaryFunction.java:325)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.densityfunction.op.BinaryFunction$AddSampler.sampleVolume(BinaryFunction.java:157)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.densityfunction.DensitySampler$Bound.sampleVolume(DensitySampler.java:35)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.densityfunction.DensitySampler$Bound.sampleVolume(DensitySampler.java:40)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.doFill(NoiseBasedChunkGenerator.java:411)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:381)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=91 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=92 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext$LazyYCondition.test(MaterialRuleContext.java:315)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=93 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:168)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=94 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.LevelChunkSection.setBlockState(LevelChunkSection.java:63)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.LevelChunkSection.setBlockState(LevelChunkSection.java:57)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ProtoChunk.setBlockState(ProtoChunk.java:133)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ChunkAccess.setBlockState(ChunkAccess.java:124)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem$1.setBlock(MaterialSystem.java:106)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:183)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=95 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.LevelChunkSection.setBlockState(LevelChunkSection.java:63)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.LevelChunkSection.setBlockState(LevelChunkSection.java:57)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ProtoChunk.setBlockState(ProtoChunk.java:133)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.chunk.ChunkAccess.setBlockState(ChunkAccess.java:124)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem$1.setBlock(MaterialSystem.java:106)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:183)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=96 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:68)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.biome.BiomeManager.getBiome(BiomeManager.java:32)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem$$Lambda/0x0000000090110fc0.apply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext.getBiome(MaterialRuleContext.java:111)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.condition.BiomeCondition$1.compute(BiomeCondition.java:39)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialRuleContext$LazyYCondition.test(MaterialRuleContext.java:315)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule.lambda$compile$0(ConditionRule.java:27)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.ConditionRule$$Lambda/0x0000000090112170.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule.lambda$compile$0(SequenceRule.java:33)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.rule.SequenceRule$$Lambda/0x00000000901123a0.tryApply(Unknown Source)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:181)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"buildTerrain" daemon prio=5 Id=97 RUNNABLE
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.material.MaterialSystem.buildSurface(MaterialSystem.java:168)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.buildSurface(NoiseBasedChunkGenerator.java:222)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator.lambda$buildTerrain$0(NoiseBasedChunkGenerator.java:391)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator$$Lambda/0x0000000090110240.get(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor.lambda$forName$1(TracingExecutor.java:18)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.TracingExecutor$$Lambda/0x00000000900c66a8.run(Unknown Source)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1750)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(ForkJoinTask.java:1742)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(ForkJoinTask.java:1659)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:511)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1450)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:2019)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:187)
+
+
+"Finalizer" daemon prio=8 Id=16 WAITING on java.lang.ref.ReferenceQueue$Lock@23716860
+	at java.base@25.0.1/java.lang.Object.wait0(Native Method)
+	-  waiting on java.lang.ref.ReferenceQueue$Lock@23716860
+	at java.base@25.0.1/java.lang.Object.wait(Object.java:389)
+	at java.base@25.0.1/java.lang.Object.wait(Object.java:351)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove0(ReferenceQueue.java:137)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:215)
+	at java.base@25.0.1/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:165)
+
+
+"modloading-sync-worker" daemon prio=5 Id=77 WAITING on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@d8c0a4c
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@d8c0a4c
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:369)
+	at java.base@25.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionNode.block(AbstractQueuedSynchronizer.java:520)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.unmanagedBlock(ForkJoinPool.java:4364)
+	at java.base@25.0.1/java.util.concurrent.ForkJoinPool.managedBlock(ForkJoinPool.java:4310)
+	at java.base@25.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:1752)
+	at java.base@25.0.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:435)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1016)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"Common-Cleaner" daemon prio=8 Id=34 TIMED_WAITING on java.lang.ref.ReferenceQueue$Lock@2997d0b1
+	at java.base@25.0.1/java.lang.Object.wait0(Native Method)
+	-  waiting on java.lang.ref.ReferenceQueue$Lock@2997d0b1
+	at java.base@25.0.1/java.lang.Object.wait(Object.java:389)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove0(ReferenceQueue.java:123)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:201)
+	at java.base@25.0.1/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:146)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+	at java.base@25.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:148)
+
+
+"DedicatedLanServerPinger #1" daemon prio=8 Id=115 TIMED_WAITING
+	at java.base@25.0.1/java.lang.Thread.sleepNanos0(Native Method)
+	at java.base@25.0.1/java.lang.Thread.sleepNanos(Thread.java:509)
+	at java.base@25.0.1/java.lang.Thread.sleep(Thread.java:540)
+	at TRANSFORMER/neoforge@26.3.0.99/net.neoforged.neoforge.server.dedicated.DedicatedLanServerPinger.run(DedicatedLanServerPinger.java:56)
+
+
+"JNA Cleaner" daemon prio=5 Id=72 TIMED_WAITING on java.lang.ref.ReferenceQueue$Lock@7206c331
+	at java.base@25.0.1/java.lang.Object.wait0(Native Method)
+	-  waiting on java.lang.ref.ReferenceQueue$Lock@7206c331
+	at java.base@25.0.1/java.lang.Object.wait(Object.java:389)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove0(ReferenceQueue.java:123)
+	at java.base@25.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:201)
+	at app//com.sun.jna.internal.Cleaner$CleanerThread.run(Cleaner.java:154)
+
+
+"Minecraft Services Discovery" daemon prio=5 Id=81 TIMED_WAITING on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@32931fae
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@32931fae
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:271)
+	at java.base@25.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1803)
+	at java.base@25.0.1/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1166)
+	at java.base@25.0.1/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:883)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1016)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)
+	at java.base@25.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+"Timer hack thread" daemon prio=5 Id=74 TIMED_WAITING
+	at java.base@25.0.1/java.lang.Thread.sleepNanos0(Native Method)
+	at java.base@25.0.1/java.lang.Thread.sleepNanos(Thread.java:509)
+	at java.base@25.0.1/java.lang.Thread.sleep(Thread.java:540)
+	at TRANSFORMER/minecraft@26.3/net.minecraft.util.Util$9.run(Util.java:981)
+
+
+"config-file-watcher-0-0" daemon prio=5 Id=79 TIMED_WAITING on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@259641f5
+	at java.base@25.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+	-  waiting on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@259641f5
+	at java.base@25.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:271)
+	at java.base@25.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1803)
+	at java.base@25.0.1/java.util.concurrent.LinkedBlockingDeque.pollFirst(LinkedBlockingDeque.java:516)
+	at java.base@25.0.1/java.util.concurrent.LinkedBlockingDeque.poll(LinkedBlockingDeque.java:684)
+	at java.base@25.0.1/sun.nio.fs.AbstractWatchService.poll(AbstractWatchService.java:108)
+	at app//com.electronwill.nightconfig.core.file.FileWatcher$FsWatcher.run(FileWatcher.java:531)
+	at java.base@25.0.1/java.lang.Thread.runWith(Thread.java:1487)
+	at java.base@25.0.1/java.lang.Thread.run(Thread.java:1474)
+
+
+Stacktrace:
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.ServerWatchdog.createWatchdogCrashReport(ServerWatchdog.java:105) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.server.dedicated.ServerWatchdog.run(ServerWatchdog.java:57) [minecraft-patched-26.3.0.99.jar:?] {}
+	at java.base/java.lang.Thread.run(Thread.java:1474) [?:?] {}
+
+
+-- Performance stats --
+Details:
+	Random tick rate: 3
+	Level stats: minecraft:overworld: players: 0, entities: 19,14,10,139,139,1,0 [minecraft:wolf:4,minecraft:pig:4,minecraft:sheep:3,minecraft:cow:2,minecraft:rabbit:1], block_entities: 13 [minecraft:mob_spawner:12,minecraft:beehive:1], block_ticks: 37022, fluid_ticks: 2048, chunk_source: Chunks[S] W: 2777 E: 19,14,10,139,139,1,0,
+minecraft:the_end: players: 0, entities: 0,0,0,0,0,0,0 [], block_entities: 0 [], block_ticks: 0, fluid_ticks: 0, chunk_source: Chunks[S] W: 0 E: 0,0,0,0,0,0,0,
+minecraft:the_nether: players: 0, entities: 0,0,0,0,0,0,0 [], block_entities: 0 [], block_ticks: 0, fluid_ticks: 0, chunk_source: Chunks[S] W: 0 E: 0,0,0,0,0,0,0
+
+-- System Details --
+Details:
+	Minecraft Version: 26.3
+	Minecraft Version ID: 26.3
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 25.0.1, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 572813072 bytes (546 MiB) / 2663383040 bytes (2540 MiB) up to 8367636480 bytes (7980 MiB)
+	Memory (heap): init: 500MiB, used: 1988MiB, committed: 2540MiB, max: 7980MiB
+	Memory (non-heap): init: 007MiB, used: 167MiB, committed: 177MiB, max: 000MiB
+	CPUs: 16
+	Processor Vendor: AuthenticAMD
+	Processor Name: AMD Ryzen 7 8700G w/ Radeon 780M Graphics      
+	Identifier: AuthenticAMD Family 25 Model 117 Stepping 2
+	Microarchitecture: Zen 3
+	Frequency (GHz): 4.19
+	Number of physical packages: 1
+	Number of physical CPUs: 8
+	Number of logical CPUs: 16
+	Graphics card #0 name: AMD Radeon 780M Graphics
+	Graphics card #0 vendor: Advanced Micro Devices, Inc.
+	Graphics card #0 VRAM (MiB): 512.00
+	Graphics card #0 deviceId: VideoController1
+	Graphics card #0 versionInfo: 32.0.32015.7029
+	Graphics card #1 name: AMD Radeon RX 6800 XT
+	Graphics card #1 vendor: Advanced Micro Devices, Inc.
+	Graphics card #1 VRAM (MiB): 16368.00
+	Graphics card #1 deviceId: VideoController2
+	Graphics card #1 versionInfo: 32.0.21025.10016
+	Graphics card #2 name: AMD Radeon RX 6800 XT
+	Graphics card #2 vendor: Advanced Micro Devices, Inc.
+	Graphics card #2 VRAM (MiB): 16368.00
+	Graphics card #2 deviceId: VideoController3
+	Graphics card #2 versionInfo: 32.0.21043.5001
+	Graphics card #3 name: Microsoft Basic Display Adapter
+	Graphics card #3 vendor: Microsoft
+	Graphics card #3 VRAM (MiB): 0.00
+	Graphics card #3 deviceId: VideoController4
+	Graphics card #3 versionInfo: 10.0.26100.1
+	Graphics card #4 name: AMD Radeon RX 6800 XT
+	Graphics card #4 vendor: Advanced Micro Devices, Inc.
+	Graphics card #4 VRAM (MiB): 16368.00
+	Graphics card #4 deviceId: VideoController5
+	Graphics card #4 versionInfo: 32.0.21045.16010
+	Memory slot #0 capacity (MiB): 16384.00
+	Memory slot #0 clockSpeed (GHz): 4.80
+	Memory slot #0 type: DDR5
+	Memory slot #1 capacity (MiB): 16384.00
+	Memory slot #1 clockSpeed (GHz): 4.80
+	Memory slot #1 type: DDR5
+	Virtual memory max (MiB): 50343.40
+	Virtual memory used (MiB): 42716.78
+	Swap memory total (MiB): 18432.00
+	Swap memory used (MiB): 1012.28
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 196017.08, total: 1906156.00
+	Space in storage for workdir (MiB): available: 167321.45, total: 953853.00
+	Operating System Version: Microsoft Windows 11 (Home) build 26200
+	Process Elevated: false
+	Process Loads: ~~ERROR~~ NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getUserTime()" because "process" is null
+	Process Virtual Size (MiB): ~~ERROR~~ NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getVirtualSize()" because "process" is null
+	Process Resident Size (MiB): ~~ERROR~~ NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getResidentSetSize()" because "process" is null
+	JVM Flags: 0 total; 
+	Debug Flags: 0 total; 
+	Server Running: true
+	Player Count: 0 / 20; []
+	Active Data Packs: vanilla, mod_data, mod/grandatlas, mod/neoforge
+	Available Data Packs: minecart_improvements, redstone_experiments, trade_rebalance, vanilla, mod/grandatlas, mod/neoforge, mod_data
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	World Seed: 2108563594
+	Suppressed Exceptions: ~~NONE~~
+	Is Modded: Definitely; Server brand changed to 'neoforge'
+	Type: Dedicated Server
+	Class Processors: 
+		03.72%: neoforge:access_transformer
+		00.00%: neoforge:neoforge_dev_dist_cleaner
+		00.00%: neoforge:mixin_frame_context
+		00.00%: neoforge:computing_frames (marker)
+		00.00%: neoforge:runtime_enum_extender
+		00.09%: neoforge:mixin
+		00.00%: neoforge:simple_processors_default (marker)
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.biome.biome
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.block.flowerpotblock
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.levelgen.structure.structure
+		00.39%: neoforge.coremods:method_redirector
+	Mod List: 
+		main                                              |Grand Atlas                   |grandatlas                    |0.9.0               |Manifest: NOSIGNATURE
+		minecraft-patched-26.3.0.99.jar                   |Minecraft                     |minecraft                     |26.3                |Manifest: NOSIGNATURE
+		neoforge-26.3.0.99-universal.jar                  |NeoForge                      |neoforge                      |26.3.0.99           |Manifest: NOSIGNATURE
+	Crash Report UUID: 5b064cf6-ffdc-4c3b-ac92-82917b5faa20
+	FML: 12.0.12
+	NeoForge: 26.3.0.99
+	Class Processors: 
+		03.71%: neoforge:access_transformer
+		00.00%: neoforge:neoforge_dev_dist_cleaner
+		00.00%: neoforge:mixin_frame_context
+		00.00%: neoforge:computing_frames (marker)
+		00.00%: neoforge:runtime_enum_extender
+		00.09%: neoforge:mixin
+		00.00%: neoforge:simple_processors_default (marker)
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.biome.biome
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.block.flowerpotblock
+		00.02%: neoforge.coremods:field_to_getter.net.minecraft.world.level.levelgen.structure.structure
+		00.39%: neoforge.coremods:method_redirector
+	Mod List: 
+		main                                              |Grand Atlas                   |grandatlas                    |0.9.0               |Manifest: NOSIGNATURE
+		minecraft-patched-26.3.0.99.jar                   |Minecraft                     |minecraft                     |26.3                |Manifest: NOSIGNATURE
+		neoforge-26.3.0.99-universal.jar                  |NeoForge                      |neoforge                      |26.3.0.99           |Manifest: NOSIGNATURE
+	Crash Report UUID: cf3f4cc9-c3fb-4c1e-8493-6fc63a02053b
+	FML: 12.0.12
+	NeoForge: 26.3.0.99

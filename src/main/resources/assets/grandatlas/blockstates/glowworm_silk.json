@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "tip=true": {
+      "model": "grandatlas:block/glowworm_silk"
+    },
+    "tip=false": {
+      "model": "grandatlas:block/glowworm_silk_plant"
+    }
+  }
+}

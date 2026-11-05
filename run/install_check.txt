@@ -1,0 +1,9 @@
+Chunky-NeoForge-1.5.4.jar.disabled
+DistantHorizons-3.3.4-26.3-fabric-neoforge.jar
+entityculling-neoforge-1.11.3-mc26.3.jar
+ferritecore-9.0.0-neoforge.jar
+grandatlas-0.1.6.jar
+ImmediatelyFast-NeoForge-1.17.1+26.3.jar
+lithium-neoforge-0.26.3+mc26.3.jar
+xaerominimap-neoforge-26.3-26.6.2.jar
+xaeroworldmap-neoforge-26.3-1.47.2.jar

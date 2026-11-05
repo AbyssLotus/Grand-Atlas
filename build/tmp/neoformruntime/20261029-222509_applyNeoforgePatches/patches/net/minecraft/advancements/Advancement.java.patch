@@ -1,0 +1,34 @@
+--- a/net/minecraft/advancements/Advancement.java
++++ b/net/minecraft/advancements/Advancement.java
+@@ -24,6 +_,8 @@
+ import net.minecraft.world.item.ItemStackTemplate;
+ import net.minecraft.world.level.storage.loot.ValidationContextSource;
+ 
++import net.neoforged.neoforge.common.extensions.IAdvancementBuilderExtension;
++
+ public record Advancement(
+     Optional<Identifier> parent,
+     Optional<DisplayInfo> display,
+@@ -114,7 +_,7 @@
+         });
+     }
+ 
+-    public static class Builder {
++    public static class Builder implements IAdvancementBuilderExtension {
+         private Optional<Identifier> parent = Optional.empty();
+         private Optional<DisplayInfo> display = Optional.empty();
+         private AdvancementRewards rewards = AdvancementRewards.EMPTY;
+@@ -223,8 +_,12 @@
+         }
+ 
+         public AdvancementHolder save(BootstrapContext<Advancement> output, String name) {
++            return this.save(output, name, new net.neoforged.neoforge.common.conditions.ICondition[0]);
++        }
++
++        public AdvancementHolder save(BootstrapContext<Advancement> output, String name, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
+             AdvancementHolder advancement = this.build(Identifier.parse(name));
+-            advancement.register(output);
++            advancement.register(output, conditions);
+             return advancement;
+         }
+     }

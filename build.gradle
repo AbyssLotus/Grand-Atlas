@@ -1,0 +1,134 @@
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// Minecraft 26.3 ships Java 25 to players, so the mod targets it too.
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+neoForge {
+    version = project.neo_version
+
+    // Minecraft has shipped unobfuscated since 26.1, so no mapping setup is needed.
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        // Smoke test: a dev client that loads run/saves/GA-Test straight away (copy a dev
+        // server world there first). gradlew runPlaytest
+        playtest {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'GA-Test'
+        }
+        // A client joined to the dev server (runServer), so RCON can move it between viewpoints.
+        look {
+            client()
+            programArgument '--quickPlayMultiplayer'
+            programArgument '127.0.0.1:25565'
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+}
+
+// neoforge.mods.toml is templated so the version and ids come from
+// gradle.properties and cannot drift out of sync with the build.
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version   : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version         : neo_version,
+            mod_id              : mod_id,
+            mod_name            : mod_name,
+            mod_version         : mod_version,
+            mod_authors         : mod_authors,
+            mod_description     : mod_description,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : mod_name,
+                'Implementation-Version'  : mod_version,
+                'Implementation-Vendor'   : mod_authors,
+        ])
+    }
+}
+
+// The terrain core (com.seaweed.grandatlas.core) has no Minecraft imports, so these
+// run straight off the compiled classes without booting the game.
+//
+//   gradlew preview                                  -> preview/map.png, preview/section.png
+//   gradlew preview -Pargs="--seed 42 --size 32768 --scale 32"
+tasks.register('preview', JavaExec) {
+    group = 'grandatlas'
+    description = 'Renders the terrain core to PNG maps without starting Minecraft.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.output
+    mainClass = 'com.seaweed.grandatlas.core.preview.Preview'
+    workingDir = projectDir
+    args = (project.findProperty('args') ?: '').toString().tokenize()
+}
+
+//   gradlew mapServer                                -> live map on http://localhost:8765
+//   gradlew mapServer -Pargs="--seed <core seed> --port 8765"
+tasks.register('mapServer', JavaExec) {
+    group = 'grandatlas'
+    description = 'Serves a live, clickable map of the terrain core in a browser.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.output
+    mainClass = 'com.seaweed.grandatlas.core.preview.MapServer'
+    workingDir = projectDir
+    maxHeapSize = '6g'
+    args = (project.findProperty('args') ?: '').toString().tokenize()
+}
+
+tasks.register('checkCore', JavaExec) {
+    group = 'grandatlas'
+    description = 'Determinism, continuity and bounds checks on the terrain core.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.output
+    mainClass = 'com.seaweed.grandatlas.core.SelfCheck'
+    workingDir = projectDir
+}
+
+tasks.named('check') { dependsOn 'checkCore' }

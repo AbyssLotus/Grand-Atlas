@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: grandatlas
+Specification-Vendor: tripp
+Specification-Version: 1
+Implementation-Title: Grand Atlas
+Implementation-Version: 0.9.0
+Implementation-Vendor: tripp
+

@@ -1,0 +1,19 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:badlands": "2026-11-02 17:27:33 -0500",
+      "minecraft:sparse_jungle": "2026-11-02 17:30:00 -0500",
+      "minecraft:plains": "2026-11-02 17:29:29 -0500",
+      "minecraft:jagged_peaks": "2026-11-02 17:27:31 -0500",
+      "minecraft:warm_ocean": "2026-11-02 17:29:00 -0500"
+    },
+    "done": false
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-11-02 17:27:30 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 5023
+}

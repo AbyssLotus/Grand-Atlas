@@ -1,0 +1,26 @@
+--------------------------------------------------------------------------------
+
+Command-Line:
+ - C:\Users\tripp\.jdks\openjdk-25.0.1\bin\java.exe
+ - -jar
+ - C:\Users\tripp\.gradle\caches\modules-2\files-2.1\net.neoforged.installertools\installertools\4.0.17\d0e22dfef7eb7eeffa20fee4c393b3f7cad0323b\installertools-4.0.17-fatjar.jar
+ - --task
+ - PROCESS_MINECRAFT_JAR
+ - --input
+ - C:\Users\tripp\.gradle\caches\neoformruntime\artifacts\minecraft_26.3_client.jar
+ - --input
+ - C:\Users\tripp\.gradle\caches\neoformruntime\artifacts\minecraft_26.3_server.jar
+ - --output
+ - ./output.jar
+ - --no-mod-manifest
+ - --no-dist-annotations
+--------------------------------------------------------------------------------
+
+Task: PROCESS_MINECRAFT_JAR
+Using common thread-pool with parallelism 15
+load minecraft_26.3_client.jar [475ms]
+load minecraft_26.3_server.jar [479ms]
+Merged 32876 entries (15223 client-only, 0 server-only)
+merge jars [11ms]
+write output file [1378ms]
+overall work [1899ms]

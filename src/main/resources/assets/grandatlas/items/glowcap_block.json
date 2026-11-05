@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "grandatlas:block/glowcap_block"
+  }
+}

@@ -1,0 +1,53 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "All Rights Reserved"
+
+[[mixins]]
+config = "grandatlas.mixins.json"
+
+[[mods]]
+modId = "grandatlas"
+version = "0.9.0"
+displayName = "Grand Atlas"
+authors = "tripp"
+description = '''One-stop terrain and biomes: oversized real-world and fantasy landforms on a world from y -128 to 1024, blended without seams.'''
+
+[[dependencies.grandatlas]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.3.0.99,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.grandatlas]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.3]"
+ordering = "NONE"
+side = "BOTH"
+
+# Grand Atlas owns the overworld's dimension, dimension type and noise settings.
+# These mods override the same files, so only one of them can win.
+[[dependencies.grandatlas]]
+modId = "tectonic"
+type = "incompatible"
+reason = "Grand Atlas replaces Tectonic's terrain. Remove Tectonic."
+versionRange = "[0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.grandatlas]]
+modId = "terralith"
+type = "incompatible"
+reason = "Grand Atlas replaces Terralith's terrain and biomes. Remove Terralith (and Terralith ReStoned)."
+versionRange = "[0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.grandatlas]]
+modId = "pandorawilds"
+type = "incompatible"
+reason = "Pandora Wilds is folded into Grand Atlas. Remove the separate Pandora Wilds jar."
+versionRange = "[0,)"
+ordering = "NONE"
+side = "BOTH"

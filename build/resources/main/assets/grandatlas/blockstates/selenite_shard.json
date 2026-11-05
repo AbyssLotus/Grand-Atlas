@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "grandatlas:block/selenite_shard",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "grandatlas:block/selenite_shard",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "grandatlas:block/selenite_shard",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "grandatlas:block/selenite_shard",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "grandatlas:block/selenite_shard"
+    },
+    "facing=west": {
+      "model": "grandatlas:block/selenite_shard",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/block/BaseFireBlock.java
++++ b/net/minecraft/world/level/block/BaseFireBlock.java
+@@ -151,6 +_,7 @@
+         if (!oldState.is(state.getBlock())) {
+             if (inPortalDimension(level)) {
+                 Optional<PortalShape> optionalShape = PortalShape.findEmptyPortalShape(level, pos, Direction.Axis.X);
++                optionalShape = net.neoforged.neoforge.event.EventHooks.onTrySpawnPortal(level, pos, optionalShape);
+                 if (optionalShape.isPresent()) {
+                     optionalShape.get().createPortalBlocks(level);
+                     return;

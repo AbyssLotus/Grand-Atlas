@@ -1,0 +1,10 @@
+--- a/com/mojang/renderpearl/api/buffers/GpuBuffer.java
++++ b/com/mojang/renderpearl/api/buffers/GpuBuffer.java
+@@ -49,6 +_,7 @@
+ 
+     @Retention(RetentionPolicy.CLASS)
+     @Target(ElementType.TYPE_USE)
++    @org.intellij.lang.annotations.MagicConstant(flagsFromClass = GpuBuffer.class)
+     @interface Usage {
+     }
+ }

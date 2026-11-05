@@ -1,0 +1,16 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:desert": "2026-11-02 17:32:50 -0500",
+      "minecraft:jagged_peaks": "2026-11-02 17:32:47 -0500"
+    },
+    "done": false
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-11-02 17:32:47 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 5023
+}

@@ -1,0 +1,18 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:badlands": "2026-11-02 17:42:11 -0500",
+      "minecraft:taiga": "2026-11-02 17:43:08 -0500",
+      "minecraft:plains": "2026-11-02 17:42:39 -0500",
+      "minecraft:jagged_peaks": "2026-11-02 17:42:08 -0500"
+    },
+    "done": false
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-11-02 17:42:07 -0500"
+    },
+    "done": true
+  },
+  "DataVersion": 5023
+}

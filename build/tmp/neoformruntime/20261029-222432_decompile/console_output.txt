@@ -1,0 +1,25 @@
+--------------------------------------------------------------------------------
+
+Command-Line:
+ - C:\Users\tripp\.jdks\openjdk-25.0.1\bin\java.exe
+ - -Xmx4096m
+ - -cp
+ - C:\Users\tripp\.gradle\caches\modules-2\files-2.1\org.vineflower\vineflower\1.12.0\85570609a0a5941a7d2918b6260b209de810f66f\vineflower-1.12.0.jar;C:\Users\tripp\.gradle\caches\modules-2\files-2.1\net.neoforged\vineflower-plugins\0.1.6\84857083964b98ac94f8d124f401c2b2d86839ab\vineflower-plugins-0.1.6.jar
+ - org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler
+ - --decompile-inner
+ - --remove-bridge
+ - --decompile-generics
+ - --ascii-strings
+ - --remove-synthetic
+ - --include-classpath
+ - --ignore-invalid-bytecode
+ - --bytecode-source-mapping
+ - --dump-code-lines
+ - --indent-string=    
+ - --log-level=WARN
+ - -cfg=./libraries.txt
+ - C:\Users\tripp\.gradle\caches\neoformruntime\intermediate_results\preProcessJar_5199224795d14b5024ed8f876653bf8587335074_output.jar
+ - ./output.jar
+--------------------------------------------------------------------------------
+
+WARN:  Loading Minecraft-Dist manifest data from archive C:\Users\tripp\.gradle\caches\neoformruntime\intermediate_results\preProcessJar_5199224795d14b5024ed8f876653bf8587335074_output.jar

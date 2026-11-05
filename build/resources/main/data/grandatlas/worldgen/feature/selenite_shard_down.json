@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "id": "grandatlas:selenite_shard",
+    "properties": {
+      "facing": "down",
+      "waterlogged": "false"
+    }
+  }
+}

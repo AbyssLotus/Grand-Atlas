@@ -1,0 +1,21 @@
+--- a/net/minecraft/data/loot/EntityLootSubProvider.java
++++ b/net/minecraft/data/loot/EntityLootSubProvider.java
+@@ -134,12 +_,16 @@
+ 
+     public abstract void generate();
+ 
++    protected java.util.stream.Stream<EntityType<?>> getKnownEntityTypes() {
++        return this.output.listContextElements(Registries.ENTITY_TYPE).map(Holder::value);
++    }
++
+     @Override
+     public void run() {
+         this.generate();
+         Set<ResourceKey<LootTable>> seen = new HashSet<>();
+-        this.output
+-            .listContextElements(Registries.ENTITY_TYPE)
++        this.getKnownEntityTypes()
++            .map(EntityType::builtInRegistryHolder)
+             .forEach(
+                 holder -> {
+                     EntityType<?> type = holder.value();

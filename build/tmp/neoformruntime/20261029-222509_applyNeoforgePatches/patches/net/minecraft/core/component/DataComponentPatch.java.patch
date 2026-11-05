@@ -1,0 +1,34 @@
+--- a/net/minecraft/core/component/DataComponentPatch.java
++++ b/net/minecraft/core/component/DataComponentPatch.java
+@@ -143,6 +_,23 @@
+         return new DataComponentPatch.Builder();
+     }
+ 
++    public boolean isPatched(DataComponentType<?> type) {
++        return this.map.containsKey(type);
++    }
++
++    /// {@return the patch stored for the given component type, null if no patch is stored}
++    public <T> @Nullable T getPatch(DataComponentType<? extends T> type) {
++        Object value = this.map.get(type);
++        if (value == null) {
++            throw new IllegalStateException("DataComponentType " + type + " is not patched");
++        }
++        return (T) Removed.removedToNull(value);
++    }
++
++    public Set<DataComponentType<?>> keySet(){
++        return this.map.keySet();
++    }
++
+     public <T> @Nullable T get(DataComponentGetter prototype, DataComponentType<? extends T> type) {
+         return getFromPatchAndPrototype(this.map, prototype, type);
+     }
+@@ -238,6 +_,7 @@
+         }
+ 
+         public <T> DataComponentPatch.Builder set(DataComponentType<T> type, T value) {
++            net.neoforged.neoforge.common.CommonHooks.validateComponent(value);
+             this.map.put(type, value);
+             return this;
+         }

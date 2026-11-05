@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "grandatlas:caves",
+    "mode": "caverns"
+  }
+}

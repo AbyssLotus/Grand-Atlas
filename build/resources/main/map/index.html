@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grand Atlas Map</title>
+<style>
+  :root { --bg: #14171c; --panel: rgba(22, 26, 32, 0.92); --text: #e8eaed; --dim: #9aa3ad; --accent: #e3b341; --line: #2c333c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  canvas { display: block; cursor: grab; }
+  canvas.drag { cursor: grabbing; }
+  .bar { position: fixed; top: 12px; left: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: calc(100% - 24px); }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  button { background: #252b33; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer; }
+  button.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); font-weight: 600; }
+  input { background: #0f1216; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font: inherit; width: 150px; }
+  #info { position: fixed; right: 12px; top: 12px; width: 290px; max-width: calc(100% - 24px); display: none; }
+  #info h2 { margin: 0 0 6px; font-size: 14px; }
+  #info table { width: 100%; border-collapse: collapse; }
+  #info td { padding: 2px 0; vertical-align: top; }
+  #info td:first-child { color: var(--dim); width: 42%; }
+  #tp { margin-top: 8px; display: flex; gap: 6px; }
+  #tp code { flex: 1; background: #0f1216; border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #status { position: fixed; left: 12px; bottom: 12px; color: var(--dim); }
+</style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<div class="bar">
+  <div class="box"><button id="terrain" class="on">Terrain</button> <button id="biome">Biomes</button> <button id="height">Height</button></div>
+  <div class="box"><input id="goto" placeholder="Go to: x z" aria-label="Go to coordinates"> <button id="go">Go</button></div>
+</div>
+<div id="info" class="box" aria-live="polite">
+  <h2 id="info-title">Spot</h2>
+  <table id="info-table"></table>
+  <div id="tp"><code id="tp-cmd"></code><button id="copy">Copy</button></div>
+</div>
+<div id="status" class="box">Drag to pan · scroll to zoom · click a spot</div>
+<script>
+const TILE = 256;
+const canvas = document.getElementById("map");
+const ctx = canvas.getContext("2d");
+let layer = "terrain";
+let level = 4;                 // blocks per pixel = 2^level
+let cx = 0, cz = 0;            // block at the centre
+let marker = null;
+const cache = new Map();
+
+function size() {
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
+  draw();
+}
+
+function tile(l, tx, tz) {
+  const key = layer + "/" + l + "/" + tx + "/" + tz;
+  let t = cache.get(key);
+  if (!t) {
+    t = new Image();
+    t.onload = draw;
+    t.src = `/tile?layer=${layer}&l=${l}&x=${tx}&z=${tz}`;
+    cache.set(key, t);
+  }
+  return t;
+}
+
+function draw() {
+  const dpr = devicePixelRatio, w = canvas.width / dpr, h = canvas.height / dpr, s = 2 ** level;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = "#1d2229";
+  ctx.fillRect(0, 0, w, h);
+  ctx.imageSmoothingEnabled = false;
+  const left = cx - (w / 2) * s, top = cz - (h / 2) * s, span = TILE * s;
+  for (let tz = Math.floor(top / span); tz * span < top + h * s; tz++) {
+    for (let tx = Math.floor(left / span); tx * span < left + w * s; tx++) {
+      const t = tile(level, tx, tz);
+      if (t.complete && t.naturalWidth) ctx.drawImage(t, (tx * span - left) / s, (tz * span - top) / s, TILE, TILE);
+    }
+  }
+  if (marker) {
+    const mx = (marker[0] - left) / s, mz = (marker[1] - top) / s;
+    ctx.strokeStyle = "#e3b341"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(mx, mz, 7, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+
+function toBlock(px, py) {
+  const s = 2 ** level;
+  return [Math.floor(cx + (px - innerWidth / 2) * s), Math.floor(cz + (py - innerHeight / 2) * s)];
+}
+
+let drag = null, moved = false;
+canvas.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY, cx, cz]; moved = false; canvas.classList.add("drag"); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointermove", e => {
+  const [bx, bz] = toBlock(e.clientX, e.clientY);
+  const step = level <= 1 ? 5 : level === 2 ? 10 : level === 3 ? 25 : level <= 5 ? 50 : 100;
+  document.getElementById("status").textContent = `${bx}, ${bz}  ·  ${2 ** level} blocks/px` + (layer === "height" ? `  ·  lines every ${step} blocks (dark every ${step * 5})` : "");
+  if (!drag) return;
+  const dx = e.clientX - drag[0], dy = e.clientY - drag[1];
+  if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+  cx = drag[2] - dx * 2 ** level; cz = drag[3] - dy * 2 ** level;
+  draw();
+});
+canvas.addEventListener("pointerup", e => {
+  canvas.classList.remove("drag");
+  if (drag && !moved) inspect(...toBlock(e.clientX, e.clientY));
+  drag = null;
+});
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  const next = Math.max(0, Math.min(7, level + (e.deltaY > 0 ? 1 : -1)));
+  if (next === level) return;
+  const [bx, bz] = toBlock(e.clientX, e.clientY);
+  const k = 2 ** (next - level);
+  cx = bx - (bx - cx) * k; cz = bz - (bz - cz) * k;
+  level = next;
+  draw();
+}, { passive: false });
+
+async function inspect(x, z) {
+  marker = [x + 0.5, z + 0.5];
+  draw();
+  const r = await fetch(`/info?x=${x}&z=${z}`).then(r => r.json());
+  const names = { surface: "Ground", water: "Water level", biome: "Biome", landform: "Landform", zone: "Zone", macro: "Macro", site: "Site", feature: "Feature", shore: "Shore", temperature: "Temperature", humidity: "Humidity", continentalness: "Continentalness", roughness: "Roughness" };
+  const rows = Object.entries(names).filter(([k]) => r[k] !== null && r[k] !== undefined)
+    .map(([k, label]) => `<tr><td>${label}</td><td>${String(r[k]).replaceAll("_", " ")}</td></tr>`).join("");
+  document.getElementById("info-title").textContent = `${r.x}, ${r.z}`;
+  document.getElementById("info-table").innerHTML = rows;
+  const y = Math.max(r.surface, r.water ?? r.surface, 63) + 40;
+  document.getElementById("tp-cmd").textContent = `/tp @s ${r.x} ${Math.round(y)} ${r.z}`;
+  document.getElementById("info").style.display = "block";
+}
+
+document.getElementById("copy").onclick = () => navigator.clipboard?.writeText(document.getElementById("tp-cmd").textContent);
+function setLayer(name) {
+  layer = name;
+  document.getElementById("terrain").classList.toggle("on", name === "terrain");
+  document.getElementById("biome").classList.toggle("on", name === "biome");
+  document.getElementById("height").classList.toggle("on", name === "height");
+  draw();
+}
+document.getElementById("terrain").onclick = () => setLayer("terrain");
+document.getElementById("biome").onclick = () => setLayer("biome");
+document.getElementById("height").onclick = () => setLayer("height");
+function go() {
+  const m = document.getElementById("goto").value.trim().split(/[\s,]+/).map(Number);
+  if (m.length >= 2 && m.every(Number.isFinite)) {
+    const [x, z] = m.length >= 3 ? [m[0], m[2]] : m;
+    cx = x; cz = z; level = Math.min(level, 3); inspect(Math.floor(x), Math.floor(z));
+  }
+}
+document.getElementById("go").onclick = go;
+document.getElementById("goto").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+addEventListener("resize", size);
+size();
+</script>
+</body>
+</html>

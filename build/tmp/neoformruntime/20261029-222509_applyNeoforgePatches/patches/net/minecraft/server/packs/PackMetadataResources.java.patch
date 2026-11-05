@@ -1,0 +1,13 @@
+--- a/net/minecraft/server/packs/PackMetadataResources.java
++++ b/net/minecraft/server/packs/PackMetadataResources.java
+@@ -6,7 +_,9 @@
+ import net.minecraft.server.packs.resources.IoSupplier;
+ import org.jspecify.annotations.Nullable;
+ 
+-public interface PackMetadataResources extends AutoCloseable {
++import net.neoforged.neoforge.common.extensions.PackMetadataResourcesExtension;
++
++public interface PackMetadataResources extends AutoCloseable, PackMetadataResourcesExtension {
+     PackLocationInfo location();
+ 
+     @Nullable IoSupplier<InputStream> getRootResource(String... path);

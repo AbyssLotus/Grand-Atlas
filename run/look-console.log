@@ -1,0 +1,214 @@
+Starting a Gradle Daemon, 2 busy Daemons could not be reused, use --status for details
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :generateModMetadata UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :prepareLookRun UP-TO-DATE
+
+> Task :runLook
+2026-11-03T05:27:00.186080500Z main WARN Advanced terminal features are not available in this environment
+2026-11-03T05:27:00.265622800Z main ERROR Unable to delete file G:\SeaWeed League\grand-atlas\run\logs\latest.log: java.nio.file.FileSystemException G:\SeaWeed League\grand-atlas\run\logs\latest.log: The process cannot access the file because it is being used by another process
+2026-11-03T05:27:00.281299900Z main ERROR Unable to delete file G:\SeaWeed League\grand-atlas\run\logs\debug.log: java.nio.file.FileSystemException G:\SeaWeed League\grand-atlas\run\logs\debug.log: The process cannot access the file because it is being used by another process
+[00:27:00] [main/INFO] [ne.ne.fm.st.Entrypoint/]: JVM Uptime at startup: 128ms
+[00:27:00] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Starting FancyModLoader version 12.0.12 (CLIENT in DEV)
+[00:27:00] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Game directory: G:\SeaWeed League\grand-atlas\run
+[00:27:00] [main/INFO] [ne.ne.fm.lo.EarlyServiceDiscovery/]: Found 2 early service jars (out of 106) in 17ms
+[00:27:00] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Loading FML Early Services:
+[00:27:00] [main/INFO] [ne.ne.fm.lo.FMLLoader/]:  - C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.neoforged.fancymodloader/loader/12.0.12/f097a25d6289aa0b289e7cdb6de83a5c8c72f77e/loader-12.0.12.jar
+[00:27:00] [main/INFO] [ne.ne.fm.lo.FMLLoader/]:  - C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.neoforged.fancymodloader/earlydisplay/12.0.12/8437387fd35033b1ea0d3fac7cc28ced4efdc6b/earlydisplay-12.0.12.jar
+[00:27:00] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[00:27:00] [main/INFO] [ne.ne.fm.ea.re.ba.op.GlRenderer/]: GL info: AMD Radeon RX 6800 XT GL version 3.3.0 Core Profile Context 26.10.1.261008, ATI Technologies Inc.
+[00:27:00] [ForkJoinPool.commonPool-worker-5/INFO] [ne.ne.fm.lo.mo.lo.GameLocator/]: Detected a joined NeoForge and Minecraft configuration. Applying filtering...
+[00:27:01] [ForkJoinPool.commonPool-worker-5/INFO] [ne.ne.fm.lo.mo.lo.InDevFolderLocator/CORE]: Got mod coordinates grandatlas%%G:\SeaWeed League\grand-atlas\build\classes\java\main;grandatlas%%G:\SeaWeed League\grand-atlas\build\resources\main from env
+[00:27:01] [ForkJoinPool.commonPool-worker-5/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[00:27:01] [ForkJoinPool.commonPool-worker-5/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Grand Atlas 0.1.9 (grandatlas)
+		Minecraft 26.3 (minecraft)
+		NeoForge 26.3.0.99 (neoforge)
+[00:27:01] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.17.4+mixin.0.8.7/5f66cc9f59b8efaa942155a3d5a30599bf6640dd/sponge-mixin-0.17.4+mixin.0.8.7.jar Service=FML Env=CLIENT
+[00:27:01] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Loading FML Plugins:
+[00:27:01] [main/INFO] [ne.ne.fm.lo.FMLLoader/]:  - C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/26.3.0.99/215117e7a679a38b75f88b5d4254adaffd596452/neoforge-26.3.0.99-universal.jar > net.neoforged.neoforge-coremods-26.3.0.99.jar
+[00:27:01] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Building game content classloader:
+ - grandatlas (composite(folder(G:/SeaWeed League/grand-atlas/build/classes/java/main), folder(G:/SeaWeed League/grand-atlas/build/resources/main)))
+ - minecraft (composite(filtered(jar(G:/SeaWeed League/grand-atlas/build/moddev/artifacts/minecraft-patched-26.3.0.99.jar)), filtered(jar(G:/SeaWeed League/grand-atlas/build/moddev/artifacts/minecraft-patched-26.3.0.99.jar))))
+ - mixinextras.neoforge (jar(C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/26.3.0.99/215117e7a679a38b75f88b5d4254adaffd596452/neoforge-26.3.0.99-universal.jar > mixinextras-neoforge-0.5.5.jar))
+ - neoforge (composite(filtered(jar(C:/Users/tripp/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/26.3.0.99/215117e7a679a38b75f88b5d4254adaffd596452/neoforge-26.3.0.99-universal.jar))))
+ - net.neoforged.fml.generated (empty(VirtualJar/net.neoforged.fml.generated))
+[00:27:01] [main/INFO] [ne.ne.fm.lo.FMLLoader/]: Built game content classloader in 16ms
+[00:27:02] [Datafixer Bootstrap #0/INFO] [mojang/DataFixerBuilder]: 310 Datafixer optimizations took 182 milliseconds
+[00:27:02] [main/WARN] [os.dr.wi.pe.PerfmonDisabled/]: Invalid registry value type detected for PerfOS counters. Should be REG_DWORD. Ignoring: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfOS\Performance\Disable Performance Counters.
+[00:27:02] [main/ERROR] [os.dr.wi.re.HkeyPerformanceDataUtil/]: Unable to locate English counter names in registry Perflib 009. Counters may need to be rebuilt: 
+com.sun.jna.platform.win32.Win32Exception: The parameter is incorrect.
+	at com.sun.jna.platform.win32.Advapi32Util.registryGetStringArray(Advapi32Util.java:921) ~[jna-platform-5.17.0.jar:5.17.0 (b0)] {}
+	at com.sun.jna.platform.win32.Advapi32Util.registryGetStringArray(Advapi32Util.java:898) ~[jna-platform-5.17.0.jar:5.17.0 (b0)] {}
+	at oshi.driver.windows.registry.HkeyPerformanceDataUtil.mapCounterIndicesFromRegistry(HkeyPerformanceDataUtil.java:274) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.driver.windows.registry.HkeyPerformanceDataUtil.<clinit>(HkeyPerformanceDataUtil.java:51) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.driver.windows.registry.ProcessPerformanceData.buildProcessMapFromRegistry(ProcessPerformanceData.java:45) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.software.os.windows.WindowsOperatingSystem.queryProcessMapFromRegistry(WindowsOperatingSystem.java:328) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.util.Memoizer$1.get(Memoizer.java:65) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.software.os.windows.WindowsOperatingSystem.processMapToList(WindowsOperatingSystem.java:298) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.software.os.windows.WindowsOperatingSystem.getProcess(WindowsOperatingSystem.java:292) [oshi-core-6.9.0.jar:6.9.0] {}
+	at oshi.software.os.OperatingSystem.getCurrentProcess(OperatingSystem.java:246) [oshi-core-6.9.0.jar:6.9.0] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putSoftware$0(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putSoftware(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$new$7(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.<init>(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.<init>(CrashReport.java:32) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.preload(CrashReport.java:226) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.client.main.Main.main(Main.java:160) [minecraft-patched-26.3.0.99.jar:?] {}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-12.0.12.jar:12.0] {}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[?:?] {}
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?] {}
+[00:27:02] [main/WARN] [os.ut.pl.wi.PerfCounterQuery/]: Unable to locate English counter names in registry Perflib 009. Assuming English counters. Error 0x80070057. See https://support.microsoft.com/en-us/help/300956/how-to-manually-rebuild-performance-counter-library-values
+[00:27:02] [main/WARN] [minecraft/SystemReport]: Failed to get system info for Process Loads
+java.lang.NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getUserTime()" because "process" is null
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putProcessDetails$0(SystemReport.java:191) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.setDetail(SystemReport.java:96) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putProcessDetails(SystemReport.java:188) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putSoftware$0(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putSoftware(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$new$7(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.<init>(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.<init>(CrashReport.java:32) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.preload(CrashReport.java:226) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.client.main.Main.main(Main.java:160) [minecraft-patched-26.3.0.99.jar:?] {}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-12.0.12.jar:12.0] {}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[?:?] {}
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?] {}
+[00:27:02] [main/WARN] [minecraft/SystemReport]: Failed to get system info for Process Virtual Size (MiB)
+java.lang.NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getVirtualSize()" because "process" is null
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putProcessDetails$1(SystemReport.java:208) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.setDetail(SystemReport.java:96) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putProcessDetails(SystemReport.java:208) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putSoftware$0(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putSoftware(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$new$7(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.<init>(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.<init>(CrashReport.java:32) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.preload(CrashReport.java:226) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.client.main.Main.main(Main.java:160) [minecraft-patched-26.3.0.99.jar:?] {}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-12.0.12.jar:12.0] {}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[?:?] {}
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?] {}
+[00:27:02] [main/WARN] [minecraft/SystemReport]: Failed to get system info for Process Resident Size (MiB)
+java.lang.NullPointerException: Cannot invoke "oshi.software.os.OSProcess.getResidentSetSize()" because "process" is null
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putProcessDetails$2(SystemReport.java:209) ~[minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.setDetail(SystemReport.java:96) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putProcessDetails(SystemReport.java:209) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$putSoftware$0(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.putSoftware(SystemReport.java:115) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.lambda$new$7(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.ignoreErrors(SystemReport.java:120) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.SystemReport.<init>(SystemReport.java:68) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.<init>(CrashReport.java:32) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.CrashReport.preload(CrashReport.java:226) [minecraft-patched-26.3.0.99.jar:?] {}
+	at TRANSFORMER/minecraft@26.3/net.minecraft.client.main.Main.main(Main.java:160) [minecraft-patched-26.3.0.99.jar:?] {}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-12.0.12.jar:12.0] {}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[?:?] {}
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?] {}
+[00:27:02] [pool-8-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.5).
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [time, set, time] and [time, set, timemarker] with inputs: [0, 0s, 0d, 0t]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [time, set, timemarker] and [time, set, time] with inputs: [012]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [time, of, clock, set, time] and [time, of, clock, set, timemarker] with inputs: [0, 0s, 0d, 0t]
+[00:27:05] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [time, of, clock, set, timemarker] and [time, of, clock, set, time] with inputs: [012]
+[00:27:05] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 26.3.0.99, for MC 26.3
+[00:27:06] [Render thread/INFO] [mojang/MinecraftServicesDiscoveryService]: Environment: Environment[discoveryUrl=https://discovery.minecraftservices.com/minecraft/client, name=PROD]
+[00:27:06] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Dev
+[00:27:06] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.4.3+4
+[00:27:06] [Render thread/INFO] [minecraft/Minecraft]: Using graphics backend OpenGL, using drivers: 3.3.0 Core Profile Context 26.10.1.261008
+[00:27:06] [Render thread/INFO] [minecraft/Minecraft]: Using graphics device: AMD Radeon RX 6800 XT (ATI Technologies Inc.)
+[00:27:06] [Render thread/INFO] [minecraft/Minecraft]: Using graphics device extensions: GL_ARB_multi_draw_indirect, GL_ARB_buffer_storage, GL_ARB_shader_draw_parameters, GL_ARB_base_instance, GL_KHR_debug, GL_ARB_draw_indirect, GL_ARB_clip_control, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+[00:27:07] [Render thread/INFO] [mojang/Window]: Created window using SDL video driver: windows
+[00:27:07] [modloading-worker-0/INFO] [ne.ne.ne.co.VersionChecker/]: No mods enabled for version check
+[00:27:08] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, vanilla, mod_resources, mod/grandatlas, mod/neoforge
+[00:27:08] [resourceLoad/INFO] [minecraft/UnihexProvider]: Found unifont_pua-17.0.01.hex, loading
+[00:27:08] [resourceLoad/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-17.0.01.hex, loading
+[00:27:08] [resourceLoad/INFO] [minecraft/UnihexProvider]: Found unifont_jp_patch-17.0.01.hex, loading
+[00:27:09] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device OpenAL Soft on Voicemeeter AUX Input (VB-Audio Voicemeeter VAIO)
+[00:27:09] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 minecraft:textures/atlas/celestials.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x128x0 minecraft:textures/atlas/decorated_pot.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/shield_patterns.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/banner_patterns.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/items.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x0 minecraft:textures/atlas/gui.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x0 minecraft:textures/atlas/chest.png-atlas
+[00:27:09] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x0 minecraft:textures/atlas/shulker_boxes.png-atlas
+[00:27:09] [Render thread/INFO] [ne.ne.ne.cl.en.an.js.AnimationLoader/]: Loaded 0 entity animations
+[00:27:09] [Render thread/INFO] [minecraft/ConnectScreen]: Connecting to 127.0.0.1, 25565
+[00:27:13] [Render thread/WARN] [minecraft/ClientPacketListener]: Ignoring chat session from Dev due to missing Services public key
+[00:27:13] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 2 advancements
+[00:27:13] [Render thread/WARN] [minecraft/ShaderManager]: Requested post effect does not exist: minecraft:end_of_frame
+[00:27:13] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[00:27:13] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Dynamic Transforms UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 2 reached during a single frame. New capacity will be 8.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 2 reached during a single frame. New capacity will be 8.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[00:27:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Your game mode has been updated to Spectator Mode
+[00:27:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Set Dev's game mode to Spectator Mode]
+[00:27:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Set minecraft:overworld to 6000 tick(s)]
+[00:27:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Game rule advance_time is now set to false]
+[00:27:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Set the weather to clear]
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 32 reached during a single frame. New capacity will be 64.
+[00:27:14] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 32 reached during a single frame. New capacity will be 64.
+[00:27:21] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 64 reached during a single frame. New capacity will be 128.
+[00:27:21] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 64 reached during a single frame. New capacity will be 128.
+[00:36:22] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Saved the game]
+[00:36:44] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Teleported Dev to 644.400000, 218.500000, -126.700000]
+[00:36:47] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 128 reached during a single frame. New capacity will be 256.
+[00:36:48] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 256 reached during a single frame. New capacity will be 512.
+[00:36:48] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 128 reached during a single frame. New capacity will be 256.
+[00:36:50] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 256 reached during a single frame. New capacity will be 512.
+[00:36:51] [Render thread/INFO] [minecraft/DynamicGpuDataStorageMapped]: Resizing Chunk Sections Command Buffer, capacity limit of 512 reached during a single frame. New capacity will be 1024.
+[00:36:55] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Marked 72 chunks in Overworld from [36, -12] to [44, -5] to be force loaded]
+[00:37:02] [Render thread/INFO] [minecraft/DynamicGpuDataStorageNonMapped]: Resizing Chunk Sections Instanced, capacity limit of 512 reached during a single frame. New capacity will be 1024.
+[00:37:55] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Saved the game]
+[00:40:36] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Unmarked all force loaded chunks in Overworld]
+[00:46:36] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Rcon: Stopping the server]
+[00:46:36] [Render thread/WARN] [minecraft/ClientCommonPacketListenerImpl]: Client disconnected with reason: Disconnected
+
+> Task :runLook FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runLook'.
+> Process 'command 'C:\Users\tripp\.jdks\openjdk-25.0.1\bin\java.exe'' finished with non-zero exit value -1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 19m 50s
+7 actionable tasks: 1 executed, 6 up-to-date

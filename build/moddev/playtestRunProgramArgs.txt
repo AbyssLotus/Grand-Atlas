@@ -1,0 +1,14 @@
+# Main Class
+net.neoforged.fml.startup.Client
+
+# NeoForge Run-Type Program Arguments
+--version
+26.3.0.99
+--assetIndex
+34
+--assetsDir
+C:\\Users\\tripp\\.gradle\\caches\\neoformruntime\\assets
+
+# User Supplied Program Arguments
+--quickPlaySingleplayer
+GA-Test

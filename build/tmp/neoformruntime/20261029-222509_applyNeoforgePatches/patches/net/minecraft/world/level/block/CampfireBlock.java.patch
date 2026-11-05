@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/block/CampfireBlock.java
++++ b/net/minecraft/world/level/block/CampfireBlock.java
+@@ -88,7 +_,7 @@
+             }
+         }
+ 
+-        if (itemStack.is(ItemTags.DOUSES_CAMPFIRES) && state.getValue(LIT)) {
++        if (itemStack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHOVEL_DOUSE) && state.getValue(LIT)) {
+             if (!level.isClientSide()) {
+                 level.levelEvent(null, 1009, pos, 0);
+             }
+@@ -254,7 +_,7 @@
+                 return true;
+             }
+ 
+-            boolean smokeBlocked = Shapes.joinIsNotEmpty(SHAPE_VIRTUAL_POST, blockState.getCollisionShape(level, pos, CollisionContext.empty()), BooleanOp.AND);
++            boolean smokeBlocked = Shapes.joinIsNotEmpty(SHAPE_VIRTUAL_POST, blockState.getCollisionShape(level, posToCheck, CollisionContext.empty()), BooleanOp.AND); // FORGE: Fix MC-201374
+             if (smokeBlocked) {
+                 BlockState belowState = level.getBlockState(posToCheck.below());
+                 return isLitCampfire(belowState);

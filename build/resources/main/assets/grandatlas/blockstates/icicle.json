@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "part=tip": {
+      "model": "grandatlas:block/icicle_tip"
+    },
+    "part=middle": {
+      "model": "grandatlas:block/icicle_middle"
+    },
+    "part=base": {
+      "model": "grandatlas:block/icicle_base"
+    }
+  }
+}

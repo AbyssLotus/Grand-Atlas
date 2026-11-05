@@ -1,0 +1,32 @@
+--- a/net/minecraft/client/data/models/ItemModelGenerators.java
++++ b/net/minecraft/client/data/models/ItemModelGenerators.java
+@@ -49,8 +_,10 @@
+ import net.neoforged.api.distmarker.Dist;
+ import net.neoforged.api.distmarker.OnlyIn;
+ 
++import net.neoforged.neoforge.client.extensions.ItemModelGeneratorsExtension;
++
+ @OnlyIn(Dist.CLIENT)
+-public class ItemModelGenerators {
++public class ItemModelGenerators implements ItemModelGeneratorsExtension {
+     public static final ItemTintSource BLANK_LAYER = ItemModelUtils.constantTint(-1);
+     public static final Identifier TRIM_PREFIX_HELMET = prefixForSlotTrim("helmet");
+     public static final Identifier TRIM_PREFIX_CHESTPLATE = prefixForSlotTrim("chestplate");
+@@ -201,6 +_,8 @@
+         ModelTemplates.THREE_LAYERED_ITEM.create(target, TextureMapping.layered(layer0, layer1, layer2), this.modelOutput);
+     }
+ 
++    /// @deprecated Neo: Use [#generateDynamicTrimmableArmorSet] instead.
++    @Deprecated
+     public void generateTrimmableArmorSet(
+         Item helmet,
+         Item chestplate,
+@@ -215,6 +_,8 @@
+         this.generateTrimmableItem(boots, TRIM_PREFIX_BOOTS, hasDyedLayer, trimPaletteReplacements);
+     }
+ 
++    /// @deprecated Neo: Use [#generateDynamicTrimmableItem] instead.
++    @Deprecated
+     public void generateTrimmableItem(
+         Item armor, Identifier slotTrimPrefix, boolean hasDyedLayer, Map<TrimMaterials.Palette, TrimMaterials.Palette> trimPaletteReplacements
+     ) {

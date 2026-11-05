@@ -1,0 +1,36 @@
+--- a/net/minecraft/world/item/component/ItemContainerContents.java
++++ b/net/minecraft/world/item/component/ItemContainerContents.java
+@@ -207,6 +_,33 @@
+         }
+     }
+ 
++    /**
++     * Neo:
++     * {@return the number of slots in this container}
++     */
++    public int getSlots() {
++        return this.items.size();
++    }
++
++    /// Neo: Gets a reference to the item stack template at a particular slot.
++    ///
++    /// @param slot The slot to check. Must be within \[0, [#getSlots()]\]
++    /// @return A copy of the stack in that slot
++    /// @throws UnsupportedOperationException if the provided slot index is out-of-bounds.
++    public Optional<ItemStackTemplate> getTemplateInSlot(int slot) {
++        validateSlotIndex(slot);
++        return this.items.get(slot);
++    }
++
++    /**
++     * Neo: Throws {@link UnsupportedOperationException} if the provided slot index is invalid.
++     */
++    private void validateSlotIndex(int slot) {
++        if (slot < 0 || slot >= getSlots()) {
++            throw new UnsupportedOperationException("Slot " + slot + " not in valid range - [0," + getSlots() + ")");
++        }
++    }
++
+     private record Slot(int index, ItemStackTemplate item) {
+         public static final Codec<ItemContainerContents.Slot> CODEC = RecordCodecBuilder.create(
+             i -> i.group(

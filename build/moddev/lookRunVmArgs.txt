@@ -1,0 +1,10 @@
+--sun-misc-unsafe-memory-access=allow
+--enable-native-access=ALL-UNNAMED
+--add-opens
+java.base/java.lang.invoke=ALL-UNNAMED
+--add-exports
+jdk.naming.dns/com.sun.jndi.dns=java.naming
+-XX:StackShadowPages=32
+"-Dlog4j2.configurationFile=G:\\SeaWeed League\\grand-atlas\\build\\moddev\\lookLog4j2.xml"
+-Djava.net.preferIPv6Addresses=system
+-Dneoforge.enableGameTest=true

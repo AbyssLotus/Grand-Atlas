@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/abyssal_sand"
+      },
+      {
+        "model": "grandatlas:block/abyssal_sand",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/abyssal_sand",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/abyssal_sand",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/SteppedInterpolationHandler.java
++++ b/net/minecraft/world/entity/SteppedInterpolationHandler.java
+@@ -122,25 +_,7 @@
+                 case PositionPath.Linear(Vec3 pos):
+                     this.addStep(pos, yRot, xRot, interpolationSteps);
+                     break;
+-                case PositionPath.Stepped var9: {
+-                    PositionPath.Stepped var10000 = var9;
+-
+-                    try {
+-                        var10000.endPosition();
+-                    } catch (Throwable var17) {
+-                        throw new MatchException(var17.toString(), var17);
+-                    }
+-
+-                    var10000 = var9;
+-
+-                    try {
+-                        var24 = var10000.steps();
+-                    } catch (Throwable var16) {
+-                        throw new MatchException(var16.toString(), var16);
+-                    }
+-
+-                    List totalInterpolationTicks = var24;
+-                    List<PositionStep> steps = totalInterpolationTicks;
++                case PositionPath.Stepped(_, List<PositionStep> steps): {
+                     if (yRot == this.yRot() && xRot == this.xRot()) {
+                         for (PositionStep step : steps) {
+                             this.addStep(step.position(), yRot, xRot, step.tickOffset());

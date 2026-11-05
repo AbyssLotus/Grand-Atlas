@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": "grandatlas:set_piece_dressing",
+  "step": "local_modifications"
+}

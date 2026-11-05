@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:sequence",
+  "sequence": [
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:above_preliminary_surface"
+      },
+      "then_run": "grandatlas:overworld/surface"
+    },
+    "grandatlas:overworld/caves",
+    {
+      "type": "grandatlas:strata"
+    },
+    "minecraft:overworld"
+  ]
+}
