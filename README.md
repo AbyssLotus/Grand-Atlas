@@ -47,7 +47,6 @@ python tools/gen_data.py            # regenerate worldgen JSON (needs one gradle
 
 Playtest: `python tools/make_playtest_mrpack.py` builds `dist/grand-atlas-playtest-<ver>.mrpack` for the Modrinth App (Grand Atlas + Distant Horizons, Xaero's maps, light performance mods; release builds only). [docs/PLAYTEST.md](docs/PLAYTEST.md) is the tour and checklist. `gradlew runPlaytest` is a dev-client smoke test that loads `run/saves/GA-Test` straight away.
 
-Dev server: `gradlew runServer` uses `run/` (seed `grand-atlas`, RCON on port 25600, password `atlas`).
 
 ```
 python tools/rcon.py "grandatlas seed" "grandatlas where" "grandatlas locate canyon_plateau"
