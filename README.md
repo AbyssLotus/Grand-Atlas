@@ -1,6 +1,41 @@
 # Grand Atlas
+![Grand Atlas](docs/logo.png)
 
-One-stop terrain and biomes for **Minecraft 26.3 on NeoForge**: oversized real-world and fantasy landforms on a world that runs from y -128 to 1024, blended without seams. The plan, landform catalogue and milestones are in [docs/DESIGN.md](docs/DESIGN.md).
+One-stop terrain and biomes for **Minecraft 26.3 on NeoForge**: oversized real-world and fantasy landforms on a world that runs from y -128 to 1024, blended without seams. 
+
+## Screenshots
+
+> [!NOTE]
+> Some of these screenshots were taken in the **Create Atlas** modpack, so they can show things that are not part of Grand Atlas, such as blocks, builds and mobs from the pack's other mods (the airships in the first shot, for example). Grand Atlas makes the terrain, biomes, caves and features. Every shot uses a shader pack, so lighting and sky look different without one.
+
+<p align="center">
+  <img src="docs/images/volcano_airships.webp" width="100%" alt="A stratovolcano with lava veining its slopes, airships moored on the flank, desert crags behind">
+</p>
+<p align="center"><em>A stratovolcano in the Volcanic Wastes, lava veining its slopes, with desert crags behind. The airships come from the Create Atlas modpack.</em></p>
+
+<p align="center">
+  <img src="docs/images/aurora_arch.webp" width="49%" alt="A natural arch and sea stacks under the aurora and the full moon">
+  <img src="docs/images/aurora_inlet.webp" width="49%" alt="The aurora over a sea inlet at night">
+</p>
+<p align="center"><em>Left: a natural arch and sea stacks under the aurora. Right: the aurora over a sea inlet.</em></p>
+
+<p align="center">
+  <img src="docs/images/great_oak.webp" width="49%" alt="A great oak over mixed forest and a cherry grove, rock towers and a floating rock in the mist beyond">
+  <img src="docs/images/taiga_glade.webp" width="49%" alt="A flower glade in old-growth taiga">
+</p>
+<p align="center"><em>Left: a great oak over mixed forest and a cherry grove, with rock towers and a floating rock in the mist. Right: a flower glade in old-growth taiga.</em></p>
+
+<p align="center">
+  <img src="docs/images/birch_lake.webp" width="49%" alt="Birch woods on the steep shore of a lake">
+  <img src="docs/images/night_sky.webp" width="49%" alt="The night sky over a violet crystal spire">
+</p>
+<p align="center"><em>Left: birch woods on the steep shore of a lake. Right: the night sky over a violet crystal spire.</em></p>
+
+<p align="center">
+  <img src="docs/images/fungal_forest.webp" width="49%" alt="A fungal forest cave: giant glowcaps and red mushrooms under red weeping vines">
+  <img src="docs/images/root_caves.webp" width="49%" alt="Root caves under a forest, roots running down from the trees above">
+</p>
+<p align="center"><em>Left: a fungal forest underground, giant glowcaps and mushrooms under red weeping vines. Right: root caves under a forest.</em></p>
 
 **Status: M2 done (landform framework + macro landforms).** The world is 1152 blocks tall. Continents and tectonic belts set a base height (the datum), and a warped mosaic of ~1.6 km provinces each holds one landform that builds relief over it:
 - **Wonders:** megaranges with cirques, canyon plateaus, dune seas, playas with salt flats, and rock deserts (Wadi Rum-style sandstone jebels, towers and fins carved in 3D with holes, arches and undercut feet).
@@ -47,7 +82,9 @@ python tools/gen_data.py            # regenerate worldgen JSON (needs one gradle
 
 Playtest: `python tools/make_playtest_mrpack.py` builds `dist/grand-atlas-playtest-<ver>.mrpack` for the Modrinth App (Grand Atlas + Distant Horizons, Xaero's maps, light performance mods; release builds only). [docs/PLAYTEST.md](docs/PLAYTEST.md) is the tour and checklist. `gradlew runPlaytest` is a dev-client smoke test that loads `run/saves/GA-Test` straight away.
 
-Dev server: `gradlew runServer` uses `run/` (seed `grand-atlas`, RCON on port 25600, password `atlas`).
+**Two versions build from this folder** (since 2026-11-11): Minecraft 26.3 from the root project and Minecraft 1.21.1 from `mc1211/`, which compiles the same `core/` sources ([docs/BACKPORT_1.21.1_PLAN.md](docs/BACKPORT_1.21.1_PLAN.md)). A bare task name runs in both, so name the project: `gradlew :build` and `gradlew :runServer` for 26.3, `gradlew :mc1211:build` and `gradlew :mc1211:runServer` for 1.21.1 (`mc1211/run`, RCON port 25601). Data for 1.21.1: `python tools/gen_data.py --target 1.21.1`.
+
+Dev server: `gradlew :runServer` uses `run/` (seed `grand-atlas`, RCON on port 25600, password `atlas`).
 
 ```
 python tools/rcon.py "grandatlas seed" "grandatlas where" "grandatlas locate canyon_plateau"
