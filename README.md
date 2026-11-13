@@ -1,7 +1,7 @@
 # Grand Atlas
 ![Grand Atlas](docs/logo.png)
 
-One-stop terrain and biomes for **Minecraft 26.3 on NeoForge**: oversized real-world and fantasy landforms on a world that runs from y -128 to 1024, blended without seams. 
+One-stop terrain and biomes for **Minecraft 1.21.1 on NeoForge** (a 26.3 version builds from the same sources and will follow): oversized real-world and fantasy landforms, real river systems and a world that runs from y -512 to 1024, blended without seams. Download it on Modrinth; the player-facing description and the roadmap are in [MODRINTH.md](MODRINTH.md).
 
 ## Screenshots
 
@@ -93,3 +93,7 @@ python tools/render_region.py run/world/dimensions/minecraft/overworld 128 96 38
 ```
 
 `forceload` caps at 256 chunks per call and counts every chunk touched, so use chunk-aligned ranges (multiples of 16, ending on 15). In 26.x, region files live under `world/dimensions/minecraft/overworld/region`.
+
+## License
+
+Grand Atlas uses its own [Grand Atlas License](LICENSE.md): free to use, change, port and share with credit; any modpack (monetized too) and any videos or streams are fine; servers only if they make no money; any other way of making money with it needs permission. The third-party trees and rock formations in [docs/CREDITS.md](docs/CREDITS.md) stay under their authors' terms and are not covered.

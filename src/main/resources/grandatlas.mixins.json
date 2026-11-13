@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "NoiseBasedChunkGeneratorMixin",
-    "WaterFluidMixin"
+    "WaterFluidMixin",
+    "StructureMixin",
+    "SpringFeatureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

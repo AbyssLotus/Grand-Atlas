@@ -21,6 +21,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *   <li>{@code grandatlas:fall_detail}: moss, vines and ferns round the river network's waterfalls</li>
  *   <li>{@code grandatlas:floater_cleanup}: clears rock the crags' undercuts cut loose</li>
  *   <li>{@code grandatlas:steep_rock}: bare rock instead of grass and dirt on steep ground</li>
+ *   <li>{@code grandatlas:atlas_assets}: hand-built trees, god trees and rock formations from the approved packs (docs/CREDITS.md)</li>
+ *   <li>{@code grandatlas:country_detail}: boulders, logs and ground cover on ordinary ground between the meso sites</li>
  *   <li>{@code grandatlas:cave_dressing}: roots, icicles and crystal beams for the cave biomes (M7e)</li>
  *   <li>{@code grandatlas:deep_water}: the underground's lakes, seas and flooded caves (M7d)</li>
  *   <li>{@code grandatlas:strata}: the abyss's tuff layers and blackstone base (a material rule)</li>
@@ -49,9 +51,12 @@ public final class ModWorldgen {
         FEATURE_TYPES.register("fall_detail", () -> FallDetail.CODEC);
         FEATURE_TYPES.register("floater_cleanup", () -> FloaterCleanup.CODEC);
         FEATURE_TYPES.register("steep_rock", () -> SteepRock.CODEC);
+        FEATURE_TYPES.register("country_detail", () -> CountryDetail.CODEC);
+        FEATURE_TYPES.register("atlas_assets", () -> AtlasAssets.CODEC);
         FEATURE_TYPES.register("deep_water", () -> DeepWater.CODEC);
         FEATURE_TYPES.register("cave_dressing", () -> CaveDressing.CODEC);
         FEATURE_TYPES.register("set_piece_dressing", () -> SetPieceDressing.CODEC);
         MATERIAL_RULE_TYPES.register("strata", () -> Strata.CODEC);
+        MATERIAL_RULE_TYPES.register("cave_gate", () -> CaveGate.CODEC);
     }
 }

@@ -80,7 +80,7 @@ Picked in 3D from the depth band, a regional noise, and the land above. *Italics
 | Deep dark (vanilla) | under high land | Sculk; ancient cities. |
 | Magma chambers | under volcanoes | Lava lakes and falls, basalt columns, red glow. |
 | Abyssal shores | round an underground sea | Black tuff and basalt beaches, glowing life in the water. |
-| *Inverted lakes* | big caverns | Lakes hanging from the ceiling, their surfaces facing down. You can swim up into them. |
+| *Inverted lakes* | big caverns | Lakes hanging from the ceiling, their surfaces facing down. You can swim up into them. The lake's bed (the cavern ceiling above the water) is studded with glowing crystals in many colours, so their light shines down through the water like an aurora (user, 2026-11-09). |
 | *Rising falls* | wet caverns | Waterfalls that pour upward from floor pools into the ceiling. |
 | *Mirror halls* | volcanic rock | Walls of black volcanic glass, polished, reflecting the lava glow. |
 | *Frozen fire* | old magma chambers | Lava falls caught mid-fall and turned to obsidian and basalt, their cores still glowing. |
@@ -132,7 +132,7 @@ Picked in 3D from the depth band, a regional noise, and the land above. *Italics
 - **Skylight cavern:** daylight through a hole in the roof, trees growing in the light.
 
 **Fantastical:**
-- **Inverted lake chamber:** a lake on the ceiling, with a rising fall feeding it from a pool below.
+- **Inverted lake chamber:** a lake on the ceiling, with a rising fall feeding it from a pool below. Its bed is lined with multicoloured glowing crystals (new blocks, Vanilla-plus quality with LabPBR maps) so the hanging water glows like an aurora.
 - **Rising falls shaft:** water pouring up a shaft to the level above.
 - **Amber vault:** a chamber of amber with one great thing trapped in its centre.
 - **Prismatic springs:** stepped hot pools in rings of colour.
@@ -250,7 +250,9 @@ From the 26.3 sources (`levelgen/carver/CaveWorldCarver`, the overworld cave den
    - Rules: AtlasCore.caveBiome, material rules (gen_data CAVE_RULES), world/CaveDressing (formations, decoration, selenite beams).
    - Ten new blocks: world/ModBlocks; textures and LabPBR maps from tools/textures.py, approved on the New Blocks page.
    - User notes: fungal/sulfur/crystal rare but random anywhere; ice/sandstone needed more of their biome; "bland" fixed with formations and decoration; repetitive tiling fixed with variants and random turns; every block needs a specular map.
-   - **Next:** the set pieces (the Hollow, Titan's grave, the Great Geode, the Worldroot, inverted lakes, rising falls) and more biomes.
+   - **Done in 0.10.0 (2026-11-09):** set pieces round 1 (core/SetPieces, world/SetPieceDressing): the Hollow, the Great Geode, Titan's grave (always lush, heavily overgrown at the user's request). Aquifer leftovers (lava, barrier sheets) cleared from set pieces and mega-caverns; set-piece lakes filled by DeepWater; river water gets water's shader id under Iris (mixin/compat).
+   - **Done in 0.11.0 (2026-11-09):** the Aurora Vault (hanging lake, aurora-crystal bed, rising fall, Aurora Well on the surface), the Worldroot (surface tree, root hall, gate and shaft) and the Hanging Mountains; set-piece kinds 4-6 in core/SetPieces, each with its own cave biome. River water FLOW=held/up never pours or converts; world/RisingWater lifts entities. New blocks: aurora crystal x5 (drops shattered aurora crystal without Silk Touch, the user's ask), aurora shard x5, amber sap.
+   - **Next:** passage streams (step pools), thicker root caves, more set pieces and fantastical cave biomes from the lists above (the user, 2026-11-09: "more set pieces and/or biomes").
 5. **M7e, cave biomes, mesos and micros:** the lists above, most striking first (the Hollow, Titan's grave, inverted lakes, crystal caves).
 6. Throughout: a depth view on the live map (a horizontal slice at a chosen Y).
 

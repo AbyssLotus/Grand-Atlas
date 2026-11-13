@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [{"item": "minecraft:book"}, {"item": "minecraft:map"}, {"item": "minecraft:compass"}],
+  "result": {"id": "grandatlas:grand_atlas", "count": 1}
+}

@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/cinder_moss"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_1"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_2"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_2",
+        "y": 270
+      }
+    ]
+  }
+}

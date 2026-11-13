@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "grandatlas:block/glowcap"
+  },
+  "render_type": "minecraft:cutout"
+}

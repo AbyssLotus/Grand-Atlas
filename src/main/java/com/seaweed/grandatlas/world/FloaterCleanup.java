@@ -12,7 +12,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jspecify.annotations.Nullable;
 
@@ -27,9 +26,6 @@ import org.jspecify.annotations.Nullable;
 public record FloaterCleanup() implements Feature {
     public static final MapCodec<FloaterCleanup> CODEC = MapCodec.unit(FloaterCleanup::new);
     private static final int[][] STEPS = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
-
-    private static volatile @Nullable ServerLevel lastLevel;
-    private static volatile @Nullable AtlasCore lastCore;
 
     @Override
     public MapCodec<FloaterCleanup> codec() {
@@ -105,10 +101,6 @@ public record FloaterCleanup() implements Feature {
     }
 
     private static @Nullable AtlasCore core(ServerLevel level) {
-        if (level == lastLevel) return lastCore;
-        AtlasCore core = CoreHandle.coreFrom(level.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED));
-        lastCore = core;
-        lastLevel = level;
-        return core;
+        return CoreHandle.coreOf(level);
     }
 }

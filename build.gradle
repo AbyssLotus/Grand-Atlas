@@ -82,6 +82,11 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.named('jar', Jar).configure {
+    // The license travels with every copy (LICENSE.md section 3).
+    from(rootDir) {
+        include 'LICENSE.md'
+        rename 'LICENSE.md', 'GRAND_ATLAS_LICENSE.md'
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,

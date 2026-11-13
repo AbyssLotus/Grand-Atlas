@@ -8,6 +8,7 @@ The bar (the user, 2026-11-04): "vanilla plus", or as good as Obscuria's work. S
 keeps to a small palette (4-7 tones), shades in clusters rather than per-pixel noise, has no
 outlines, and plants keep a clear silhouette, as vanilla's do.
 """
+import math
 import pathlib
 import random
 import sys
@@ -110,25 +111,55 @@ def selenite_shard():
     return im
 
 def glowworm_silk(tip):
-    """Hanging threads beaded with glowing droplets, as glowworms spin them; the tip ends in big drops."""
-    thread = (214, 222, 228)
-    rim, glow, core = (54, 160, 180), (110, 226, 222), (214, 255, 249)
+    """Hanging glowworm silk, drawn the way vanilla draws its hanging plants (the user, 2026-11-10:
+    the first version, three one-pixel lines in three colours, "doesn't match the vibe of vanilla
+    Minecraft which has more gradient work"). Strands two pixels thick that sway, lit from the upper
+    left and shaded down the right in a hue-shifted ramp (silver-teal thread, deep teal to pale mint
+    droplets), with beads of light swelling along them and a heavy drop at each tip. About a hundred
+    pixels of it, like cave vines, and the body tiles top to bottom."""
+    # thread: shadow, body, light; droplets: rim, shade, body, light, shine, core
+    t_dark, t_mid, t_light = (52, 96, 118), (104, 152, 168), (170, 208, 214)
+    d_rim, d_shade, d_body, d_light, d_shine, d_core = (22, 74, 98), (36, 116, 136), (60, 168, 176), (104, 214, 206), (168, 240, 228), (232, 255, 249)
     im = img()
-    strands = [(4, 1, 13), (8, 3, 15), (11, 0, 10)]  # (x, first bead row, where a tip's strand ends)
-    for sx, first, stop in strands:
+
+    def strand_x(sx, phase, y):
+        return sx + int(round(1.15 * math.sin(2 * math.pi * y / 16.0 + phase)))
+
+    def bead(cx, cy):
+        # a small swelling of light: lit upper left, shaded lower right, a dark rim under it
+        for dx, dy, c in ((0, 0, d_shine), (1, 0, d_light), (-1, 1, d_light), (0, 1, d_core), (1, 1, d_body), (2, 1, d_shade),
+                          (0, 2, d_body), (1, 2, d_shade), (0, 3, d_rim)):
+            put(im, cx + dx, cy + dy, c)
+
+    def drop(cx, cy):
+        # the heavy drop at a strand's end
+        for dx, dy, c in ((0, -1, t_light), (0, 0, d_light), (1, 0, d_body),
+                          (-1, 1, d_light), (0, 1, d_shine), (1, 1, d_light), (2, 1, d_shade),
+                          (-1, 2, d_body), (0, 2, d_core), (1, 2, d_light), (2, 2, d_shade),
+                          (-1, 3, d_shade), (0, 3, d_light), (1, 3, d_body), (2, 3, d_rim),
+                          (0, 4, d_shade), (1, 4, d_rim)):
+            put(im, cx + dx, cy + dy, c)
+
+    # (x, sway phase, first bead row, where a tip's strand ends)
+    strands = [(3, 0.0, 2, 10), (8, 2.2, 6, 14), (12, 4.3, 0, 8)]
+    for sx, phase, first, stop in strands:
         bottom = stop if tip else 16
-        kink = (sx * 5) % 11 + 2  # one small kink, not a zigzag
         for y in range(bottom):
-            x = sx + (1 if y >= kink else 0)
-            put(im, x, y, thread, 200)
-        for b in range(first, bottom - (2 if tip else 0), 5):
-            x = sx + (1 if b >= kink else 0)
-            put(im, x, b, core)
-            put(im, x, b + 1, glow)
+            x = strand_x(sx, phase, y)
+            nxt = strand_x(sx, phase, y + 1)
+            put(im, x, y, t_mid)
+            put(im, x + 1, y, t_dark)             # the shaded side
+            if (y + sx) % 3 == 0: put(im, x - 1, y, t_light)  # glints down the lit side
+            if nxt != x: put(im, min(x, nxt), y, t_light)   # where it bends, the turn catches the light
+        for row in range(first, bottom - (5 if tip else 0), 7):
+            bead(strand_x(sx, phase, row + 1), row % 16 if not tip else row)
         if tip:
-            x = sx + (1 if bottom - 1 >= kink else 0)
-            for dx, dy, c in ((0, -1, glow), (-1, 0, glow), (0, 0, core), (1, 0, glow), (0, 1, core), (-1, 1, rim), (1, 1, rim), (0, 2, glow)):
-                put(im, x + dx, bottom - 1 + dy, c)
+            drop(strand_x(sx, phase, bottom - 1), bottom)
+    # fine side threads between the strands, as in a web: short, dim, on the diagonal
+    for x0, y0, n, dx in ((5, 4, 3, 1), (10, 9, 2, -1), (6, 12, 2, 1)):
+        if tip and y0 > 7: continue
+        for k in range(n):
+            put(im, x0 + k * dx, y0 + k, t_dark, 200)
     return im
 
 def glowcap():
@@ -293,6 +324,160 @@ def cinder_moss(variant=0):
             put(im, (x + dx) % N, (y + dy) % N, ember)
     return im
 
+# The aurora crystals that line an inverted lake's bed (user, 2026-11-09: "multi colored crystals" so
+# the light through the water glows like an aurora). One design, five jewel palettes, dark to white.
+AURORA = {
+    "green": [(14, 84, 64), (26, 140, 98), (58, 198, 134), (138, 240, 182), (220, 255, 234)],
+    "cyan": [(10, 78, 98), (20, 138, 160), (54, 196, 208), (148, 236, 238), (226, 255, 255)],
+    "blue": [(22, 42, 116), (36, 82, 188), (76, 134, 236), (158, 192, 255), (230, 240, 255)],
+    "violet": [(56, 24, 110), (98, 50, 176), (148, 98, 232), (200, 162, 255), (244, 232, 255)],
+    "rose": [(104, 24, 70), (172, 48, 116), (226, 94, 164), (255, 164, 208), (255, 234, 246)],
+}
+
+
+def aurora_crystal(colour, variant=0):
+    """A mass of grown crystal, read like vanilla's amethyst: a few large flat facets in mid tones
+    (each lit by its own tilt), bevelled edges lit on the upper left and shaded on the lower right,
+    one facet glowing from a bright heart, a sparkle. Three variants turned at random so a lake bed
+    of it doesn't tile."""
+    import math
+    pal = AURORA[colour]
+    rnd = random.Random(7100 + 37 * variant)
+    seeds = [(rnd.random() * N, rnd.random() * N) for _ in range(6)]
+    tone = [rnd.choice((1, 2, 2, 2, 3)) for _ in seeds]
+    heart = rnd.randrange(len(seeds))
+    tone[heart] = 2
+    def facet(x, y):
+        best, bi = 1e9, 0
+        for i, (sx, sy) in enumerate(seeds):
+            dx = min(abs(x - sx), N - abs(x - sx)); dy = min(abs(y - sy), N - abs(y - sy))
+            # stretched along a diagonal so the facets read as crystal faces, not cells
+            d = math.hypot(dx * 0.8 + dy * 0.35, dy)
+            if d < best:
+                best, bi = d, i
+        return bi
+    f = [[facet((x + 0.5) % N, (y + 0.5) % N) for x in range(N)] for y in range(N)]
+    im = img()
+    for y in range(N):
+        for x in range(N):
+            k = tone[f[y][x]]
+            if f[(y - 1) % N][(x - 1) % N] != f[y][x]:
+                k = min(4, k + 1)  # lit edge
+            elif f[(y + 1) % N][(x + 1) % N] != f[y][x]:
+                k = max(0, k - 1)  # shaded edge
+            sx, sy = seeds[f[y][x]]
+            if f[y][x] == heart:
+                dx = min(abs(x + 0.5 - sx), N - abs(x + 0.5 - sx)); dy = min(abs(y + 0.5 - sy), N - abs(y + 0.5 - sy))
+                r = math.hypot(dx, dy)
+                if r < 1.3:
+                    k = 4
+                elif r < 2.6:
+                    k = max(k, 3)
+            put(im, x, y, pal[k])
+    put(im, rnd.randrange(N), rnd.randrange(N), pal[4])
+    return im
+
+
+def aurora_shattered(colour, variant=0):
+    """Aurora crystal once it's been mined: broken into many small shards at every angle, bright
+    fracture faces among them (what an aurora crystal drops without Silk Touch, as stone drops
+    cobblestone). Three variants turned at random."""
+    import math
+    pal = AURORA[colour]
+    rnd = random.Random(7100 + 37 * variant)
+    seeds = []
+    for _ in range(9):
+        a = rnd.random() * math.pi * 2
+        seeds.append((rnd.random() * N, rnd.random() * N, math.cos(a + 0.8), rnd.random() < 0.22))
+    def near(x, y):
+        best = []
+        for i, (sx, sy, _, _) in enumerate(seeds):
+            dx = min(abs(x - sx), N - abs(x - sx)); dy = min(abs(y - sy), N - abs(y - sy))
+            best.append((math.hypot(dx, dy), i))
+        best.sort()
+        return best[0], best[1]
+    im = img()
+    for y in range(N):
+        for x in range(N):
+            (d1, i), (d2, j) = near(x + 0.5, y + 0.5)
+            sx, sy, tilt, glow = seeds[i]
+            k = 1 if tilt < -0.35 else 2 if tilt < 0.4 else 3
+            if glow:
+                k = 3 if d1 > 2.2 else 4
+            if d2 - d1 < 0.9 and seeds[j][2] < tilt:
+                k = min(4, k + 1)
+            elif d2 - d1 < 0.9 and k > 1 and tilt < 0:
+                k -= 1
+            put(im, x, y, pal[k])
+    for _ in range(2):
+        put(im, rnd.randrange(N), rnd.randrange(N), pal[4])
+    return im
+
+
+def aurora_shard(colour):
+    """Crystal points growing from the base, stubbier and more jewel-like than selenite: faceted,
+    deep at the root, glowing at the tips."""
+    pal = AURORA[colour]
+    im = img()
+    for bx, by, ang, length, half in ((8.2, 16.2, 0.08, 13, 2.2), (4.6, 16.2, -0.5, 9, 1.8), (11.8, 16.2, 0.46, 9, 1.7),
+                                      (2.4, 16.2, -0.95, 5, 1.2), (14.0, 16.2, 0.9, 5, 1.2)):
+        blade(im, bx, by, ang, length, half, [pal[0], pal[1], pal[2], pal[3]], pal[4])
+    return im
+
+
+def amber_sap(variant=0):
+    """Glowing tree resin set hard: warm amber in slow, soft swirls (seamless), brightest where it is
+    thickest, one or two flecks of bark caught deep in it and a single small bubble, kept apart.
+    Three variants turned at random."""
+    import math
+    pal = [(150, 70, 12), (186, 98, 18), (216, 132, 30), (240, 170, 56), (255, 210, 116)]
+    im = img()
+    rnd = random.Random(8320 + variant)
+    ph = [rnd.random() * math.pi * 2 for _ in range(6)]
+    for y in range(N):
+        for x in range(N):
+            u, v = x / N * math.pi * 2, y / N * math.pi * 2
+            # sums of whole-period waves: seamless on all four edges
+            w = (math.sin(u + ph[0] + 0.8 * math.sin(v + ph[1])) + 0.7 * math.sin(2 * v + ph[2] + 0.9 * math.sin(u + ph[3]))
+                 + 0.4 * math.sin(2 * u + 3 * v + ph[4])) / 2.1
+            put(im, x, y, ramp(pal, 0.5 + 0.42 * w), 230 + int(20 * (0.5 + 0.5 * w)))
+    fx, fy = rnd.randrange(N), rnd.randrange(N)
+    put(im, fx, fy, (96, 46, 12), 250)
+    bx, by = (fx + 8) % N, (fy + 5 + rnd.randrange(4)) % N
+    put(im, bx, by, (255, 236, 170), 210)
+    return im
+
+
+def aurora_veil(colour, tip):
+    """A curtain of aurora light: soft streaks of the colour that sway a little and shimmer along
+    their length, translucent, the tip fading to nothing (as an aurora's curtain fades at its lower
+    edge). Seamless top to bottom, so a curtain of any length runs on without a seam."""
+    import math
+    pal = AURORA[colour]
+    im = img()
+    rnd = random.Random(9100 + len(colour) * 7 + (1 if tip else 0))
+    shimmer = value_noise(9200 + len(colour), 4)
+    centres = [rnd.random() * N for _ in range(5)]
+    widths = [0.8 + 1.4 * rnd.random() for _ in centres]
+    for y in range(N):
+        sway = 0.6 * math.sin(y / N * math.pi * 2)
+        for x in range(N):
+            s = 0.0
+            for c, w in zip(centres, widths):
+                d = min(abs(x + 0.5 - (c + sway) % N), N - abs(x + 0.5 - (c + sway) % N))
+                s = max(s, max(0.0, 1 - d / w))
+            if s <= 0.05:
+                continue
+            v = s * (0.55 + 0.45 * shimmer(x, y))
+            k = 4 if v > 0.8 else 3 if v > 0.5 else 2
+            fade = (1 - y / N) ** 1.4 if tip else 1.0
+            a = int((60 + 170 * v) * fade)
+            if a < 12:
+                continue
+            put(im, x, y, pal[k], a)
+    return im
+
+
 def lum(c):
     return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255
 
@@ -318,6 +503,12 @@ MATERIALS = {
     "hoarfrost": (0.8, 5, 190, None),
     "abyssal_sand": (0.12, 10, 60, None),
     "cinder_moss": (0.08, 9, 50, lambda c: 230 if lum(c) > 0.6 else 170 if ember(c) else 255),
+    # Glassy, a little subsurface, and every pixel glows (brighter tones more).
+    "aurora_crystal": (0.9, 12, 170, lambda c: int(min(254, 30 + 225 * lum(c)))),
+    "aurora_shard": (0.92, 12, 180, lambda c: int(min(254, 40 + 214 * lum(c)))),
+    "aurora_veil": (0.5, 10, 120, lambda c: int(min(254, 120 + 130 * lum(c)))),
+    "amber_sap": (0.88, 14, 200, lambda c: int(min(254, 30 + 200 * lum(c)))),
+    "shattered_aurora_crystal": (0.7, 12, 150, lambda c: int(min(254, 20 + 200 * lum(c)))),
 }
 
 
@@ -380,6 +571,19 @@ TEXTURES = {
     "cinder_moss_1": lambda: cinder_moss(1),
     "cinder_moss_2": lambda: cinder_moss(2),
 }
+TEXTURES["amber_sap"] = lambda: amber_sap(0)
+TEXTURES["amber_sap_1"] = lambda: amber_sap(1)
+TEXTURES["amber_sap_2"] = lambda: amber_sap(2)
+for _c in AURORA:
+    TEXTURES[f"aurora_crystal_{_c}"] = (lambda c: lambda: aurora_crystal(c, 0))(_c)
+    TEXTURES[f"aurora_crystal_{_c}_1"] = (lambda c: lambda: aurora_crystal(c, 1))(_c)
+    TEXTURES[f"aurora_crystal_{_c}_2"] = (lambda c: lambda: aurora_crystal(c, 2))(_c)
+    TEXTURES[f"aurora_shard_{_c}"] = (lambda c: lambda: aurora_shard(c))(_c)
+    TEXTURES[f"aurora_veil_{_c}"] = (lambda c: lambda: aurora_veil(c, False))(_c)
+    TEXTURES[f"aurora_veil_{_c}_tip"] = (lambda c: lambda: aurora_veil(c, True))(_c)
+    TEXTURES[f"shattered_aurora_crystal_{_c}"] = (lambda c: lambda: aurora_shattered(c, 0))(_c)
+    TEXTURES[f"shattered_aurora_crystal_{_c}_1"] = (lambda c: lambda: aurora_shattered(c, 1))(_c)
+    TEXTURES[f"shattered_aurora_crystal_{_c}_2"] = (lambda c: lambda: aurora_shattered(c, 2))(_c)
 
 
 def main():

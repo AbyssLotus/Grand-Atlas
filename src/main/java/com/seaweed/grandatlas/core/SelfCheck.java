@@ -131,7 +131,9 @@ public final class SelfCheck {
                     double residual = residualJump(core, x - 1, x, z);
                     if (residual > worstResidual) {
                         worstResidual = residual;
-                        at = x + ", " + z;
+                        ColumnSample a = core.sampleBase(x - 1, z), b = core.sampleBase(x, z);
+                        at = x + ", " + z + " (" + a.landform().id() + " " + Math.round(a.height()) + " / " + b.landform().id() + " " + Math.round(b.height())
+                                + ", uncut " + Math.round(a.uncut()) + "/" + Math.round(b.uncut()) + ")";
                     }
                 }
                 prev = h;
@@ -253,7 +255,7 @@ public final class SelfCheck {
                             double residual = residualJumpAlong(core, site.x() + ux * (r - 1), site.z() + uz * (r - 1), x, z);
                             if (residual > worstResidual) {
                                 worstResidual = residual;
-                                at = String.format("%.0f, %.0f (%s)", x, z, site.kind().id());
+                                at = String.format("%.0f, %.0f (%s; %s)", x, z, site.kind().id(), core.sampleBase(x, z).landform().id());
                             }
                         }
                         prev = h;
@@ -286,7 +288,10 @@ public final class SelfCheck {
 
     private static boolean sharp(AtlasCore core, double x, double z) {
         ColumnSample c = core.sampleBase(x, z);
-        return c.wall() != null && c.wall().sharp() || c.shore() != null && c.shore().atFace();
+        // A granite needle's side (landform/MistyPeaks): its envelope stands over the exact ground there.
+        // (Also where a macro's edge lets a needle province's needles through at part height: still sheer.)
+        boolean needle = c.uncut() > c.height() + 2;
+        return c.wall() != null && c.wall().sharp() || c.shore() != null && c.shore().atFace() || needle;
     }
 
     /** Every M1 landform turns up, in plausible shares, across a large area. */
@@ -305,7 +310,8 @@ public final class SelfCheck {
         }
         StringBuilder shares = new StringBuilder();
         boolean all = true;
-        for (String id : List.of("megarange", "canyon_plateau", "dune_sea", "rock_desert", "playa", "lowlands", "hills", "highlands")) {
+        for (String id : List.of("megarange", "canyon_plateau", "dune_sea", "rock_desert", "playa", "lowlands", "hills", "highlands",
+                "misty_peaks", "volcanic_wastes", "silverwood", "glimmer_vale", "tepui", "rift_valley", "rainbow_mountains")) {
             int n = counts.getOrDefault(id, 0);
             all &= n > 0;
             shares.append(String.format(" %s %.1f%%", id, 100.0 * n / Math.max(1, land)));

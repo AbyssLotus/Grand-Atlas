@@ -83,6 +83,12 @@ public final class Caves {
     }
 
     /** Pits, fissures and wind-carved rock at a block: negative where it carves. */
+    /** True if nothing fine (pit, crack, wind-carved rock) is in this column: {@link #fine} is NONE at every y. */
+    public boolean fineNone(int x, int z) {
+        Column c = column(x, z);
+        return c.pitCount == 0 && c.crackWidth <= 0 && c.rock <= 0;
+    }
+
     public double fine(int x, int y, int z) {
         Column c = column(x, z);
         if (c.pitCount == 0 && c.crackWidth <= 0 && c.rock <= 0) {

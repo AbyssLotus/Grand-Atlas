@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.seaweed.grandatlas.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "NoiseBasedChunkGeneratorMixin",
+    "WaterFluidMixin",
+    "StructureMixin",
+    "SpringFeatureMixin",
+    "RandomStateMixin",
+    "NoiseChunkMixin",
+    "SurfaceContextMixin",
+    "BeardifierMixin",
+    "AquiferMixin",
+    "RandomSpreadPlacementAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

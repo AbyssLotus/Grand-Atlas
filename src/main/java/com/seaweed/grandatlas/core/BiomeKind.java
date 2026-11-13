@@ -18,6 +18,9 @@ public enum BiomeKind {
     DESERT(0xFA9418), SAVANNA(0xBDB25F), SAVANNA_PLATEAU(0xA79D64), JUNGLE(0x537B09), SPARSE_JUNGLE(0x628B17),
     SWAMP(0x07F9B2), MANGROVE_SWAMP(0x2CCC8E), FROZEN_RIVER(0xA0B8FF), BADLANDS(0xD94515), WOODED_BADLANDS(0xB09765),
     ERODED_BADLANDS(0xFF6D3D),
+    // vanilla surface biomes added 2026-11-10 (they could not generate at all before)
+    BAMBOO_JUNGLE(0x768E14), ICE_SPIKES(0xB4DCDC), MUSHROOM_FIELDS(0xFF00FF), WINDSWEPT_GRAVELLY_HILLS(0x789878),
+    WINDSWEPT_FOREST(0x507050), WINDSWEPT_SAVANNA(0xE5DA87),
     MEADOW(0x83BB6D), CHERRY_GROVE(0xF0A0C8), GROVE(0x8AB689), SNOWY_SLOPES(0xC4D0D8), WINDSWEPT_HILLS(0x606060),
     STONY_PEAKS(0xA0A0A0), JAGGED_PEAKS(0xDCE8F0), FROZEN_PEAKS(0xB0C8FF),
     LUSH_CAVES(0x50A050), DRIPSTONE_CAVES(0x806040), DEEP_DARK(0x102030), SULFUR_CAVES(0xB8C030),
@@ -25,9 +28,16 @@ public enum BiomeKind {
     ROOT_CAVES(0x6A4A2A, "grandatlas"), ICE_CAVES(0x9CD0F0, "grandatlas"), SANDSTONE_CAVES(0xE0C080, "grandatlas"),
     FUNGAL_FOREST(0xB04060, "grandatlas"), CRYSTAL_CAVES(0xD8C8F8, "grandatlas"), MAGMA_CHAMBERS(0xE04010, "grandatlas"),
     ABYSSAL_SHORES(0x303848, "grandatlas"), GLOWWORM_GROTTO(0x2AA0A8, "grandatlas"),
-    THE_HOLLOW(0x3A6A50, "grandatlas"), TITANS_GRAVE(0xC8C0A8, "grandatlas"),
+    THE_HOLLOW(0x3A6A50, "grandatlas"), TITANS_GRAVE(0xC8C0A8, "grandatlas"), AURORA_VAULT(0x3AD8A0, "grandatlas"),
+    WORLDROOT_HALL(0x7A5A30, "grandatlas"), HANGING_PEAKS(0xA8C8E0, "grandatlas"),
     SALT_FLAT(0xF4F4EE, "grandatlas"), RED_DESERT(0xD2733C, "grandatlas"), RIVER(0x3070E0, "grandatlas"),
-    SALT_MARSH(0x6E8B4A, "grandatlas"), PEBBLE_BEACH(0xA8A296, "grandatlas"), CRATER_LAKE(0x2A4AD0, "grandatlas");
+    SALT_MARSH(0x6E8B4A, "grandatlas"), PEBBLE_BEACH(0xA8A296, "grandatlas"), CRATER_LAKE(0x2A4AD0, "grandatlas"),
+    // M6 fantasy (landform/MistyPeaks, VolcanicWastes, Silverwood, GlimmerVale)
+    MISTY_PEAKS(0xC8D4D0, "grandatlas"), CLOUD_FOREST(0x4E8A60, "grandatlas"), VOLCANIC_WASTES(0x302828, "grandatlas"),
+    VOLCANO(0x5A3A30, "grandatlas"), SILVERWOOD(0xE8C050, "grandatlas"), GLIMMER_VALE(0x60D890, "grandatlas"),
+    GLIMMER_RIVER(0x3AD6C8, "grandatlas"), SKY_GARDEN(0x9AE070, "grandatlas"),
+    // M5 real-world wonders (landform/Tepui and RainbowMountains, and the Spotted Lake site)
+    TEPUI_SUMMIT(0x4A4A40, "grandatlas"), RAINBOW_MOUNTAINS(0xE08060, "grandatlas"), SPOTTED_LAKE(0x7AC8B0, "grandatlas");
 
     private final int previewColor;
     private final String namespace;

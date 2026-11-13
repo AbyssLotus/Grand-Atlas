@@ -57,6 +57,11 @@ public final class MicroFeature {
             case TRAVERTINE -> r2 + r * 2.6 + 10;
             case SPIRE -> r * 1.3 + 10;
             case CALDERA -> r2;
+            case CRYSTAL_SPIRE -> r + h * 0.45 + 3;
+            case MONOLITH -> extra == 1 ? h + 2 : r + 3;
+            case FLOAT_ROCK -> r * 1.4 + 3;
+            case RIB_CAGE -> r2 / 2 + h + 6;
+            case PETRIFIED_TRUNK -> extra >= 0 ? h + r + 2 : r + 3;
         };
     }
 

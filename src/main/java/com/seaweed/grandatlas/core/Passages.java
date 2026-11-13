@@ -607,6 +607,20 @@ public final class Passages {
     // ---- per block
 
     /** The passages at a block: negative where they carve. {@code c} is this column's sample. */
+    /** The lowest y any passage reaches in this column (MAX_VALUE if none), so callers can skip {@link #carve} outside. */
+    public int lowest(int x, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        return cc.colCount == 0 ? Integer.MAX_VALUE : (int) Math.floor(cc.colLo);
+    }
+
+    /** The highest y any passage reaches in this column (MIN_VALUE if none). */
+    public int highest(int x, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        return cc.colCount == 0 ? Integer.MIN_VALUE : (int) Math.ceil(cc.colHi);
+    }
+
     public double carve(ColumnSample c, int x, int y, int z) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
@@ -614,7 +628,8 @@ public final class Passages {
         // No passage through a cavern lake's bed (8 blocks of it kept) or its water.
         if (!Double.isNaN(cc.lakeLevel) && y >= cc.lakeBed - 8 && y <= cc.lakeLevel + 1) return Caves.NONE;
         double cover = c.height() - y;
-        boolean shallow = cover < (c.nearWater() || c.isOcean() ? 26 : 10);
+        boolean wet = c.nearWater() || c.isOcean() || !Double.isNaN(c.water());
+        boolean shallow = cover < (wet ? 26 : 10);
         double best = Caves.NONE;
         double bx = x + 0.5, by = y + 0.5, bz = z + 0.5;
         boolean indexed = cc.colCount <= 64;
@@ -624,7 +639,9 @@ public final class Passages {
             if (indexed) mask &= mask - 1; // this candidate taken; the loop moves to the next set bit
             Seg s = cc.col[i];
             if (by < s.minY || by > s.maxY) continue;
-            if (shallow && !s.open) continue;
+            // (A mouth is open to the surface, but never in a column at or beside water: its width
+            // could reach one from a dry anchor, and the river above ran into the cave.)
+            if (shallow && (!s.open || wet)) continue;
             double q = shape(s, bx, by, bz);
             if (q < 1.4) {
                 double rough = s.kind == BORE ? 0.03 : s.kind == RIFT || s.kind == GREAT_RIFT ? 0.06 : 0.13;

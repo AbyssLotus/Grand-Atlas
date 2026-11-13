@@ -52,7 +52,8 @@ public final class Waters {
         return level;
     }
 
-    public static final int ROCK = 0, AIR = 1, WATER = 2;
+    public static final int ROCK = 0, AIR = 1, WATER = 2, HELD = 3, RISING = 4;
+    // HELD: water held up over open air (a hanging lake); RISING: a rising fall's column. Neither pours.
 
     /**
      * What the core makes of a block underground: rock, open (a dry cave), or water. Only Grand
@@ -63,7 +64,7 @@ public final class Waters {
         if (sp.nearColumn(x, z)) {
             SetPieces.Probe p = sp.sample(x, y, z);
             if (p.claimed) {
-                if (p.open) return p.water ? WATER : AIR;
+                if (p.open) return p.rise ? RISING : p.hang ? HELD : p.water ? WATER : AIR;
                 if (p.protect) return ROCK;
                 return core.passages().carve(c, x, y, z) < 0 ? AIR : ROCK; // a passage breaking in: an entrance
             }

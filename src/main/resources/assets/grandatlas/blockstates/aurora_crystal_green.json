@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/aurora_crystal_green"
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_1"
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_2"
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/aurora_crystal_green_2",
+        "y": 270
+      }
+    ]
+  }
+}

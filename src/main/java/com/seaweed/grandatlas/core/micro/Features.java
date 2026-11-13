@@ -192,7 +192,8 @@ public final class Features {
                     out.micro = m;
                     out.calm = true;
                 }
-                case BASALT_COLUMNS, ERRATIC, TOR, GIANT_TREE, GIANT_MUSHROOM, SNAG -> {
+                case BASALT_COLUMNS, ERRATIC, TOR, GIANT_TREE, GIANT_MUSHROOM, SNAG,
+                        CRYSTAL_SPIRE, MONOLITH, FLOAT_ROCK, RIB_CAGE, PETRIFIED_TRUNK -> {
                     if (out.micro == null) out.micro = m; // built whole in the detail pass
                 }
                 case SPIRE -> {
@@ -455,6 +456,10 @@ public final class Features {
         Drainage.Carve carve = new Drainage.Carve();
         if (m.kind == MicroKind.CALDERA) {
             checkCaldera(m, carve);
+            return;
+        }
+        if (m.kind == MicroKind.FLOAT_ROCK) {
+            m.state = MicroFeature.OK; // it floats: a river under it does it no harm
             return;
         }
         double around = m.reach() + 8;

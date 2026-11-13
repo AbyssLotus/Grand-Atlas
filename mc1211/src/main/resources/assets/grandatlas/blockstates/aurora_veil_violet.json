@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "tip=true": {
+      "model": "grandatlas:block/aurora_veil_violet"
+    },
+    "tip=false": {
+      "model": "grandatlas:block/aurora_veil_violet_plant"
+    }
+  }
+}

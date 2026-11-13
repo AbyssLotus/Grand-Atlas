@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jspecify.annotations.Nullable;
 
@@ -45,9 +44,6 @@ import org.jspecify.annotations.Nullable;
 public record FallDetail() implements Feature {
     public static final MapCodec<FallDetail> CODEC = MapCodec.unit(FallDetail::new);
     private static final long SEED = 0xFA11DE7A1L;
-
-    private static volatile @Nullable ServerLevel lastLevel;
-    private static volatile @Nullable AtlasCore lastCore;
 
     @Override
     public MapCodec<FallDetail> codec() {
@@ -227,10 +223,6 @@ public record FallDetail() implements Feature {
     }
 
     private static @Nullable AtlasCore core(ServerLevel level) {
-        if (level == lastLevel) return lastCore;
-        AtlasCore core = CoreHandle.coreFrom(level.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED));
-        lastCore = core;
-        lastLevel = level;
-        return core;
+        return CoreHandle.coreOf(level);
     }
 }

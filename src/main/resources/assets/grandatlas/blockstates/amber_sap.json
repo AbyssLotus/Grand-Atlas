@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/amber_sap"
+      },
+      {
+        "model": "grandatlas:block/amber_sap",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/amber_sap",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/amber_sap",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/amber_sap_1"
+      },
+      {
+        "model": "grandatlas:block/amber_sap_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/amber_sap_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/amber_sap_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/amber_sap_2"
+      },
+      {
+        "model": "grandatlas:block/amber_sap_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/amber_sap_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/amber_sap_2",
+        "y": 270
+      }
+    ]
+  }
+}

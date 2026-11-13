@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.seaweed.grandatlas.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "IrisBlockIdsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

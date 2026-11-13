@@ -165,6 +165,11 @@ public final class MegaCaverns {
     }
 
     /** The mega-caverns at a point on the interpolated grid: negative inside one. */
+    /** True if a mega-cavern is open over this column at all: elsewhere {@link #carve} is NONE at every y. */
+    public boolean openColumn(int x, int z) {
+        return column(x, z).open;
+    }
+
     public double carve(int x, int y, int z) {
         Col c = column(x, z);
         if (!c.open) return Caves.NONE;

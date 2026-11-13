@@ -21,5 +21,7 @@ public class GrandAtlas {
         ModWorldgen.BIOME_SOURCES.register(modBus);
         ModWorldgen.FEATURE_TYPES.register(modBus);
         ModWorldgen.MATERIAL_RULE_TYPES.register(modBus);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.server.ServerStoppedEvent.class,
+                e -> com.seaweed.grandatlas.world.CoreHandle.release());
     }
 }

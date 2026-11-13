@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "grandatlas:block/aurora_veil_violet_tip"
+  },
+  "render_type": "minecraft:cutout"
+}

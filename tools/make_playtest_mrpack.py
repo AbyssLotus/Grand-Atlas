@@ -21,7 +21,24 @@ LOADER = "neoforge"
 
 PROPS = dict(line.split("=", 1) for line in (ROOT / "gradle.properties").read_text(encoding="utf-8").splitlines()
              if "=" in line and not line.startswith("#"))
-NEOFORGE = PROPS["neo_version"].strip()
+NEOFORGE = PROPS["neo_version"].strip()  # the dev environment's build; the pack asks for the newest (below)
+
+
+def newest_neoforge():
+    """The newest NeoForge build for this Minecraft version. Pinning the dev build (26.3.0.99) made
+    the Modrinth App drop the profile's loader to it, and mods needing a newer one (GuideME wants
+    26.3.0.100+) refused to load. Grand Atlas accepts any build from the dev one up."""
+    try:
+        req = urllib.request.Request("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml",
+                                     headers={"User-Agent": "grand-atlas-playtest-pack (local build script)"})
+        xml = urllib.request.urlopen(req, timeout=30).read().decode()
+        import re
+        builds = [v for v in re.findall(r"<version>([^<]+)</version>", xml) if v.startswith(MC + ".") and "beta" not in v and "alpha" not in v]
+        builds.sort(key=lambda v: [int(x) for x in v.split(".")])
+        return builds[-1] if builds else NEOFORGE
+    except Exception as e:
+        print("NeoForge lookup failed, using the dev build:", e)
+        return NEOFORGE
 VERSION = PROPS["mod_version"].strip()
 
 HELPERS = [
@@ -72,7 +89,7 @@ def main():
         "name": "Grand Atlas Playtest",
         "summary": "Grand Atlas terrain on Minecraft 26.3, with Distant Horizons and maps for exploring it.",
         "files": files,
-        "dependencies": {"minecraft": MC, "neoforge": NEOFORGE},
+        "dependencies": {"minecraft": MC, "neoforge": newest_neoforge()},
     }
     out = ROOT / "dist" / f"grand-atlas-playtest-{VERSION}.mrpack"
     out.parent.mkdir(exist_ok=True)

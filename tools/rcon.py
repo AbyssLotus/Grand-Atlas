@@ -19,7 +19,7 @@ def packet(sock, req_id, kind, body):
     return buf[8:-2].decode(errors="replace")
 
 
-with socket.create_connection(("127.0.0.1", 25600), timeout=600) as s:
+with socket.create_connection(("127.0.0.1", int(__import__("os").environ.get("GA_RCON_PORT", "25600"))), timeout=600) as s:
     packet(s, 1, 3, "atlas")
     for cmd in sys.argv[1:]:
         print(f"> {cmd}\n{packet(s, 2, 2, cmd)}")

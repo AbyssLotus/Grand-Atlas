@@ -61,7 +61,25 @@ public enum MesoKind {
      * great volcano, a ring of forested rim standing high over the country round it, sheer cliffs
      * and talus inside dropping to a deep blue lake, often with a cinder-cone island in it.
      */
-    CALDERA(0.45, 270, 300);
+    CALDERA(0.45, 270, 300),
+    // ---- M6 fantasy sites (built in world/MicroDetail)
+    /** Giant spires of aurora crystal thrusting out of the ground at angles, glowing in their colours. */
+    CRYSTAL_GARDEN(0.8, 70, 130),
+    /** A ring of tall rune-cut standing stones round an altar stone, on open ground. */
+    STANDING_STONES(0.5, 34, 52),
+    /** Boulders and crags floating over the ground, hung with vines and roots, the odd one grassed and treed. */
+    FLOATING_ROCKS(0.8, 70, 120),
+    /** The bones of giants: great rib cages arching out of the ground along their spines, skulls half buried. */
+    BONE_FIELD(0.6, 80, 140),
+    /** A petrified forest: trunks of stone, some standing, most fallen, in bare ground. */
+    PETRIFIED_FOREST(0.6, 90, 150),
+    // ---- M5 real-world wonders
+    /**
+     * Spotted Lake (after Kliluk in British Columbia): a shallow basin in dry grassland whose water
+     * has dried back into dozens of round pools, each a different colour (green, gold, blue) from
+     * the minerals left in it, walled apart by a white crust you can walk across.
+     */
+    SPOTTED_LAKE(1.6, 75, 110);
 
     /** How common it is where it suits. */
     final double chance;
@@ -82,6 +100,9 @@ public enum MesoKind {
         if (c.continentalness() < 0.03 || c.height() < AtlasCore.SEA_LEVEL + 3 || c.rock() > 0.5 || !Double.isNaN(c.water())) return 0;
         String land = c.landform().id();
         boolean ordinary = land.equals("lowlands") || land.equals("hills") || land.equals("highlands");
+        boolean enchanted = land.equals("glimmer_vale") || land.equals("silverwood") || land.equals("misty_peaks");
+        boolean volcanic = land.equals("volcanic_wastes");
+        boolean dry = DRY.contains(c.biome());
         double t = c.temperature(), w = c.humidity();
         double gentle = 1 - smoothstep(0.12, 0.35, slope);
         return switch (this) {
@@ -89,7 +110,7 @@ public enum MesoKind {
             case SINKHOLE_FIELD -> ordinary ? gentle * smoothstep(-0.05, 0.25, w) * smoothstep(-0.5, -0.2, t) : 0;
             case HOODOO_GARDEN -> (ordinary || land.equals("canyon_plateau")) && !forest(c.biome()) && t > -0.4
                     ? gentle * (1 - smoothstep(-0.2, 0.05, w)) : 0;
-            case CINDER_FIELD -> (ordinary || land.equals("canyon_plateau") || land.equals("playa") && !c.zone().id().equals("pan"))
+            case CINDER_FIELD -> volcanic ? gentle * 0.6 : (ordinary || land.equals("canyon_plateau") || land.equals("playa") && !c.zone().id().equals("pan"))
                     ? gentle * smoothstep(-0.6, -0.3, t) : 0;
             case GLADE -> forest(c.biome()) ? gentle : 0;
             case ERRATIC_FIELD -> ordinary ? gentle * (1 - smoothstep(-0.1, 0.25, t)) : 0;
@@ -109,10 +130,26 @@ public enum MesoKind {
             case LAKE_DISTRICT -> ordinary && t > -0.7 && t < 0.25 ? gentle * smoothstep(-0.25, 0.1, w) : 0;
             case CALDERA -> ordinary ? 1 - smoothstep(0.1, 0.3, slope) : 0;
             // A hillside, not flat ground: the terraces need a fall to step down.
+            // Fantasy: at home in the fantasy landforms, a rare wonder in ordinary country.
+            case CRYSTAL_GARDEN -> (land.equals("glimmer_vale") || land.equals("misty_peaks")) ? gentle
+                    : ordinary && t > -0.6 ? 0.08 * gentle : 0;
+            case STANDING_STONES -> land.equals("silverwood") ? gentle : ordinary && !forest(c.biome()) && !dry ? 0.25 * gentle : 0;
+            case FLOATING_ROCKS -> enchanted ? 1 - smoothstep(0.3, 0.6, slope) : ordinary && w > 0.1 ? 0.06 * gentle : 0;
+            case BONE_FIELD -> volcanic ? gentle * 0.8 : (ordinary || land.equals("dune_sea") || land.equals("rock_desert") || land.equals("playa")
+                    && !c.zone().id().equals("pan")) && dry ? 0.35 * gentle : 0;
+            case PETRIFIED_FOREST -> volcanic ? gentle * 0.8 : (ordinary || land.equals("canyon_plateau") || land.equals("playa")
+                    && !c.zone().id().equals("pan")) && (dry || t > 0.2 && w < -0.2) ? 0.6 * gentle : 0;
+            case SPOTTED_LAKE -> (ordinary || land.equals("rift_valley") || land.equals("rainbow_mountains") && c.zone().id().equals("valley")
+                    || land.equals("playa") && !c.zone().id().equals("pan")) && !forest(c.biome()) && t > -0.45
+                    ? (1 - smoothstep(0.05, 0.14, slope)) * (1 - smoothstep(-0.15, 0.15, w)) : 0;
             case TERRACE_FALLS -> (ordinary || forest(c.biome())) && t > -0.25
                     ? smoothstep(0.06, 0.14, slope) * (1 - smoothstep(0.4, 0.6, slope)) * smoothstep(-0.2, 0.15, w) : 0;
         };
     }
+
+    private static final java.util.EnumSet<BiomeKind> DRY = java.util.EnumSet.of(BiomeKind.DESERT, BiomeKind.RED_DESERT, BiomeKind.BADLANDS,
+            BiomeKind.ERODED_BADLANDS, BiomeKind.WOODED_BADLANDS, BiomeKind.SAVANNA, BiomeKind.SAVANNA_PLATEAU, BiomeKind.WINDSWEPT_SAVANNA,
+            BiomeKind.VOLCANIC_WASTES, BiomeKind.VOLCANO);
 
     private static boolean forest(BiomeKind b) {
         return switch (b) {
@@ -263,6 +300,66 @@ public enum MesoKind {
                     double r = rim * (0.28 + 0.04 * rnd.nextDouble()), cone = cal.calderaDepth() + 16 + 10 * rnd.nextDouble();
                     double ix = cx + Math.cos(a) * off, iz = cz + Math.sin(a) * off;
                     out.add(new MicroFeature(MicroKind.CINDER_CONE, ix, iz, r, cone, r * 0.25, cone * 0.18, ground.sample(ix, iz).height(), rnd.nextLong()));
+                }
+            }
+            case SPOTTED_LAKE -> {
+                // A main basin and two smaller ones, ponds whose water is broken into pools at
+                // decoration. A pond only holds on level enough ground, so of the three, those that
+                // fit the lie of the land stand and the rest never appear.
+                for (int k = 0; k < 3; k++) {
+                    double r = k == 0 ? 24 + 8 * rnd.nextDouble() : 14 + 8 * rnd.nextDouble();
+                    place(out, rnd, cx0, cz0, radius, cx, cz, radius * (k == 0 ? 0.15 : 0.55), r * 1.45 + 6, ground, (x, z, g, seed) ->
+                            new MicroFeature(MicroKind.POND, x, z, r, 0, 0, 0, g, seed));
+                }
+            }
+            case CRYSTAL_GARDEN -> {
+                int n = 7 + rnd.nextInt(9);
+                int colour = rnd.nextInt(5); // the garden has a colour of its own, its spires in it and its neighbours
+                for (int k = 0; k < n; k++) {
+                    boolean big = k < 2;
+                    double half = big ? 3 + 1.5 * rnd.nextDouble() : 1.2 + 2 * rnd.nextDouble();
+                    double tall = big ? 26 + 16 * rnd.nextDouble() : 7 + 18 * Math.pow(rnd.nextDouble(), 1.3);
+                    double lean = rnd.nextDouble() * Math.PI * 2;
+                    int col = (colour + (rnd.nextDouble() < 0.7 ? 0 : rnd.nextDouble() < 0.5 ? 1 : 4)) % 5;
+                    place(out, rnd, cx0, cz0, radius, cx, cz, radius * (big ? 0.35 : 0.8), half + 5, ground, (x, z, g, seed) ->
+                            new MicroFeature(MicroKind.CRYSTAL_SPIRE, x, z, half, tall, lean, col, g, seed));
+                }
+            }
+            case STANDING_STONES -> {
+                // A ring, not a scatter: evenly round a circle, one gap where the way in is.
+                int n = 7 + rnd.nextInt(6);
+                double ring = Math.min(radius - 8, 12 + 9 * rnd.nextDouble()), gap = rnd.nextDouble() * Math.PI * 2;
+                for (int k = 0; k < n; k++) {
+                    double a = gap + (k + 0.5) * (Math.PI * 2 - 0.5) / n + 0.25;
+                    double x = cx + Math.cos(a) * ring, z = cz + Math.sin(a) * ring;
+                    double tall = 6 + 5 * rnd.nextDouble();
+                    out.add(new MicroFeature(MicroKind.MONOLITH, x, z, 1, tall, a, rnd.nextDouble() < 0.15 ? 1 : 0, ground.sample(x, z).height(), rnd.nextLong()));
+                }
+                out.add(new MicroFeature(MicroKind.MONOLITH, cx, cz, 2, 2, gap, 2, ground.sample(cx, cz).height(), rnd.nextLong())); // the altar
+            }
+            case FLOATING_ROCKS -> {
+                int n = 5 + rnd.nextInt(7);
+                for (int k = 0; k < n; k++) {
+                    double r = 2.5 + 7 * Math.pow(rnd.nextDouble(), 1.5), lift = 12 + 40 * rnd.nextDouble();
+                    place(out, rnd, cx0, cz0, radius, cx, cz, radius * 0.8, r + 6, ground, (x, z, g, seed) ->
+                            new MicroFeature(MicroKind.FLOAT_ROCK, x, z, r, lift, 0, 0, g, seed));
+                }
+            }
+            case BONE_FIELD -> {
+                int n = 1 + rnd.nextInt(3);
+                for (int k = 0; k < n; k++) {
+                    double length = 28 + 30 * rnd.nextDouble(), tall = 10 + 9 * rnd.nextDouble(), heading = rnd.nextDouble() * Math.PI;
+                    place(out, rnd, cx0, cz0, radius, cx, cz, radius * 0.5, length / 2 + 8, ground, (x, z, g, seed) ->
+                            new MicroFeature(MicroKind.RIB_CAGE, x, z, tall * 0.9, tall, length, heading, g, seed));
+                }
+            }
+            case PETRIFIED_FOREST -> {
+                int n = 9 + rnd.nextInt(10);
+                for (int k = 0; k < n; k++) {
+                    double r = 1.3 + 1.4 * rnd.nextDouble(), tall = 5 + 16 * rnd.nextDouble();
+                    double fallen = rnd.nextDouble() < 0.6 ? rnd.nextDouble() * Math.PI * 2 : -1;
+                    place(out, rnd, cx0, cz0, radius, cx, cz, radius * 0.85, fallen >= 0 ? tall / 2 + 3 : r + 4, ground, (x, z, g, seed) ->
+                            new MicroFeature(MicroKind.PETRIFIED_TRUNK, x, z, r, tall, 0, fallen, g, seed));
                 }
             }
             case CRAG_TOWERS -> {

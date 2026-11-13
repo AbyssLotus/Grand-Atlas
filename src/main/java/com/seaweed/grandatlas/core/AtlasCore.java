@@ -13,7 +13,14 @@ import com.seaweed.grandatlas.core.micro.MicroKind;
 import com.seaweed.grandatlas.core.landform.CanyonPlateau;
 import com.seaweed.grandatlas.core.landform.DuneSea;
 import com.seaweed.grandatlas.core.landform.Frame;
+import com.seaweed.grandatlas.core.landform.GlimmerVale;
 import com.seaweed.grandatlas.core.landform.Landform;
+import com.seaweed.grandatlas.core.landform.MistyPeaks;
+import com.seaweed.grandatlas.core.landform.RainbowMountains;
+import com.seaweed.grandatlas.core.landform.RiftValley;
+import com.seaweed.grandatlas.core.landform.Tepui;
+import com.seaweed.grandatlas.core.landform.Silverwood;
+import com.seaweed.grandatlas.core.landform.VolcanicWastes;
 import com.seaweed.grandatlas.core.landform.Megarange;
 import com.seaweed.grandatlas.core.landform.Ordinary;
 import com.seaweed.grandatlas.core.landform.Playa;
@@ -83,6 +90,7 @@ public final class AtlasCore {
     private final MegaCaverns megaCaverns;
     private final Waters waters;
     private final SetPieces setPieces;
+    private final SkyIsles skyIsles;
     private final Drainage drainage;
     private final Features features;
     private final Map<Macro, ProvinceMosaic> subMosaics = new IdentityHashMap<>();
@@ -102,8 +110,16 @@ public final class AtlasCore {
         Landform lowlands = new Ordinary.Lowlands(seed);
         DuneSea dunes = new DuneSea(seed);
         landforms = List.of(lowlands, new Ordinary.Hills(seed), new Ordinary.Highlands(seed),
-                new Megarange(seed), new CanyonPlateau(seed), dunes, new Playa(seed), new RockDesert(seed, dunes));
+                new Megarange(seed), new CanyonPlateau(seed), dunes, new Playa(seed), new RockDesert(seed, dunes),
+                // M6 fantasy
+                new MistyPeaks(seed), new VolcanicWastes(seed), new Silverwood(seed), new GlimmerVale(seed),
+                // M5 real-world wonders (appended, so provinces that can't hold them keep their landform)
+                new Tepui(seed), new RiftValley(seed), new RainbowMountains(seed));
         mosaic = new ProvinceMosaic(GradientNoise.fork(seed, 50), PROVINCE_CELL, world, landforms, ocean, lowlands);
+        for (Landform l : landforms) {
+            if (l instanceof Tepui t) t.bind(mosaic);
+            if (l instanceof RiftValley r) r.bind(mosaic);
+        } // the tepuis and rifts are laid out in the mosaic's warped space
         macros = new MacroField(GradientNoise.fork(seed, 60), world,
                 List.of(new GreatPlateau(seed), new Massif(seed), new Basin(seed), new ElevatedMesa(seed)));
         for (Macro kind : macros.kinds()) {
@@ -115,6 +131,7 @@ public final class AtlasCore {
         megaCaverns = new MegaCaverns(this, GradientNoise.fork(seed, 500));
         waters = new Waters(this, GradientNoise.fork(seed, 600));
         setPieces = new SetPieces(this, GradientNoise.fork(seed, 700));
+        skyIsles = new SkyIsles(this, GradientNoise.fork(seed, 800));
         drainage = new Drainage(GradientNoise.fork(seed, 80), world, this::sampleBase);
         features = new Features(GradientNoise.fork(seed, 90), this::sampleBase, drainage);
         roughness = GradientNoise.fork(seed, 11);
@@ -153,6 +170,11 @@ public final class AtlasCore {
     /** M7e: the Hollow, the Great Geode, Titan's grave. */
     public SetPieces setPieces() {
         return setPieces;
+    }
+
+    /** M6: the floating isles. */
+    public SkyIsles skyIsles() {
+        return skyIsles;
     }
 
     /** M7d: the underground water table. */
@@ -375,6 +397,12 @@ public final class AtlasCore {
                 relief = plainRelief;
                 height = plainHeight;
             }
+            if (s.envelope > 0.5) {
+                // Something sheer stands here (a granite needle): the interpolated ground keeps its full
+                // height round its foot and the exact height trims it (see Shape.envelope).
+                double top = height + s.envelope * reliefMask;
+                coastEnvelope = Double.isNaN(coastEnvelope) ? top : Math.max(coastEnvelope, top);
+            }
             rough = s.roughness * reliefMask;
             rock = s.rock * reliefMask;
             rockInside = s.rockInside;
@@ -572,9 +600,11 @@ public final class AtlasCore {
             // without a height difference between them.
             double tb = t + 0.09 * cn(50, x, z, 900) + 0.05 * cn(51, x, z, 260) + 0.02 * cn(52, x, z, 70);
             double wb = w + 0.15 * cn(53, x, z, 900) + 0.08 * cn(54, x, z, 260) + 0.03 * cn(55, x, z, 70);
-            biome = !Double.isNaN(water) && !microWater ? (t < -0.5 ? BiomeKind.FROZEN_RIVER : BiomeKind.RIVER)
+            biome = !Double.isNaN(water) && !microWater ? (t < -0.5 ? BiomeKind.FROZEN_RIVER
+                            : landform instanceof GlimmerVale ? BiomeKind.GLIMMER_RIVER : BiomeKind.RIVER)
                     : rock > 6 ? BiomeKind.BADLANDS // standing rock is banded sandstone whatever province it's in
-                    : landform.biome(zone, tb, wb, altitude, v);
+                    : Biomes.variety(landform.biome(zone, tb, wb, altitude, v), tb, wb, altitude,
+                            1.7 * (cn(60, x, z, 700) + 0.35 * cn(61, x, z, 190)), 1.7 * (cn(62, x, z, 520) + 0.35 * cn(63, x, z, 150)), wp.interior());
             double fromSite = site == null ? Double.MAX_VALUE : Math.hypot(x - site.x(), z - site.z());
             if (site != null && site.kind() == MesoKind.GLADE && Double.isNaN(water) && fromSite < 0.62 * site.radius()) {
                 biome = BiomeKind.MEADOW; // the glade's clearing: open meadow, no trees
@@ -588,6 +618,8 @@ public final class AtlasCore {
                 biome = t < -0.45 ? BiomeKind.SNOWY_PLAINS : site.kind() == MesoKind.TARN_BASIN ? BiomeKind.MEADOW : BiomeKind.PLAINS;
             } else if (site != null && Double.isNaN(water) && fromSite < 0.85 * site.radius() && forestBiome(site.kind(), site.biome(), t) != null) {
                 biome = forestBiome(site.kind(), site.biome(), t);
+            } else if (microWater && site != null && site.kind() == MesoKind.SPOTTED_LAKE) {
+                biome = BiomeKind.SPOTTED_LAKE; // clear water over the coloured pools
             } else if (microWater && site != null && site.kind() == MesoKind.CALDERA) {
                 biome = t < -0.8 ? BiomeKind.FROZEN_RIVER : BiomeKind.CRATER_LAKE; // deep: it only freezes in the hardest cold
             } else if (microWater && feature != null && (feature.kind == MicroKind.CENOTE || feature.kind == MicroKind.GROTTO || feature.kind == MicroKind.TRAVERTINE)) {
@@ -993,7 +1025,10 @@ public final class AtlasCore {
     private static boolean coastShore(Shore s, double height) {
         // Anything standing out past the shore (rocks, rubble, a stack, a little islet) is shore, never
         // the land's forest: trees were growing out of the shallows.
-        if (s.stack() || s.distance() < 0) return true;
+        if (s.stack()) return true;
+        // (Only low ground: a sunk basin's rim also sits "past the shore" by this distance, a hundred
+        // blocks up, and came out as a strip of beach along the canyon plateau's edge.)
+        if (s.distance() < 0) return height < SEA_LEVEL + 20;
         return switch (s.kind()) {
             case BEACH -> s.distance() < s.beachWidth() && height < SEA_LEVEL + 14;
             case CLIFF -> s.distance() < s.edge() && height < SEA_LEVEL + 6;
@@ -1103,6 +1138,7 @@ public final class AtlasCore {
             s.rocks[n] = s.shape.rock * taper;
             s.rockInsides[n] = s.shape.rockInside;
             s.rockSizes[n] = s.shape.rockSize;
+            s.envelopes[n] = s.shape.envelope * taper;
             s.zones[n] = s.shape.zone;
             s.provinces[n] = p;
             sumW += w;
@@ -1134,10 +1170,11 @@ public final class AtlasCore {
             }
             maxW = Math.max(maxW, s.w[i]);
         }
-        double relief = 0, rough = 0, untapered = 0, micro = 0, rock = 0;
+        double relief = 0, rough = 0, untapered = 0, micro = 0, rock = 0, envelope = 0;
         for (int i = 0; i < n; i++) {
             double wn = s.wp[i] / sumP;
             relief += wn * s.r[i];
+            envelope += wn * s.envelopes[i];
             rock += wn * s.rocks[i];
             rough += wn * s.rough[i];
             untapered += wn * s.untapered[i];
@@ -1152,6 +1189,7 @@ public final class AtlasCore {
         s.relief = frame.clampRelief(relief);
         s.roughness = rough;
         s.rock = rock;
+        s.envelope = envelope;
         s.rockInside = s.rockInsides[dominant];
         s.rockSize = s.rockSizes[dominant];
         s.landform = dom.landform();
@@ -1292,6 +1330,10 @@ public final class AtlasCore {
 
     public BiomeKind biomeAt(ColumnSample c, int x, int y, int z) {
         int surface = c.surfaceY();
+        if (y > surface + 24) {
+            java.util.List<SkyIsles.Isle> isles = skyIsles.near(x, z);
+            if (!isles.isEmpty() && skyIsles.claims(isles, x, y, z)) return BiomeKind.SKY_GARDEN;
+        }
         // Cave biomes start well under the lowest ground nearby, not under this column's own top:
         // measured from the top, a cliff's exposed face more than 12 blocks down turned dripstone
         // and lost its terracotta bands (61% of the bare stone on 0.0.2's canyon walls).
@@ -1324,7 +1366,8 @@ public final class AtlasCore {
     private static final java.util.EnumSet<BiomeKind> FORESTS = java.util.EnumSet.of(BiomeKind.FOREST, BiomeKind.FLOWER_FOREST,
             BiomeKind.BIRCH_FOREST, BiomeKind.DARK_FOREST, BiomeKind.OLD_GROWTH_BIRCH_FOREST, BiomeKind.PALE_GARDEN, BiomeKind.TAIGA,
             BiomeKind.OLD_GROWTH_SPRUCE_TAIGA, BiomeKind.OLD_GROWTH_PINE_TAIGA, BiomeKind.SNOWY_TAIGA, BiomeKind.JUNGLE, BiomeKind.SPARSE_JUNGLE,
-            BiomeKind.SWAMP, BiomeKind.MANGROVE_SWAMP, BiomeKind.CHERRY_GROVE, BiomeKind.GROVE, BiomeKind.WOODED_BADLANDS);
+            BiomeKind.SWAMP, BiomeKind.MANGROVE_SWAMP, BiomeKind.CHERRY_GROVE, BiomeKind.GROVE, BiomeKind.WOODED_BADLANDS,
+            BiomeKind.BAMBOO_JUNGLE, BiomeKind.WINDSWEPT_FOREST);
     private static final java.util.EnumSet<BiomeKind> DESERTS = java.util.EnumSet.of(BiomeKind.DESERT, BiomeKind.RED_DESERT,
             BiomeKind.BADLANDS, BiomeKind.ERODED_BADLANDS);
 
@@ -1342,7 +1385,9 @@ public final class AtlasCore {
         // Set pieces have their own.
         if (setPieces.nearColumn(x, z)) {
             SetPieces.Probe p = setPieces.sample(x, y, z);
-            if (p.claimed) return p.kind == SetPieces.HOLLOW ? BiomeKind.THE_HOLLOW : p.kind == SetPieces.GEODE ? BiomeKind.CRYSTAL_CAVES : BiomeKind.TITANS_GRAVE;
+            if (p.claimed) return p.kind == SetPieces.HOLLOW ? BiomeKind.THE_HOLLOW : p.kind == SetPieces.GEODE ? BiomeKind.CRYSTAL_CAVES
+                    : p.kind == SetPieces.VAULT ? BiomeKind.AURORA_VAULT : p.kind == SetPieces.ROOT ? BiomeKind.WORLDROOT_HALL
+                    : p.kind == SetPieces.PEAKS ? BiomeKind.HANGING_PEAKS : BiomeKind.TITANS_GRAVE;
         }
         // The upper caves follow the land over them, ice and sandstone reaching down to about -80
         // (the user: they "need more of their respective biome").
@@ -1399,9 +1444,10 @@ public final class AtlasCore {
         final double[] micros = new double[ProvinceMosaic.WINDOW];
         final double[] rocks = new double[ProvinceMosaic.WINDOW], rockInsides = new double[ProvinceMosaic.WINDOW];
         final double[] rockSizes = new double[ProvinceMosaic.WINDOW];
+        final double[] envelopes = new double[ProvinceMosaic.WINDOW];
         final Zone[] zones = new Zone[ProvinceMosaic.WINDOW];
         final Province[] provinces = new Province[ProvinceMosaic.WINDOW];
-        double relief, roughness, micro, rock, rockInside, rockSize;
+        double relief, roughness, micro, rock, rockInside, rockSize, envelope;
         Landform landform;
         Zone zone;
         Transition transition;
@@ -1414,6 +1460,7 @@ public final class AtlasCore {
             rock = 0;
             rockInside = 0;
             rockSize = 0;
+            envelope = 0;
             landform = ocean;
             zone = Zone.OCEAN;
             transition = Transition.INTERIOR;

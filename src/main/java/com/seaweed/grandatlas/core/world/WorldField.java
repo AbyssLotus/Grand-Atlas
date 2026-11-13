@@ -76,7 +76,9 @@ public final class WorldField {
 
         double shadow = rainShadow(x, z);
         double temp = clamp(Fractal.fbm(temperature, x / 8000.0, z / 8000.0, 3) * 2.2, -1, 1);
-        double humid = clamp(Fractal.fbm(humidity, x / 6000.0, z / 6000.0, 3) * 2.2 - 0.75 * shadow - 0.3 * basin, -1, 1);
+        // (+0.16 and a lighter rain shadow, 2026-11-10: a tenth of the land sat at the driest humidity
+        // there is, and the wet-country biomes, swamp, mangrove and jungle, were each under 1% of the land.)
+        double humid = clamp(Fractal.fbm(humidity, x / 6000.0, z / 6000.0, 3) * 2.2 + 0.16 - 0.55 * shadow - 0.25 * basin, -1, 1);
         return new Point(cont, interior, belt, basin, datum, temp, humid, shadow);
     }
 
@@ -486,7 +488,8 @@ public final class WorldField {
     }
 
     private double continentalness(double wx, double wz, int octaves) {
-        return clamp(Fractal.fbm(continents, wx / 9000.0, wz / 9000.0, octaves) * 1.6 + 0.12, -1, 1);
+        // (+0.19, was +0.12: the sea was 48% of the world against vanilla's ~29%; the user, 2026-11-10: "shrinking oceans a bit")
+        return clamp(Fractal.fbm(continents, wx / 9000.0, wz / 9000.0, octaves) * 1.6 + 0.19, -1, 1);
     }
 
     /** Belts follow the zero line of a very low-frequency field: long, winding, ~3 km wide. */

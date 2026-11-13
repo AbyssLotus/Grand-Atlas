@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "grandatlas:block/aurora_shard_green"
+  },
+  "render_type": "minecraft:cutout"
+}

@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jspecify.annotations.Nullable;
 
@@ -31,9 +30,6 @@ import org.jspecify.annotations.Nullable;
 public record SteepRock() implements Feature {
     public static final MapCodec<SteepRock> CODEC = MapCodec.unit(SteepRock::new);
     private static final long SEED = 0x57EE9L;
-
-    private static volatile @Nullable ServerLevel lastLevel;
-    private static volatile @Nullable AtlasCore lastCore;
 
     @Override
     public MapCodec<SteepRock> codec() {
@@ -91,10 +87,6 @@ public record SteepRock() implements Feature {
     }
 
     private static @Nullable AtlasCore core(ServerLevel level) {
-        if (level == lastLevel) return lastCore;
-        AtlasCore core = CoreHandle.coreFrom(level.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED));
-        lastCore = core;
-        lastLevel = level;
-        return core;
+        return CoreHandle.coreOf(level);
     }
 }

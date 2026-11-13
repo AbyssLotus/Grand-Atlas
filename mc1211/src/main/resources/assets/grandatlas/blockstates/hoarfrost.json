@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/hoarfrost"
+      },
+      {
+        "model": "grandatlas:block/hoarfrost",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/hoarfrost",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/hoarfrost",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_1"
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_2"
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/hoarfrost_2",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [{"condition": "minecraft:random_chance", "chance": 0.45}],
+      "entries": [
+        {"type": "minecraft:item", "name": "grandatlas:ripped_map",
+         "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}}]}
+      ]
+    }
+  ]
+}

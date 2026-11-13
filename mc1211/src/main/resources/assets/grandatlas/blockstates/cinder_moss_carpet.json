@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/cinder_moss_carpet"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_1"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_2"
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/cinder_moss_carpet_2",
+        "y": 270
+      }
+    ]
+  }
+}

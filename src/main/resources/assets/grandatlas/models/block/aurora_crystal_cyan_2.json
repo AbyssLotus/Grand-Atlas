@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "grandatlas:block/aurora_crystal_cyan_2"
+  }
+}

@@ -58,7 +58,15 @@ public final class ProvinceMosaic {
             Set.of("canyon_plateau", "dune_sea"),
             Set.of("playa", "megarange"),
             Set.of("canyon_plateau", "playa"),
-            Set.of("rock_desert", "dune_sea"));
+            Set.of("rock_desert", "dune_sea"),
+            // M6 fantasy: the enchanted country keeps together, the needles and volcanoes stand off the ranges.
+            Set.of("silverwood", "glimmer_vale"),
+            Set.of("misty_peaks", "megarange"),
+            Set.of("volcanic_wastes", "megarange"),
+            // M5: the rainbow ridges beside the red-rock country, a rift opening beside volcanoes.
+            Set.of("rainbow_mountains", "canyon_plateau"),
+            Set.of("rainbow_mountains", "rock_desert"),
+            Set.of("rift_valley", "volcanic_wastes"));
 
     private final long seed;
     private final double cell;
@@ -103,15 +111,7 @@ public final class ProvinceMosaic {
 
     /** Fills {@code out} with every province of the 5x5 window around (x, z), nearest first. */
     public void nearest(double x, double z, Nearest out) {
-        // Three warp scales: broad bends, mid-scale lobes, and ragged edges. The ragged scale
-        // stays fixed in blocks, since it's about how an edge looks up close.
-        double k = warpScale;
-        double u = x + 650 * k * Fractal.fbm(warpA, x / (2600.0 * k), z / (2600.0 * k), 2)
-                + 180 * k * GradientNoise.noise2(warpA ^ 0x1234L, x / (600.0 * k), z / (600.0 * k))
-                + 36 * GradientNoise.noise2(raggedA, x / 140.0, z / 140.0);
-        double v = z + 650 * k * Fractal.fbm(warpB, x / (2600.0 * k), z / (2600.0 * k), 2)
-                + 180 * k * GradientNoise.noise2(warpB ^ 0x1234L, x / (600.0 * k), z / (600.0 * k))
-                + 36 * GradientNoise.noise2(raggedB, x / 140.0, z / 140.0);
+        double u = warpX(x, z), v = warpZ(x, z);
         int cx = GradientNoise.floor(u / cell), cz = GradientNoise.floor(v / cell);
         double[] d = out.distance;
         int n = 0;
@@ -135,6 +135,39 @@ public final class ProvinceMosaic {
         for (int i = 0; i < WINDOW; i++) {
             out.province[i] = province(out.cellX[i], out.cellZ[i]);
         }
+    }
+
+    // Three warp scales: broad bends, mid-scale lobes, and ragged edges. The ragged scale stays
+    // fixed in blocks, since it's about how an edge looks up close. Province centres live in this
+    // warped space.
+
+    /** The warped x of a real position: the space province centres are in. */
+    public double warpX(double x, double z) {
+        double k = warpScale;
+        return x + 650 * k * Fractal.fbm(warpA, x / (2600.0 * k), z / (2600.0 * k), 2)
+                + 180 * k * GradientNoise.noise2(warpA ^ 0x1234L, x / (600.0 * k), z / (600.0 * k))
+                + 36 * GradientNoise.noise2(raggedA, x / 140.0, z / 140.0);
+    }
+
+    /** The warped z of a real position. */
+    public double warpZ(double x, double z) {
+        double k = warpScale;
+        return z + 650 * k * Fractal.fbm(warpB, x / (2600.0 * k), z / (2600.0 * k), 2)
+                + 180 * k * GradientNoise.noise2(warpB ^ 0x1234L, x / (600.0 * k), z / (600.0 * k))
+                + 36 * GradientNoise.noise2(raggedB, x / 140.0, z / 140.0);
+    }
+
+    /**
+     * A real position whose warped position is about (u, v), by fixed-point iteration; good to
+     * a few blocks (the warp is smooth at the scale of its own offsets).
+     */
+    public double[] unwarp(double u, double v) {
+        double x = u, z = v;
+        for (int i = 0; i < 12; i++) {
+            x += u - warpX(x, z);
+            z += v - warpZ(x, z);
+        }
+        return new double[] {x, z};
     }
 
     /** The province of a cell (cached per thread). */

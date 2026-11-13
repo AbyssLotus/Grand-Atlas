@@ -1,0 +1,153 @@
+// Grand Atlas for Minecraft 1.21.1 (NeoForge 21.1). The backport: docs/BACKPORT_1.21.1_PLAN.md.
+//
+// The terrain core (com.seaweed.grandatlas.core) is the SAME source as the 26.3 build's: it is
+// compiled here straight from ../src/main/java, never copied, so a change to the core lands on
+// both versions. Only the Minecraft-facing layer (world, mixin, client) lives in this folder.
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev'
+}
+
+ext {
+    mc_version = '1.21.1'
+    mc_version_range = '[1.21.1]'
+    neo_version_1211 = '21.1.265'
+    neo_version_min = '21.1.197'
+}
+
+version = mod_version + '+mc1.21.1'
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// Minecraft 1.21.1 runs on Java 21.
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+sourceSets {
+    core {
+        java {
+            srcDirs = ['../src/main/java']
+            include 'com/seaweed/grandatlas/core/**'
+        }
+        resources {
+            srcDirs = ['../src/main/resources']
+            include 'map/**'
+        }
+    }
+    main {
+        compileClasspath += sourceSets.core.output
+        runtimeClasspath += sourceSets.core.output
+    }
+}
+
+neoForge {
+    version = project.neo_version_1211
+
+    accessTransformers.from 'src/main/resources/META-INF/accesstransformer.cfg'
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        // Loads every mixin target of every mod in run/mods and exits: GrandAtlasClient.audit
+        audit {
+            client()
+            systemProperty 'grandatlas.mixinAudit', 'true'
+        }
+        // Joins the singleplayer world run/saves/join-test straight away: the one thing a title-screen
+        // boot cannot show is whether a player can actually get into a world (2026-11-11).
+        join {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+        }
+        look {
+            client()
+            programArgument '--quickPlayMultiplayer'
+            programArgument '127.0.0.1:25565'
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.core
+        }
+    }
+}
+
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : mc_version,
+            minecraft_version_range: mc_version_range,
+            neo_version            : neo_version_min,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_version            : project.version.toString(),
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+// Shared with the 26.3 build, not copied: textures (tools/textures.py), the packed tree and
+// rock assets (tools/assets/Import.java) and the credits. Everything else under resources is
+// written for this version by tools/gen_data.py --target 1.21.1.
+tasks.named('processResources', ProcessResources).configure {
+    from('../src/main/resources') {
+        include 'assets/grandatlas/textures/**'
+        include 'data/grandatlas/atlas_assets/**'
+        include 'GRAND_ATLAS_CREDITS.md'
+        include 'grandatlas_logo.png'
+    }
+    // The license travels with every copy (LICENSE.md section 3); prefixed so it can't clash with
+    // other mods' license files on the classpath.
+    from('..') {
+        include 'LICENSE.md'
+        rename 'LICENSE.md', 'GRAND_ATLAS_LICENSE.md'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+tasks.named('jar', Jar).configure {
+    from sourceSets.core.output
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_id,
+                'Specification-Vendor'  : mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : mod_name,
+                'Implementation-Version': project.version.toString(),
+                'Implementation-Vendor' : mod_authors,
+        ])
+    }
+}
+
+tasks.register('checkCore', JavaExec) {
+    group = 'grandatlas'
+    description = 'The core self-check, run on the Java 21 build of the shared core.'
+    dependsOn 'coreClasses'
+    classpath = sourceSets.core.output
+    mainClass = 'com.seaweed.grandatlas.core.SelfCheck'
+    workingDir = rootProject.projectDir
+}
+
+tasks.named('check') { dependsOn 'checkCore' }

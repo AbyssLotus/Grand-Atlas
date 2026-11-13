@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/glowcap_block"
+      },
+      {
+        "model": "grandatlas:block/glowcap_block",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/glowcap_block",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/glowcap_block",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_1"
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_2"
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/glowcap_block_2",
+        "y": 270
+      }
+    ]
+  }
+}

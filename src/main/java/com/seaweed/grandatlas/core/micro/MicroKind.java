@@ -49,7 +49,18 @@ public enum MicroKind {
      * A caldera: a volcano's rim round a lake, sheer cliffs over talus inside, long ribbed flanks
      * outside. Its lake stands well over the country round it.
      */
-    CALDERA;
+    CALDERA,
+    // ---- M6 fantasy (built whole in world/MicroDetail)
+    /** A leaning hexagonal spire of aurora crystal. r: half-width; h: length; r2: lean heading; extra: colour 0-4. */
+    CRYSTAL_SPIRE,
+    /** A standing stone cut with runes (extra 0), a fallen one (1), or the altar at the ring's heart (2). r2: facing. */
+    MONOLITH,
+    /** A boulder floating over the ground, a hanging root of rock under it. r: radius; h: height over the ground. */
+    FLOAT_ROCK,
+    /** A giant's rib cage: a spine along the ground with ribs arching over it, a skull at one end. h: height; r2: length; extra: heading. */
+    RIB_CAGE,
+    /** A trunk turned to stone: standing (extra -1) or fallen toward the heading in extra. r: radius; h: length. */
+    PETRIFIED_TRUNK;
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);

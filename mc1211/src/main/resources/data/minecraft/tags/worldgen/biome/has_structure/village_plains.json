@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:flower_forest",
+    "minecraft:cherry_grove",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:sunflower_plains",
+    "minecraft:dark_forest",
+    "grandatlas:silverwood",
+    "grandatlas:glimmer_vale"
+  ]
+}

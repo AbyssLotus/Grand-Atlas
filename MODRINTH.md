@@ -4,6 +4,8 @@
     text can be pasted into Modrinth as it is. Upload docs/logo.png as the project icon; putting the
     docs/images/*.webp shots in the project's Gallery too is optional.
   - Check the version numbers and the "Versions" section against the files you upload.
+  - Updated 2026-11-13 for 0.13.0 (1.21.1 is now the main version; wonders, fantasy, the guide book
+    and a roadmap added). Read it through and edit it before publishing.
 -->
 
 ![Grand Atlas](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/logo.png)
@@ -72,6 +74,35 @@ Rare, hand-designed places generated into the world:
 
 ![The rising fall of an Aurora Vault, seen across its crystal floor](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/images/aurora_vault_lake.webp)
 
+### Real-world wonders
+- **Tepuis** — table mountains rising sheer out of the jungle on walls 230 to 400 blocks tall, streams
+  pouring off their rims in falls that drop all the way to the forest below.
+- **Rift valleys** — a flat savanna floor sunk between walls that climb in great fault scarps, with
+  volcanoes standing on the floor.
+- **Rainbow mountains** — sharp ridges striped from foot to crest in red, orange, gold, cream, green,
+  teal and lavender.
+- **Spotted lakes** — dried-back lakes of round pools, each its own colour, walled apart by white crust.
+- Calderas, karst and cenotes, fjords, Ha Long Bay-style island seas, salt playas and more.
+
+### High fantasy
+- **The Misty Peaks** — granite needles up to 320 blocks tall standing out of a gorge-cut upland, high
+  enough to look down on the clouds.
+- **The Volcanic Wastes** — black basalt plains under volcanoes up to 450 blocks tall, lava lakes in
+  their craters and lava running down their flanks.
+- **The Silverwood** and **Glimmer Vales** — colossal golden-leaved trees over soft hills, and lush
+  valleys whose turquoise rivers glow.
+- **The Sky Isles** — great islands hanging hundreds of blocks over the land, streams falling from
+  their rims.
+- Smaller wonders scattered through the world: crystal gardens, standing stones, floating rocks, bone
+  fields of fallen giants and petrified forests.
+
+### The Grand Atlas
+A guide book to the world, in the spirit of a bestiary. Every landform, wonder, site and cave biome
+has a page that starts blank and fills in as you find it, with a turning 3D model of the place and
+the coordinates of every one you have found. **Ripped maps** in dungeon and structure chests fill in
+a page you haven't found yet and mark where the nearest one lies. Craft the book from a book, a map
+and a compass.
+
 ### A world that feels made by hand
 - **Landmarks:** god trees 80 to 180 blocks tall, natural arches, spires and pillar mountains.
 - **Named places:** every set piece, landform and landmark has a name of its own, shown as you
@@ -95,8 +126,11 @@ Rare, hand-designed places generated into the world:
 
 | Minecraft | Loader | Notes |
 |---|---|---|
-| **26.3** | NeoForge | The main version. |
-| **1.21.1** | NeoForge 21.1.197 or newer | A backport with the same terrain. Install **[Vanilla Backport](https://modrinth.com/mod/vanillabackport)** for the newer blocks and biomes Grand Atlas uses (Pale Garden, Sulfur Caves, leaf litter, dry grass and more); without it those are swapped for 1.21.1 stand-ins. |
+| **1.21.1** | NeoForge 21.1.197 or newer | The main version. Install **[Vanilla Backport](https://modrinth.com/mod/vanillabackport)** (optional) for the newer blocks and biomes Grand Atlas uses (Pale Garden, Sulfur Caves, leaf litter, dry grass and more); without it those are swapped for 1.21.1 stand-ins. |
+| **26.3** | NeoForge | Coming later: the same terrain, once it has caught up with the 1.21.1 version. |
+
+Grand Atlas is in **beta**: the world generates complete and is playable, but expect changes between
+versions, and back up your worlds.
 
 **Grand Atlas needs a new world.** It cannot change terrain that has already been generated.
 
@@ -124,6 +158,45 @@ Rare, hand-designed places generated into the world:
   built through are kept clear.
 - Biome mods that add Overworld biomes through the vanilla biome system will not appear: Grand Atlas
   places all Overworld biomes itself.
+
+## License
+
+Grand Atlas uses its own **[Grand Atlas License](https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md)**.
+In short:
+
+- **Free to use:** play it, change it, port it, fork it and share it for free, with credit.
+- **Modpacks:** any modpack is welcome, including monetized packs.
+- **Videos and streams:** monetized or not, go ahead.
+- **Servers:** any server that makes no money.
+- **Ask first** for any other way of making money with it, such as a server that takes donations or
+  sells ranks, a hosting add-on, or selling worlds made with it.
+
+---
+
+## Roadmap
+
+What's next, roughly in order. Plans change; feedback steers them.
+
+- **Polish the underground** — streams with step pools in the cave passages, thicker root caves, and
+  more set pieces and cave biomes.
+- **Finish the water** — kettle lakes, valley lakes behind natural dams, terraced turquoise cascades,
+  and a wooded marsh biome.
+- **More fantasy** — a darker, corrupted country, giant flowers, lava rivers that flow, and floating
+  islands woven into the land itself.
+- **Smoother borders** — softer meetings between neighbouring landforms (sand drifting up the rock,
+  scree running out onto the plain), and plants on bare cliff faces.
+- **Integration** — Biomes O' Plenty and other biome mods placed on Grand Atlas's landforms, and a
+  config file.
+- **1.0** — a performance pass, then the 26.3 version.
+
+---
+
+## License
+
+Grand Atlas is under the **[Grand Atlas License](https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md)**.
+In short: play it, change it, fork it and share it for free with credit; put it in any modpack,
+monetized ones included; make videos and streams with it; run it on servers that make no money. Ask
+first for any other way of making money with it.
 
 ---
 

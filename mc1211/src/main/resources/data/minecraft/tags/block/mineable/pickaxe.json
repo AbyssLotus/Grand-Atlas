@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "grandatlas:selenite_block",
+    "grandatlas:selenite_shard",
+    "grandatlas:icicle",
+    "grandatlas:hoarfrost",
+    "grandatlas:aurora_crystal_green",
+    "grandatlas:aurora_shard_green",
+    "grandatlas:shattered_aurora_crystal_green",
+    "grandatlas:aurora_crystal_cyan",
+    "grandatlas:aurora_shard_cyan",
+    "grandatlas:shattered_aurora_crystal_cyan",
+    "grandatlas:aurora_crystal_blue",
+    "grandatlas:aurora_shard_blue",
+    "grandatlas:shattered_aurora_crystal_blue",
+    "grandatlas:aurora_crystal_violet",
+    "grandatlas:aurora_shard_violet",
+    "grandatlas:shattered_aurora_crystal_violet",
+    "grandatlas:aurora_crystal_rose",
+    "grandatlas:aurora_shard_rose",
+    "grandatlas:shattered_aurora_crystal_rose"
+  ]
+}

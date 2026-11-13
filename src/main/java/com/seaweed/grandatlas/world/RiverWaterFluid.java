@@ -66,6 +66,7 @@ public class RiverWaterFluid extends WaterFluid {
     /** Never spreads. Ticked by a neighbour change: if that opened it to the air, it becomes ordinary water. */
     @Override
     public void tick(ServerLevel level, BlockPos pos, BlockState blockState, FluidState fluidState) {
+        if (fluidState.getValue(RiverWater.FLOW).held()) return; // a hanging lake, a rising fall
         for (Direction d : LiquidBlock.POSSIBLE_FLOW_DIRECTIONS) {
             BlockState next = level.getBlockState(pos.relative(d));
             if (next.getFluidState().isEmpty() && next.canBeReplaced(Fluids.FLOWING_WATER)) {
@@ -88,6 +89,18 @@ public class RiverWaterFluid extends WaterFluid {
     @Override
     public void animateTick(Level level, BlockPos pos, FluidState fluidState, RandomSource random) {
         super.animateTick(level, pos, fluidState, random);
+        if (fluidState.getValue(RiverWater.FLOW) == RiverFlow.UP) {
+            // A rising fall: streams of bubbles climbing, and its rush heard close by.
+            if (random.nextInt(3) == 0) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, pos.getX() + random.nextDouble(),
+                        pos.getY() + random.nextDouble(), pos.getZ() + random.nextDouble(), 0.0, 0.04, 0.0);
+            }
+            if (random.nextInt(200) == 0) {
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
+                        SoundSource.AMBIENT, 0.6F + random.nextFloat() * 0.3F, 0.8F + random.nextFloat() * 0.3F, false);
+            }
+            return;
+        }
         // A running river is heard at its surface; a still pool or lake isn't.
         if (fluidState.getValue(RiverWater.FLOW) != RiverFlow.NONE && random.nextInt(48) == 0 && level.isEmptyBlock(pos.above())) {
             level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.WATER_AMBIENT, SoundSource.AMBIENT,

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "grandatlas:glowcap_block"
+    "grandatlas:glowcap_block",
+    "grandatlas:amber_sap"
   ]
 }

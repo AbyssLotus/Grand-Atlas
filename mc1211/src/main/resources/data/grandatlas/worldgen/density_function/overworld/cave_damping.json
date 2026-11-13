@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:cache_once",
+  "argument": {
+    "type": "grandatlas:cave_damping"
+  }
+}

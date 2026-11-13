@@ -15,6 +15,13 @@ public final class Shape {
      * All 0 where there's no rock. The 3D carving works from these (see {@link Rocks}).
      */
     public double rock, rockInside, rockSize;
+    /**
+     * Blocks over {@code relief} that the interpolated ground still reaches here (0 almost
+     * everywhere). Something sheer and thin, like a granite needle, gives the columns round its foot
+     * its full height as an envelope; the exact {@code relief} then trims the rest per block, so its
+     * sides stay vertical instead of being rounded off by the 4-block grid.
+     */
+    public double envelope;
 
     public Shape set(double relief, Zone zone, double roughness) {
         this.relief = relief;
@@ -24,6 +31,7 @@ public final class Shape {
         this.rock = 0;
         this.rockInside = 0;
         this.rockSize = 0;
+        this.envelope = 0;
         return this;
     }
 }

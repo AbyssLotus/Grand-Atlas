@@ -44,6 +44,9 @@ public enum Strata implements MaterialRule {
     private static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
     private static final BlockState BASALT_STATE = Blocks.BASALT.defaultBlockState();
     private static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
+    private static final BlockState STONE = Blocks.STONE.defaultBlockState();
+    /** Vanilla's ore veins (copper 0..50, iron -60..-8) and its deepslate fade (0..8) lie between these. */
+    private static final int VEINS_TOP = 52, VEINS_BOTTOM = -62;
 
     @Override
     public MapCodec<Strata> codec() {
@@ -53,7 +56,7 @@ public enum Strata implements MaterialRule {
     @Override
     public RuleEvaluator compile(MaterialRuleContext context) {
         long seed = context.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath("grandatlas", "strata")).fromHashOf("layers").nextLong();
-        return new Evaluator(seed);
+        return new Evaluator(seed, context);
     }
 
     /** Per chunk: the warp and each layer's thickness are cached for the column being walked. */
@@ -65,13 +68,26 @@ public enum Strata implements MaterialRule {
         private final double[] basalt = new double[BASALT.length];
         private double baseWarp;
 
-        Evaluator(long seed) {
+        private final MaterialRuleContext context;
+
+        Evaluator(long seed, MaterialRuleContext context) {
             this.seed = seed;
+            this.context = context;
         }
 
         @Override
         public @Nullable BlockState tryApply(int x, int y, int z) {
-            if (y > TOP || y < BEDROCK_TOP) return null;
+            if (y < BEDROCK_TOP) return null;
+            if (y > TOP) {
+                // Plain rock well under the ground, outside the levels where vanilla's rule can give
+                // anything but the default: its ore veins run from -60 to 50 and its deepslate fades
+                // out from 0 to 8, and everything else it does is at the surface. Answering here saves
+                // running its whole sequence on every block of a mountain's inside (profiled
+                // 2026-11-10: the material rules were 40% of chunk generation).
+                if (y > VEINS_TOP) return y < context.getMinSurfaceLevel() ? STONE : null;
+                if (y < VEINS_BOTTOM) return y < context.getMinSurfaceLevel() ? DEEPSLATE : null;
+                return null;
+            }
             if (x != cx || z != cz) column(x, z);
             double w = y + warp;
             if (w < BASE + baseWarp) {

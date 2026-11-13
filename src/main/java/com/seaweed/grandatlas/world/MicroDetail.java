@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jspecify.annotations.Nullable;
 
@@ -44,9 +43,6 @@ import org.jspecify.annotations.Nullable;
 public record MicroDetail() implements Feature {
     public static final MapCodec<MicroDetail> CODEC = MapCodec.unit(MicroDetail::new);
     private static final int[][] SIDES = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-
-    private static volatile @Nullable ServerLevel lastLevel;
-    private static volatile @Nullable AtlasCore lastCore;
 
     @Override
     public MapCodec<MicroDetail> codec() {
@@ -935,10 +931,6 @@ public record MicroDetail() implements Feature {
     }
 
     private static @Nullable AtlasCore core(ServerLevel level) {
-        if (level == lastLevel) return lastCore;
-        AtlasCore core = CoreHandle.coreFrom(level.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED));
-        lastCore = core;
-        lastLevel = level;
-        return core;
+        return CoreHandle.coreOf(level);
     }
 }

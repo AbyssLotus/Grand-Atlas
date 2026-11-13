@@ -150,6 +150,41 @@ Distant Horizons generates terrain far past your view, with this mod's generator
 - Distant Horizons CPU load: **4-6 generation threads** (of your 16), or its "Balanced"/"Low Impact" CPU preset.
 - **10-12 GB** RAM for this profile (Modrinth App: the profile's settings, Java and memory).
 
+## Changes in 0.11.0 (M7e, third round: more set pieces)
+
+Use a new world for these. Find them with `/grandatlas locate aurora_vault`, `aurora_well`, `worldroot` or `hanging_mountains`.
+
+- **The Aurora Vault:** a domed chamber 300-480 across with a lake hanging from its roof, surface facing down, held by a lip of rock.
+  - The lake's bed is aurora crystal in waving ribbons (green most, with cyan, blue, violet and rose); crystal spires and shards hang into the water.
+  - A rising fall climbs from a pool on the pale calcite floor into the lake. Its current carries you up; sneak to sink.
+  - **The Aurora Well** on the surface above: a ring of glowing crystal spires round a crystal-lined shaft that drops into the hanging lake.
+- **The Worldroot:** one colossal tree (trunk 14-22 across, 95-130 tall, a canopy over 100 across, flowering in patches), its wood veined with glowing amber sap.
+  - A gate between its buttress roots leads down a shaft beside the taproot, about 400 blocks, to a root hall where great roots cross as bridges and dive into the floor, hung with roots and glow berries.
+- **The Hanging Mountains:** a cavern 600-900 across in the abyss whose roof hangs a mountain range upside down, the tips crusted in packed and blue ice and hung with icicles, over a still lake with small islands; pale mist drifts.
+- **New blocks:** aurora crystal in five colours (Silk Touch keeps it whole; otherwise it drops shattered aurora crystal), aurora shards, amber sap. All have LabPBR maps.
+- **Three new cave biomes:** aurora vault, worldroot hall, hanging peaks.
+- **Shaders:** the crystals and amber sap borrow the shader ids of vanilla lights of the same colour, so packs that colour block light tint theirs.
+- **Fixes:** waterlogged crystals in set-piece pools are no longer washed out; set-piece lookups no longer stall the server.
+
+## Changes in 0.10.0 (M7e, second round: set pieces)
+
+Use a new world for these. Find them with `/grandatlas locate the_hollow`, `great_geode` or `titans_grave`.
+
+- **The Hollow:** a cavern in the abyss over 1 km across and about 300 tall, with a dark lake on its floor.
+  - Twelve to twenty floating islands: cones, spires and mesas, in banded tuff and calcite with mossy tops.
+  - Some islands have spill pools that pour over their edges into the lake.
+  - Hanging rock under the islands, stone bridges, giant stalactites from the dome, hourglass columns and sea stacks.
+  - Glowcaps, glowworm silk and glow lichen.
+- **The Great Geode:** a hollow crystal sphere about 300 across.
+  - Shell of basalt, calcite and amethyst, with budding amethyst, clusters and buds.
+  - Selenite and amethyst pillars, around 150 crystal formations, and a crack through one side.
+  - A lake in its bowl.
+- **Titan's grave:** the skeleton of something over 1,000 blocks long, in bone.
+  - Spine with vertebrae and dorsal spikes, ribs (some broken), pelvis, limbs with claws, and a hollow skull with eyes, teeth, jaw and horns.
+  - Always a lush cave and heavily overgrown: cave-vine curtains with glow berries, moss over the floor and the bones, azaleas, dripleaf pools and spore blossoms.
+- **Clean open space.** Vanilla's aquifers no longer leave lava, obsidian or floating stone sheets inside the set pieces or the mega-caverns.
+- **Shaders:** river water now counts as water for Iris shader packs, so it gets their waves, reflections and fog like vanilla water.
+
 ## Changes in 0.9.0 (M7e, first round: cave biomes and new blocks)
 
 Use a new world for these.

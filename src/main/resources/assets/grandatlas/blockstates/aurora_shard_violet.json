@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "grandatlas:block/aurora_shard_violet",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "grandatlas:block/aurora_shard_violet",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "grandatlas:block/aurora_shard_violet",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "grandatlas:block/aurora_shard_violet",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "grandatlas:block/aurora_shard_violet"
+    },
+    "facing=west": {
+      "model": "grandatlas:block/aurora_shard_violet",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

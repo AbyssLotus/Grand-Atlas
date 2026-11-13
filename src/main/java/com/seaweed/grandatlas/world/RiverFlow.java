@@ -13,7 +13,11 @@ public enum RiverFlow implements StringRepresentable {
     SOUTH("south", 0, 1),
     SOUTH_WEST("south_west", -1, 1),
     WEST("west", -1, 0),
-    NORTH_WEST("north_west", -1, -1);
+    NORTH_WEST("north_west", -1, -1),
+    /** Held up with nothing under it (a hanging lake): still, and it never turns to ordinary water. */
+    HELD("held", 0, 0),
+    /** A rising fall: the current runs straight up, and it never turns to ordinary water. */
+    UP("up", 0, 0);
 
     private static final RiverFlow[] COMPASS = {EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST, NORTH, NORTH_EAST};
 
@@ -22,7 +26,12 @@ public enum RiverFlow implements StringRepresentable {
 
     RiverFlow(String name, int dx, int dz) {
         this.name = name;
-        this.vector = new Vec3(dx, 0, dz).normalize();
+        this.vector = name.equals("up") ? new Vec3(0, 1, 0) : new Vec3(dx, 0, dz).normalize();
+    }
+
+    /** Water that stays where generation put it whatever its neighbours do. */
+    public boolean held() {
+        return this == HELD || this == UP;
     }
 
     /** The nearest of the eight directions to (dx, dz), or NONE for (0, 0). */

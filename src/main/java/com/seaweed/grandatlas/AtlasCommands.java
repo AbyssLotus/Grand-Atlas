@@ -48,7 +48,8 @@ public final class AtlasCommands {
                                                     core.macros().kinds().stream().map(Macro::id),
                                                     java.util.Arrays.stream(MesoKind.values()).map(MesoKind::id),
                                                     com.seaweed.grandatlas.core.world.WorldField.ISLAND_SEAS.stream(),
-                                                    java.util.stream.Stream.of("worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave")).flatMap(s -> s), builder);
+                                                    java.util.stream.Stream.of("worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave", "aurora_vault", "aurora_well", "worldroot", "titan_skull"),
+                                                    com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.stream()).flatMap(s -> s), builder);
                                 })
                                 .executes(ctx -> locate(ctx.getSource(), StringArgumentType.getString(ctx, "landform"))))));
     }
@@ -88,17 +89,54 @@ public final class AtlasCommands {
         AtlasCore core = coreOrFail(source);
         if (core == null) return 0;
         BlockPos pos = BlockPos.containing(source.getPosition());
-        if (id.equals("the_hollow") || id.equals("great_geode") || id.equals("titans_grave")) {
-            int kind = id.equals("the_hollow") ? com.seaweed.grandatlas.core.SetPieces.HOLLOW : id.equals("great_geode")
-                    ? com.seaweed.grandatlas.core.SetPieces.GEODE : com.seaweed.grandatlas.core.SetPieces.TITAN;
+        if (com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.contains(id)) {
+            int[] w = com.seaweed.grandatlas.world.AtlasAssets.nearest(core, id, pos.getX(), pos.getZ());
+            if (w == null) {
+                source.sendFailure(Component.literal("No " + id.replace('_', ' ') + " within ~8 km."));
+                return 0;
+            }
+            int distance = (int) Math.hypot(w[0] - pos.getX(), w[2] - pos.getZ());
+            located(source, String.format("Nearest %s: %d %d %d (%d blocks)", id.replace('_', ' '), w[0], w[1], w[2], distance));
+            return distance;
+        }
+        if (id.equals("titan_skull")) {
+            double[] w = core.setPieces().nearestSkull(pos.getX(), pos.getZ());
+            if (w == null) {
+                source.sendFailure(Component.literal("None nearby."));
+                return 0;
+            }
+            int distance = (int) Math.hypot(w[0] - pos.getX(), w[2] - pos.getZ());
+            located(source, String.format("Nearest titan skull: %d %d %d (%d blocks)", (int) w[0], (int) w[1], (int) w[2], distance));
+            return distance;
+        }
+        if (id.equals("aurora_well")) {
+            double[] w = core.setPieces().nearestWell(pos.getX(), pos.getZ());
+            if (w == null) {
+                source.sendFailure(Component.literal("None nearby."));
+                return 0;
+            }
+            int distance = (int) Math.hypot(w[0] - pos.getX(), w[2] - pos.getZ());
+            located(source, String.format("Nearest aurora well: %d %d %d (%d blocks)", (int) w[0], (int) w[1], (int) w[2], distance));
+            return distance;
+        }
+        if (id.equals("the_hollow") || id.equals("great_geode") || id.equals("titans_grave") || id.equals("aurora_vault")
+                || id.equals("worldroot") || id.equals("hanging_mountains")) {
+            int kind = switch (id) {
+                case "the_hollow" -> com.seaweed.grandatlas.core.SetPieces.HOLLOW;
+                case "great_geode" -> com.seaweed.grandatlas.core.SetPieces.GEODE;
+                case "aurora_vault" -> com.seaweed.grandatlas.core.SetPieces.VAULT;
+                case "worldroot" -> com.seaweed.grandatlas.core.SetPieces.ROOT;
+                case "hanging_mountains" -> com.seaweed.grandatlas.core.SetPieces.PEAKS;
+                default -> com.seaweed.grandatlas.core.SetPieces.TITAN;
+            };
             double[] m = core.setPieces().nearest(kind, pos.getX(), pos.getZ());
             if (m == null) {
                 source.sendFailure(Component.literal("None nearby."));
                 return 0;
             }
             int distance = (int) Math.hypot(m[0] - pos.getX(), m[2] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest %s: %d %d %d (%d blocks), about %.0f across",
-                    id.replace('_', ' '), (int) m[0], (int) m[1], (int) m[2], distance, m[3])), false);
+            located(source, String.format("Nearest %s: %d %d %d (%d blocks), about %.0f across",
+                    id.replace('_', ' '), (int) m[0], (int) m[1], (int) m[2], distance, m[3]));
             return distance;
         }
         if (id.equals("underground_sea")) {
@@ -108,8 +146,8 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(m[0] - pos.getX(), m[1] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest underground sea: middle %d %d, water at y %d (%d blocks), about %.0f across",
-                    (int) m[0], (int) m[1], (int) m[3], distance, m[2])), false);
+            located(source, String.format("Nearest underground sea: middle %d %d, water at y %d (%d blocks), about %.0f across",
+                    (int) m[0], (int) m[1], (int) m[3], distance, m[2]));
             return distance;
         }
         if (id.equals("mega_cavern")) {
@@ -119,8 +157,8 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(m[0] - pos.getX(), m[1] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest mega-cavern: middle %d %d %d (%d blocks), about %.0f across",
-                    (int) m[0], (int) m[3], (int) m[1], distance, m[2])), false);
+            located(source, String.format("Nearest mega-cavern: middle %d %d %d (%d blocks), about %.0f across",
+                    (int) m[0], (int) m[3], (int) m[1], distance, m[2]));
             return distance;
         }
         if (id.equals("rift") || id.equals("great_rift")) {
@@ -130,8 +168,8 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(r[0] - pos.getX(), r[1] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest %s: middle at %d %d, top y %d (%d blocks)",
-                    r[3] > 0 ? "great rift" : "rift", (int) r[0], (int) r[1], (int) r[2], distance)), false);
+            located(source, String.format("Nearest %s: middle at %d %d, top y %d (%d blocks)",
+                    r[3] > 0 ? "great rift" : "rift", (int) r[0], (int) r[1], (int) r[2], distance));
             return distance;
         }
         if (id.equals("worm_bore")) {
@@ -141,8 +179,8 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(bore[0] - pos.getX(), bore[1] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest worm bore: starts at %d %d %d (%d blocks), %s",
-                    (int) bore[0], (int) bore[3], (int) bore[1], distance, bore[2] > 0 ? "opening in the ground" : "underground")), false);
+            located(source, String.format("Nearest worm bore: starts at %d %d %d (%d blocks), %s",
+                    (int) bore[0], (int) bore[3], (int) bore[1], distance, bore[2] > 0 ? "opening in the ground" : "underground"));
             return distance;
         }
         if (com.seaweed.grandatlas.core.world.WorldField.ISLAND_SEAS.contains(id)) {
@@ -152,8 +190,8 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(sea[0] - pos.getX(), sea[1] - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format("Nearest %s: centre %d %d (%d blocks), about %.0f km across",
-                    id, (int) sea[0], (int) sea[1], distance, sea[2] * 2 / 1000)), false);
+            located(source, String.format("Nearest %s: centre %d %d (%d blocks), about %.0f km across",
+                    id, (int) sea[0], (int) sea[1], distance, sea[2] * 2 / 1000));
             return distance;
         }
         Macro macro = core.macro(id);
@@ -164,9 +202,9 @@ public final class AtlasCommands {
                 return 0;
             }
             int distance = (int) Math.hypot(site.x() - pos.getX(), site.z() - pos.getZ());
-            source.sendSuccess(() -> Component.literal(String.format(
+            located(source, String.format(
                     "Nearest %s: centre %d %d (%d blocks), about %.1f km across",
-                    id, (int) site.x(), (int) site.z(), distance, site.radius() * 2 / 1000)), false);
+                    id, (int) site.x(), (int) site.z(), distance, site.radius() * 2 / 1000));
             return distance;
         }
         for (MesoKind kind : MesoKind.values()) {
@@ -180,8 +218,8 @@ public final class AtlasCommands {
             String parts = site.micros().stream().filter(m -> m.present()).map(m -> m.kind.id())
                     .collect(java.util.stream.Collectors.groupingBy(s -> s, java.util.TreeMap::new, java.util.stream.Collectors.counting()))
                     .toString();
-            source.sendSuccess(() -> Component.literal(String.format("Nearest %s: centre %d %d (%d blocks), %d blocks across, %s",
-                    id, (int) site.x(), (int) site.z(), distance, (int) (site.radius() * 2), parts)), false);
+            located(source, String.format("Nearest %s: centre %d %d (%d blocks), %d blocks across, %s",
+                    id, (int) site.x(), (int) site.z(), distance, (int) (site.radius() * 2), parts));
             return distance;
         }
         Landform target = core.landform(id);
@@ -196,9 +234,9 @@ public final class AtlasCommands {
         }
         int x = (int) p.x(), z = (int) p.z();
         int distance = (int) Math.hypot(x - pos.getX(), z - pos.getZ());
-        source.sendSuccess(() -> Component.literal(String.format(
+        located(source, String.format(
                 "Nearest %s province centre: %d %d (%d blocks; centres are in warped space, so within ~450 blocks)",
-                id, x, z, distance)), false);
+                id, x, z, distance));
         return distance;
     }
 
@@ -210,4 +248,25 @@ public final class AtlasCommands {
                 + "  (gradlew preview -Pargs=\"--seed " + seed + "\")"), false);
         return 1;
     }
+
+    /**
+     * A locate reply whose first coordinates ("x y z", or "x z" with the height left as ~) are
+     * clickable, as in vanilla's /locate: green, bracketed, and a click puts a /tp in the chat box.
+     */
+    private static void located(CommandSourceStack source, String text) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(-?\\d+) (-?\\d+)(?: (-?\\d+))?(?![\\d.])").matcher(text);
+        if (!m.find()) {
+            source.sendSuccess(() -> Component.literal(text), false);
+            return;
+        }
+        String x = m.group(1), y = m.group(3) != null ? m.group(2) : "~", z = m.group(3) != null ? m.group(3) : m.group(2);
+        net.minecraft.network.chat.MutableComponent coords = net.minecraft.network.chat.ComponentUtils.wrapInSquareBrackets(
+                Component.translatable("chat.coordinates", x, y, z)).withStyle(s -> s.withColor(net.minecraft.ChatFormatting.GREEN)
+                .withClickEvent(new net.minecraft.network.chat.ClickEvent.SuggestCommand("/tp @s " + x + " " + y + " " + z))
+                .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip"))));
+        net.minecraft.network.chat.MutableComponent out = Component.literal(text.substring(0, m.start())).append(coords)
+                .append(Component.literal(text.substring(m.end())));
+        source.sendSuccess(() -> out, false);
+    }
+
 }

@@ -40,6 +40,35 @@ public final class CoreHandle {
         return core;
     }
 
+    private record LevelCore(net.minecraft.server.level.ServerLevel level, @Nullable AtlasCore core) {}
+
+    private static volatile @Nullable LevelCore lastLevel;
+
+    /**
+     * The core generating a level, or null if the level isn't Grand Atlas's. Every feature asks per
+     * chunk, so the last answer is kept (level and core together, so two dimensions generating at
+     * once can't read one's level with the other's core).
+     */
+    public static @Nullable AtlasCore coreOf(net.minecraft.server.level.ServerLevel level) {
+        LevelCore c = lastLevel;
+        if (c != null && c.level == level) return c.core;
+        AtlasCore core = coreFrom(level.getChunkSource().randomState().createClimateSampler(
+                net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED));
+        lastLevel = new LevelCore(level, core);
+        return core;
+    }
+
+    /**
+     * Drops the cores and the remembered level when a server stops. Without this the last world's
+     * ServerLevel (and every core's caches) stayed referenced from here after leaving a
+     * singleplayer world, until another world happened to replace them.
+     */
+    public static void release() {
+        lastLevel = null;
+        last = null;
+        CORES.clear();
+    }
+
     /** The most recently compiled core: a fallback for callers that pass a foreign sampler. */
     public static @Nullable AtlasCore last() {
         return last;

@@ -1,0 +1,51 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet"
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_1"
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_1",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_1",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_1",
+        "y": 270
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_2"
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_2",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_2",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_violet_2",
+        "y": 270
+      }
+    ]
+  }
+}

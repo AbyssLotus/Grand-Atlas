@@ -69,9 +69,56 @@ public final class ModBlocks {
             () -> BlockBehaviour.Properties.of().mapColor(MapColor.CRIMSON_NYLIUM).strength(0.1F).sound(SoundType.MOSS_CARPET)
                     .lightLevel(s -> 3).pushReaction(PushReaction.POPPED));
 
+    /** Glowing amber sap, veining the Worldroot's wood. */
+    public static final DeferredBlock<HalfTransparentBlock> AMBER_SAP = BLOCKS.registerBlock("amber_sap", HalfTransparentBlock::new,
+            () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.CHIME)
+                    .strength(1.0F).sound(SoundType.AMETHYST).lightLevel(s -> 10).noOcclusion());
+
+    /** Aurora crystals, in the order the inverted lake's bands run (green, cyan, blue, violet, rose). */
+    public static final String[] AURORA_COLOURS = {"green", "cyan", "blue", "violet", "rose"};
+    private static final MapColor[] AURORA_MAP = {MapColor.EMERALD, MapColor.COLOR_CYAN, MapColor.COLOR_BLUE, MapColor.COLOR_PURPLE, MapColor.COLOR_PINK};
+    @SuppressWarnings("unchecked")
+    public static final DeferredBlock<Block>[] AURORA_CRYSTAL = new DeferredBlock[AURORA_COLOURS.length];
+    @SuppressWarnings("unchecked")
+    public static final DeferredBlock<AmethystClusterBlock>[] AURORA_SHARD = new DeferredBlock[AURORA_COLOURS.length];
+    @SuppressWarnings("unchecked")
+    public static final DeferredBlock<AuroraVeilBlock>[] AURORA_VEIL = new DeferredBlock[AURORA_COLOURS.length];
+    /** What an aurora crystal drops when mined without Silk Touch: the crystal broken into shards. */
+    @SuppressWarnings("unchecked")
+    public static final DeferredBlock<Block>[] SHATTERED_AURORA = new DeferredBlock[AURORA_COLOURS.length];
+
     static {
-        for (DeferredBlock<?> b : java.util.List.of(SELENITE, SELENITE_SHARD, GLOWWORM_SILK, GLOWCAP, GLOWCAP_BLOCK, ICICLE, HOARFROST,
-                ABYSSAL_SAND, CINDER_MOSS, CINDER_MOSS_CARPET)) {
+        for (int i = 0; i < AURORA_COLOURS.length; i++) {
+            MapColor map = AURORA_MAP[i];
+            AURORA_CRYSTAL[i] = BLOCKS.registerBlock("aurora_crystal_" + AURORA_COLOURS[i], Block::new,
+                    () -> BlockBehaviour.Properties.of().mapColor(map).instrument(NoteBlockInstrument.CHIME)
+                            .strength(1.5F).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 11));
+            SHATTERED_AURORA[i] = BLOCKS.registerBlock("shattered_aurora_crystal_" + AURORA_COLOURS[i], Block::new,
+                    () -> BlockBehaviour.Properties.of().mapColor(map).instrument(NoteBlockInstrument.CHIME)
+                            .strength(1.2F).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 8));
+            AURORA_VEIL[i] = BLOCKS.registerBlock("aurora_veil_" + AURORA_COLOURS[i], AuroraVeilBlock::new,
+                    () -> BlockBehaviour.Properties.of().mapColor(map).replaceable().noCollision().noOcclusion().instabreak()
+                            .sound(SoundType.AMETHYST_CLUSTER).lightLevel(s -> 7).pushReaction(PushReaction.POPPED));
+            AURORA_SHARD[i] = BLOCKS.registerBlock("aurora_shard_" + AURORA_COLOURS[i], p -> new AmethystClusterBlock(7.0F, 3.0F, p),
+                    () -> BlockBehaviour.Properties.of().mapColor(map).forceSolidOn().noOcclusion()
+                            .sound(SoundType.AMETHYST_CLUSTER).strength(1.5F).lightLevel(s -> 7).pushReaction(PushReaction.POPPED));
+        }
+    }
+
+    private static java.util.List<DeferredBlock<?>> all() {
+        java.util.List<DeferredBlock<?>> list = new java.util.ArrayList<>(java.util.List.of(SELENITE, SELENITE_SHARD, GLOWWORM_SILK, GLOWCAP,
+                GLOWCAP_BLOCK, ICICLE, HOARFROST, ABYSSAL_SAND, CINDER_MOSS, CINDER_MOSS_CARPET, AMBER_SAP));
+        for (int i = 0; i < AURORA_COLOURS.length; i++) {
+            list.add(AURORA_CRYSTAL[i]);
+            list.add(SHATTERED_AURORA[i]);
+            list.add(AURORA_SHARD[i]);
+            list.add(AURORA_VEIL[i]);
+        }
+        return list;
+    }
+
+    static {
+        for (DeferredBlock<?> b : all()) {
             ITEMS.registerSimpleBlockItem(b);
         }
     }
@@ -81,8 +128,7 @@ public final class ModBlocks {
         ITEMS.register(modBus);
         modBus.addListener(BuildCreativeModeTabContentsEvent.class, e -> {
             if (e.getTabKey() == CreativeModeTabs.NATURAL_BLOCKS) {
-                for (DeferredBlock<?> b : java.util.List.of(SELENITE, SELENITE_SHARD, GLOWWORM_SILK, GLOWCAP, GLOWCAP_BLOCK, ICICLE,
-                        HOARFROST, ABYSSAL_SAND, CINDER_MOSS, CINDER_MOSS_CARPET)) {
+                for (DeferredBlock<?> b : all()) {
                     e.accept(b.get());
                 }
             }
