@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "grandatlas:selenite_block",
-    "grandatlas:selenite_shard",
-    "grandatlas:icicle",
-    "grandatlas:hoarfrost"
-  ]
-}

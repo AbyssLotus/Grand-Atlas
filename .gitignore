@@ -1,0 +1,15 @@
+# Gradle and build output (root project and mc1211/)
+.gradle/
+build/
+
+# Dev client/server runs: worlds, logs, configs, mods
+run/
+
+# Built playtest packs (tools/make_playtest_mrpack.py)
+dist/
+
+# IDE
+.idea/
+*.iml
+out/
+.vscode/
