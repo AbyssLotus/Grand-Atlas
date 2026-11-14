@@ -171,6 +171,13 @@ In short:
 - **Ask first** for any other way of making money with it, such as a server that takes donations or
   sells ranks, a hosting add-on, or selling worlds made with it.
 
+## Made with AI
+
+This Mod was made with the help of Ai. All concepting, design, testing, as well as code review was
+performed by a human (Me!). I know how to Code in Java, but do not know the ins and outs of Minecraft
+modding and while I am learning most of the code in this project was generated with - Claude Code,
+Opus 5.5.
+
 ---
 
 ## Roadmap
@@ -188,15 +195,6 @@ What's next, roughly in order. Plans change; feedback steers them.
 - **Integration** — Biomes O' Plenty and other biome mods placed on Grand Atlas's landforms, and a
   config file.
 - **1.0** — a performance pass, then the 26.3 version.
-
----
-
-## License
-
-Grand Atlas is under the **[Grand Atlas License](https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md)**.
-In short: play it, change it, fork it and share it for free with credit; put it in any modpack,
-monetized ones included; make videos and streams with it; run it on servers that make no money. Ask
-first for any other way of making money with it.
 
 ---
 

@@ -97,3 +97,7 @@ python tools/render_region.py run/world/dimensions/minecraft/overworld 128 96 38
 ## License
 
 Grand Atlas uses its own [Grand Atlas License](LICENSE.md): free to use, change, port and share with credit; any modpack (monetized too) and any videos or streams are fine; servers only if they make no money; any other way of making money with it needs permission. The third-party trees and rock formations in [docs/CREDITS.md](docs/CREDITS.md) stay under their authors' terms and are not covered.
+
+## Made with AI
+
+This Mod was made with the help of Ai. All concepting, design, testing, as well as code review was performed by a human (Me!). I know how to Code in Java, but do not know the ins and outs of Minecraft modding and while I am learning most of the code in this project was generated with - Claude Code, Opus 5.5.
