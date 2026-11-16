@@ -497,7 +497,8 @@ MATERIALS = {
     "selenite_shard": (0.88, 11, 150, lambda c: 60 if lum(c) > 0.95 else 255),
     "glowworm_silk": (0.55, 10, 110, lambda c: 210 if teal_glow(c) and lum(c) > 0.8 else 150 if teal_glow(c) else 255),
     "glowworm_silk_plant": (0.55, 10, 110, lambda c: 210 if teal_glow(c) and lum(c) > 0.8 else 150 if teal_glow(c) else 255),
-    "glowcap": (0.42, 10, 150, lambda c: 200 if teal_glow(c) else 255),
+    # The cap glows (bright and blue-leaning: the user's indigo redraw, or the old teal), the stem doesn't.
+    "glowcap": (0.42, 10, 150, lambda c: 200 if teal_glow(c) or (lum(c) > 0.55 and c[2] > c[0] + 20) else 255),
     "glowcap_block": (0.36, 10, 140, lambda c: 220 if lum(c) > 0.85 else 90),
     "icicle": (0.93, 5, 210, None),
     "hoarfrost": (0.8, 5, 190, None),
@@ -584,13 +585,78 @@ for _c in AURORA:
     TEXTURES[f"shattered_aurora_crystal_{_c}"] = (lambda c: lambda: aurora_shattered(c, 0))(_c)
     TEXTURES[f"shattered_aurora_crystal_{_c}_1"] = (lambda c: lambda: aurora_shattered(c, 1))(_c)
     TEXTURES[f"shattered_aurora_crystal_{_c}_2"] = (lambda c: lambda: aurora_shattered(c, 2))(_c)
+    TEXTURES[f"shattered_aurora_crystal_{_c}_3"] = (lambda c: lambda: aurora_shattered(c, 3))(_c)
+
+
+# ---- hand-drawn art (art/block/*.png) wins over the painted-from-code textures
+#
+# The user redraws textures by hand (2026-11-14: the glowcaps, and the blue aurora crystal and shard
+# with a gradient look). A file in art/block/ is used as it is; the other colours of a hand-drawn
+# aurora crystal, shard or shattered crystal are recoloured from its blue version, so the user draws
+# one colour only (2026-11-16: the shattered crystal, with a fourth variant, _3).
+
+HAND = ROOT / "art" / "block"
+
+
+def recolour(im, src="blue", dst="green"):
+    """Recolour hand-drawn aurora art from one colour's palette to another's, keeping every shade
+    and gradient: each pixel's hue moves by the palettes' hue difference, and its saturation and
+    brightness follow the two palettes shade by shade (matched on brightness), so a dark blue
+    becomes the target's dark tone, a highlight its highlight."""
+    import colorsys
+    if src == dst:
+        return im.copy()
+    a = [colorsys.rgb_to_hsv(*(v / 255 for v in p)) for p in AURORA[src]]
+    b = [colorsys.rgb_to_hsv(*(v / 255 for v in p)) for p in AURORA[dst]]
+    # Shades ordered by the source's brightness (the two brightest are both v = 1; use saturation).
+    keys = [(av[2] - (0.3 * av[1] if av[2] > 0.99 else 0)) for av in a]
+
+    def at(key):
+        if key <= keys[0]:
+            return 0, 0, 0.0
+        for i in range(len(keys) - 1):
+            if keys[i] <= key <= keys[i + 1]:
+                return i, i + 1, (key - keys[i]) / max(1e-6, keys[i + 1] - keys[i])
+        return len(keys) - 1, len(keys) - 1, 0.0
+
+    out = im.copy().convert("RGBA")
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, bl, al = px[x, y]
+            if al == 0:
+                continue
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, bl / 255)
+            i, j, t = at(v - (0.3 * s if v > 0.99 else 0))
+            lerp = lambda k: (1 - t) * (b[i][k] - a[i][k]) + t * (b[j][k] - a[j][k]) if k == 0 else \
+                (1 - t) * (b[i][k] / max(1e-6, a[i][k])) + t * (b[j][k] / max(1e-6, a[j][k]))
+            h2 = (h + lerp(0)) % 1.0
+            s2 = max(0.0, min(1.0, s * lerp(1)))
+            v2 = max(0.0, min(1.0, v * lerp(2)))
+            r2, g2, b2 = colorsys.hsv_to_rgb(h2, s2, v2)
+            px[x, y] = (round(r2 * 255), round(g2 * 255), round(b2 * 255), al)
+    return out
+
+
+def hand_drawn(name):
+    """The hand-drawn texture for a name, or one recoloured from its hand-drawn blue version; None if neither."""
+    p = HAND / f"{name}.png"
+    if p.exists():
+        return Image.open(p).convert("RGBA")
+    for c in AURORA:
+        for family in ("aurora_crystal", "aurora_shard", "shattered_aurora_crystal"):
+            if name.startswith(f"{family}_{c}"):
+                blue = HAND / (name.replace(f"{family}_{c}", f"{family}_blue") + ".png")
+                if blue.exists():
+                    return recolour(Image.open(blue).convert("RGBA"), "blue", c)
+    return None
 
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     tiles = []
     for name, fn in TEXTURES.items():
-        im = fn()
+        im = hand_drawn(name) or fn()
         im.save(OUT / f"{name}.png")
         specular(name, im).save(OUT / f"{name}_s.png")
         tiles.append((name, im))

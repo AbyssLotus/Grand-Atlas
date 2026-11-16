@@ -182,19 +182,31 @@ Opus 5.5.
 
 ## Roadmap
 
-What's next, roughly in order. Plans change; feedback steers them.
+Grand Atlas stays in beta (0.x) until two things are done. Then it releases as **1.0.0**.
+
+### The road to 1.0.0
+
+- **All art made by hand.** Every texture in the mod (blocks, items, the guide book and the aurora)
+  redrawn by human hands. Done so far: the glowcaps, and the aurora crystals, shards and
+  shattered crystal.
+- **A rebuilt water system.** Rivers, lakes and waterfalls ripped out and put back in, built so the
+  odd stepping, staircased water and other strange water shapes can't happen at all.
+
+### Also planned, before or after 1.0.0
 
 - **Polish the underground** — streams with step pools in the cave passages, thicker root caves, and
   more set pieces and cave biomes.
-- **Finish the water** — kettle lakes, valley lakes behind natural dams, terraced turquoise cascades,
-  and a wooded marsh biome.
+- **More water features** on the new system — kettle lakes, valley lakes behind natural dams,
+  terraced turquoise cascades, and a wooded marsh biome.
 - **More fantasy** — a darker, corrupted country, giant flowers, lava rivers that flow, and floating
   islands woven into the land itself.
 - **Smoother borders** — softer meetings between neighbouring landforms (sand drifting up the rock,
   scree running out onto the plain), and plants on bare cliff faces.
 - **Integration** — Biomes O' Plenty and other biome mods placed on Grand Atlas's landforms, and a
   config file.
-- **1.0** — a performance pass, then the 26.3 version.
+- **Performance**, and then the **26.3** version.
+
+Plans change; feedback steers them.
 
 ---
 

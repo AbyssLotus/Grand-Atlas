@@ -676,7 +676,7 @@ for _c in AURORA_COLOURS:
     NEW_BLOCKS[f"aurora_shard_{_c}"] = ("facing_cross", [f"aurora_shard_{_c}"], False, f"{_c.capitalize()} Aurora Shard", "pickaxe")
     NEW_BLOCKS[f"aurora_veil_{_c}"] = ("silk", [f"aurora_veil_{_c}_tip", f"aurora_veil_{_c}"], False, f"{_c.capitalize()} Aurora Veil", None)
     NEW_BLOCKS[f"shattered_aurora_crystal_{_c}"] = ("cube", [f"shattered_aurora_crystal_{_c}", f"shattered_aurora_crystal_{_c}_1",
-                                                    f"shattered_aurora_crystal_{_c}_2"], True, f"Shattered {_c.capitalize()} Aurora Crystal", "pickaxe")
+                                                    f"shattered_aurora_crystal_{_c}_2", f"shattered_aurora_crystal_{_c}_3"], True, f"Shattered {_c.capitalize()} Aurora Crystal", "pickaxe")
 
 
 def assets(rel, data):
