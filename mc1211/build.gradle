@@ -57,6 +57,12 @@ neoForge {
             server()
             programArgument '--nogui'
         }
+        // The cave survey (debug/CaveSurvey): vanilla's cave volume against Grand Atlas's, then stops.
+        caveSurvey {
+            server()
+            programArgument '--nogui'
+            systemProperty 'grandatlas.caveSurvey', 'true'
+        }
         // Loads every mixin target of every mod in run/mods and exits: GrandAtlasClient.audit
         audit {
             client()
@@ -68,6 +74,29 @@ neoForge {
             client()
             programArgument '--quickPlaySingleplayer'
             programArgument 'join-test'
+        }
+        // Drives the C0 debug tools in join-test and screenshots each (client/DebugCheck), then quits.
+        debugCheck {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.debugCheck', 'true'
+        }
+        // Screenshots the nearest karst system with a sinking stream (client/KarstCheck), then quits.
+        // Forces a sinking stream in every karst system (dev only), so there is one to look at.
+        karstCheck {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.karstCheck', 'true'
+            systemProperty 'grandatlas.karstForceSink', 'true'
+        }
+        // Screenshots a room, a gallery and an entrance of the solution caves on fresh ground (client/SolutionCheck), then quits.
+        solutionCheck {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.solutionCheck', 'true'
         }
         look {
             client()

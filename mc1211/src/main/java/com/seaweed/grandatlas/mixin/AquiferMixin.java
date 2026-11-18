@@ -36,6 +36,8 @@ public abstract class AquiferMixin {
     @Unique private int grandatlas$skipAbove = Integer.MAX_VALUE;
     /** The height band of the mega-caverns within reach of this chunk, where aquifers place no fluid (empty: lo > hi). */
     @Unique private int grandatlas$dryLo = 1, grandatlas$dryHi = 0;
+    /** The height band of the karst systems within reach (core/Karst), where aquifers place no fluid under the ground. */
+    @Unique private int grandatlas$karstLo = 1, grandatlas$karstHi = 0;
 
     @Inject(method = "computeSubstance", at = @At("HEAD"), cancellable = true)
     private void grandatlas$openSky(DensityFunction.FunctionContext context, double density, CallbackInfoReturnable<BlockState> cir) {
@@ -72,10 +74,39 @@ public abstract class AquiferMixin {
                     grandatlas$dryLo = (int) Math.floor(lo) - 24;
                     grandatlas$dryHi = (int) Math.ceil(hi) + 24;
                 }
+                // Karst systems: their passages are part of the density, so the aquifer chose what
+                // filled them, and left pockets of water at its own levels hanging in the chambers
+                // (the karst check, 2026-11-17). Their water is the core's (world/DeepWater).
+                double klo = Double.MAX_VALUE, khi = -Double.MAX_VALUE;
+                for (int z = minGridZ * 16 - 16; z <= z1 + 16; z += 16) {
+                    for (int x = minGridX * 16 - 16; x <= x1 + 16; x += 16) {
+                        com.seaweed.grandatlas.core.Karst.KarstSystem ks = core.karst().near(x, z);
+                        if (ks == null || Double.isNaN(ks.base)) continue;
+                        klo = Math.min(klo, ks.base - 44); // the flooded level and its shafts
+                        khi = Math.max(khi, ks.base + 24 * Math.max(1, ks.levels) + 16);
+                    }
+                }
+                if (klo <= khi) {
+                    grandatlas$karstLo = (int) Math.floor(klo);
+                    grandatlas$karstHi = (int) Math.ceil(khi);
+                }
             }
         }
         int y = context.blockY();
         if (y >= grandatlas$dryLo && y <= grandatlas$dryHi) {
+            shouldScheduleFluidUpdate = false;
+            cir.setReturnValue(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            return;
+        }
+        if (((com.seaweed.grandatlas.world.AtlasNoiseChunk) noiseChunk).grandatlas$core() != null
+                && y >= com.seaweed.grandatlas.core.AtlasCore.MIN_Y + 10
+                && y < noiseChunk.preliminarySurfaceLevel(context.blockX(), context.blockZ()) - 4) {
+            // No aquifer fluid anywhere under the ground (cave rework, 2026-11-17): the aquifer chose
+            // water or lava at its own levels inside Grand Atlas's passages, and it hung in the halls
+            // and poured down the galleries (the user's screenshots at y -290 to -455). Underground
+            // water is the core's alone (world/DeepWater: cavern lakes and seas, karst rivers, the
+            // drowned caves under the sea). The sea and rivers over the ground keep theirs; the lava
+            // under y -502 stays.
             shouldScheduleFluidUpdate = false;
             cir.setReturnValue(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
             return;

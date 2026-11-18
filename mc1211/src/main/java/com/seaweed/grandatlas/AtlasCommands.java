@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
  * <ul>
  *   <li>{@code /grandatlas where}: the column's tag stack and what the core decided there</li>
  *   <li>{@code /grandatlas locate <landform|macro|site>}: the nearest province holding that landform, macro, or meso site</li>
+ *   <li>{@code /grandatlas watertest}: test channels of sloped river water in front of you ({@link WaterTest})</li>
  *   <li>{@code /grandatlas seed}: the core seed, for {@code gradlew preview --seed} to render this world</li>
  * </ul>
  */
@@ -36,7 +37,14 @@ public final class AtlasCommands {
         event.getDispatcher().register(Commands.literal(GrandAtlas.MOD_ID)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("where").executes(ctx -> where(ctx.getSource())))
+                .then(Commands.literal("show")
+                        .then(Commands.argument("layer", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(
+                                        java.util.Arrays.stream(com.seaweed.grandatlas.debug.AtlasDebug.LAYER_NAMES), java.util.stream.Stream.of("off")), builder))
+                                .executes(ctx -> show(ctx.getSource(), StringArgumentType.getString(ctx, "layer")))))
+                .then(Commands.literal("survey").then(Commands.literal("caves").executes(ctx -> survey(ctx.getSource()))))
                 .then(Commands.literal("seed").executes(ctx -> seed(ctx.getSource())))
+                .then(Commands.literal("watertest").executes(ctx -> WaterTest.build(ctx.getSource())))
                 .then(Commands.literal("locate")
                         .then(Commands.argument("landform", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
@@ -47,7 +55,7 @@ public final class AtlasCommands {
                                                     core.macros().kinds().stream().map(Macro::id),
                                                     java.util.Arrays.stream(MesoKind.values()).map(MesoKind::id),
                                                     com.seaweed.grandatlas.core.world.WorldField.ISLAND_SEAS.stream(),
-                                                    java.util.stream.Stream.of("worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave", "aurora_vault", "aurora_well", "worldroot", "titan_skull", "sky_isles"),
+                                                    java.util.stream.Stream.of("karst", "swallet", "worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave", "aurora_vault", "aurora_well", "worldroot", "titan_skull", "sky_isles"),
                                                     com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.stream()).flatMap(s -> s), builder);
                                 })
                                 .executes(ctx -> locate(ctx.getSource(), StringArgumentType.getString(ctx, "landform"))))));
@@ -69,17 +77,38 @@ public final class AtlasCommands {
         AtlasCore core = coreOrFail(source);
         if (core == null) return 0;
         BlockPos pos = BlockPos.containing(source.getPosition());
-        ColumnSample c = core.column(pos.getX(), pos.getZ());
-        String report = String.format(
-                "Grand Atlas at %d, %d%n  %s  (province %d,%d, %s)%n"
-                        + "  surface y %.1f = datum %.1f + relief %.1f%n"
-                        + "  temperature %.2f  humidity %.2f  continentalness %.2f%n"
-                        + "  surface biome %s  biome here %s",
-                pos.getX(), pos.getZ(), String.join(" → ", c.tags()), c.provinceX(), c.provinceZ(), c.transition().id(),
-                c.height(), c.datum(), c.relief(),
-                c.temperature(), c.humidity(), c.continentalness(),
-                c.biome().id(), core.biomeAt(c, pos.getX(), pos.getY(), pos.getZ()).id());
-        source.sendSuccess(() -> Component.literal(report), false);
+        java.util.List<com.seaweed.grandatlas.debug.DebugReport.Row> rows = com.seaweed.grandatlas.debug.DebugReport.rows(source.getLevel(), core, pos);
+        source.sendSuccess(() -> com.seaweed.grandatlas.debug.DebugReport.chat(pos, rows), false);
+        return 1;
+    }
+
+    /** {@code /grandatlas show <caves|water|provinces|off>}: toggles a debug layer drawn through the rock. */
+    private static int show(CommandSourceStack source, String layer) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        if (coreOrFail(source) == null) return 0;
+        if (!layer.equals("off") && !java.util.Arrays.asList(com.seaweed.grandatlas.debug.AtlasDebug.LAYER_NAMES).contains(layer)) {
+            source.sendFailure(Component.literal("No layer '" + layer + "'. Layers: caves, water, provinces, off."));
+            return 0;
+        }
+        int on = com.seaweed.grandatlas.debug.AtlasDebug.show(source.getPlayerOrException(), layer);
+        String legend = (on & com.seaweed.grandatlas.debug.AtlasDebug.CAVES) != 0
+                ? "\nCaves:tube orange, canyon red, crawl khaki, shaft yellow, bore purple, chamber green cross, rift pink; white post = entrance; blue ring = mega-cavern floor/roof." : "";
+        legend += (on & com.seaweed.grandatlas.debug.AtlasDebug.WATER) != 0
+                ? "\nWater:blue sheet = water table, cyan = river surface, blue ring = lake level, white post = waterfall." : "";
+        String text = "Debug layers on: " + com.seaweed.grandatlas.debug.AtlasDebug.describe(on) + legend;
+        source.sendSuccess(() -> Component.literal(text), false);
+        return on;
+    }
+
+    /** {@code /grandatlas survey caves}: vanilla's cave volume against Grand Atlas's ({@link com.seaweed.grandatlas.debug.CaveSurvey}). */
+    private static int survey(CommandSourceStack source) {
+        net.minecraft.server.MinecraftServer server = source.getServer();
+        boolean started = com.seaweed.grandatlas.debug.CaveSurvey.start(server,
+                line -> server.execute(() -> source.sendSuccess(() -> Component.literal(line), false)), () -> {});
+        if (!started) {
+            source.sendFailure(Component.literal("A cave survey is already running."));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal("Cave survey started (a few minutes; results here and in grandatlas/cave_survey.txt)."), false);
         return 1;
     }
 
@@ -95,6 +124,19 @@ public final class AtlasCommands {
             }
             int distance = (int) Math.hypot(w[0] - pos.getX(), w[2] - pos.getZ());
             located(source, String.format("Nearest %s: %d %d %d (%d blocks)", id.replace('_', ' '), w[0], w[1], w[2], distance));
+            return distance;
+        }
+        if (id.equals("karst") || id.equals("swallet")) {
+            com.seaweed.grandatlas.core.Karst.KarstSystem ks = id.equals("karst") ? core.karst().nearest(pos.getX(), pos.getZ(), 12)
+                    : core.karst().nearestSink(pos.getX(), pos.getZ(), 20);
+            if (ks == null) {
+                source.sendFailure(Component.literal(id.equals("karst") ? "No karst system within ~10 km." : "No sinking stream within ~16 km."));
+                return 0;
+            }
+            double tx = id.equals("swallet") ? ks.swallet[0] : ks.cx, tz = id.equals("swallet") ? ks.swallet[1] : ks.cz;
+            int distance = (int) Math.hypot(tx - pos.getX(), tz - pos.getZ());
+            String extra = ks.spring == null ? "dry, no spring" : String.format("spring at %.0f %.0f, cave river at y %.0f", ks.spring[0], ks.spring[1], ks.base);
+            located(source, String.format("Nearest %s: %d %d (%d blocks; %s)", id.equals("karst") ? "karst system" : "swallet", (int) tx, (int) tz, distance, extra));
             return distance;
         }
         if (id.equals("sky_isles")) {

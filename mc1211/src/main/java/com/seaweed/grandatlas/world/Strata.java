@@ -56,8 +56,25 @@ public enum Strata implements SurfaceRules.RuleSource {
     @Override
     public SurfaceRules.SurfaceRule apply(SurfaceRules.Context context) {
         long seed = context.randomState.getOrCreateRandomFactory(ResourceLocation.fromNamespaceAndPath("grandatlas", "strata")).fromHashOf("layers").nextLong();
-        return new Evaluator(seed, context);
+        return new Evaluator(seed, context, com.seaweed.grandatlas.world.CoreHandle.coreFrom(context.randomState));
     }
+
+    // ---- the walls of the deep and abyss passages, by mood (cave rework R3: the user's Rule of Cool,
+    // colour changes with depth, and each region's mood shows in its rock). Vanilla blocks only.
+    private static final BlockState CALCITE = Blocks.CALCITE.defaultBlockState();
+    private static final BlockState DRIPSTONE = Blocks.DRIPSTONE_BLOCK.defaultBlockState();
+    private static final BlockState SMOOTH_BASALT = Blocks.SMOOTH_BASALT.defaultBlockState();
+    private static final BlockState GRANITE = Blocks.GRANITE.defaultBlockState();
+    private static final BlockState PACKED_MUD = Blocks.PACKED_MUD.defaultBlockState();
+    private static final BlockState SCULK = Blocks.SCULK.defaultBlockState();
+    private static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
+    private static final BlockState OBSIDIAN = Blocks.OBSIDIAN.defaultBlockState();
+    private static final BlockState CRYING_OBSIDIAN = Blocks.CRYING_OBSIDIAN.defaultBlockState();
+    private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
+    private static final BlockState GILDED = Blocks.GILDED_BLACKSTONE.defaultBlockState();
+    private static final BlockState SOUL_SOIL = Blocks.SOUL_SOIL.defaultBlockState();
+    /** How close to a passage's surface the wall rock changes (the carve's distance-like value). */
+    private static final double SKIN = 0.9;
 
     /** Per chunk: the warp and each layer's thickness are cached for the column being walked. */
     private static final class Evaluator implements SurfaceRules.SurfaceRule {
@@ -69,15 +86,79 @@ public enum Strata implements SurfaceRules.RuleSource {
         private double baseWarp;
 
         private final SurfaceRules.Context context;
+        private final @Nullable com.seaweed.grandatlas.core.AtlasCore core;
+        private int sx = Integer.MIN_VALUE, sz = Integer.MIN_VALUE;
+        private com.seaweed.grandatlas.core.ColumnSample skinColumn;
 
-        Evaluator(long seed, SurfaceRules.Context context) {
+        Evaluator(long seed, SurfaceRules.Context context, @Nullable com.seaweed.grandatlas.core.AtlasCore core) {
             this.seed = seed;
             this.context = context;
+            this.core = core;
+        }
+
+        /** The wall rock at a passage's surface in the deep and abyss, by mood, or null for the plain rock. */
+        private @Nullable BlockState skin(int x, int y, int z) {
+            if (x != sx || z != sz) {
+                sx = x;
+                sz = z;
+                skinColumn = core.column(x, z);
+            }
+            double d = core.passages().carve(skinColumn, x, y, z);
+            if (d < 0 || d > SKIN) return null;
+            com.seaweed.grandatlas.core.Moods.Mood mood = core.moods().at(x, y, z);
+            if (mood == null) return null;
+            boolean abyss = y < com.seaweed.grandatlas.core.AtlasCore.ABYSS_TOP;
+            boolean floor = core.passages().carve(skinColumn, x, y + 1, z) < 0;
+            // Patches a few blocks across, smooth (no speckle); a rarer accent on top.
+            double n = GradientNoise.noise3(GradientNoise.fork(seed, 50), x / 9.0, y / 6.0, z / 9.0);
+            // Accents follow cracks: thin sheets where a noise crosses zero cut the walls in lines that
+            // wander and branch (the user: crying obsidian "too random, give it structure like cracks").
+            boolean crack = crack(x, y, z);
+            // Bone in small clusters, not single blocks.
+            boolean bone = GradientNoise.noise3(GradientNoise.fork(seed, 54), x / 3.0, y / 3.0, z / 3.0) > 0.62;
+            if (!abyss) {
+                return switch (mood) {
+                    case AWE -> n > 0.25 ? DRIPSTONE : n > -0.45 ? CALCITE : TUFF_STATE;   // pale and grand
+                    case FEAR -> n > 0.1 ? SMOOTH_BASALT : n > -0.35 ? BASALT_STATE : null; // dark, close
+                    case COZY -> n > 0.15 ? DRIPSTONE : n > -0.3 ? GRANITE : PACKED_MUD;   // warm browns
+                    case CLEVER -> band(x, y, z, CALCITE, TUFF_STATE, DEEPSLATE);         // the layers show how it formed
+                    case HORROR -> bone ? BONE : n > 0.05 ? SCULK : null;                  // sculk on deepslate, bone
+                };
+            }
+            return switch (mood) {
+                case AWE -> crack ? CRYING_OBSIDIAN : n > 0.2 ? OBSIDIAN : BLACKSTONE;     // faint violet cracks
+                case FEAR -> n > 0 ? BASALT_STATE : BLACKSTONE;
+                case COZY -> !floor && crack ? MAGMA : n > 0 ? TUFF_STATE : SMOOTH_BASALT;  // ember seams in the walls
+                case CLEVER -> crack ? GILDED : band(x, y, z, BLACKSTONE, BASALT_STATE, SMOOTH_BASALT); // gold veins
+                case HORROR -> bone ? BONE : n > 0.2 ? SOUL_SOIL : SCULK;
+            };
+        }
+
+        /**
+         * On a crack: within a thin band either side of where one of two noises crosses zero. Each is
+         * stretched differently, so the lines meet and fork; a third noise breaks them into lengths.
+         */
+        private boolean crack(int x, int y, int z) {
+            double c1 = Math.abs(GradientNoise.noise3(GradientNoise.fork(seed, 52), x / 18.0, y / 11.0, z / 18.0));
+            double c2 = Math.abs(GradientNoise.noise3(GradientNoise.fork(seed, 53), x / 9.0, y / 14.0, z / 9.0));
+            double gaps = GradientNoise.noise3(GradientNoise.fork(seed, 55), x / 24.0, y / 24.0, z / 24.0);
+            return gaps > -0.25 && (c1 < 0.03 || c2 < 0.022 && gaps > 0.15);
+        }
+
+        /** Level bands of rock a few blocks thick that rise and fall gently: bedding you can read. */
+        private BlockState band(int x, int y, int z, BlockState p, BlockState q, BlockState r) {
+            double w = y + 3 * GradientNoise.noise2(GradientNoise.fork(seed, 51), x / 40.0, z / 40.0);
+            int b = Math.floorMod((int) Math.floor(w / 3), 5);
+            return b < 2 ? p : b < 4 ? q : r;
         }
 
         @Override
         public @Nullable BlockState tryApply(int x, int y, int z) {
             if (y < BEDROCK_TOP) return null;
+            if (core != null && y < com.seaweed.grandatlas.core.Moods.TOP) {
+                BlockState skin = skin(x, y, z);
+                if (skin != null) return skin;
+            }
             if (y > TOP) {
                 // Plain rock well under the ground, outside the levels where vanilla's rule can give
                 // anything but the default: its ore veins run from -60 to 50 and its deepslate fades

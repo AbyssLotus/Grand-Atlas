@@ -384,14 +384,16 @@ public final class SelfCheck {
             for (int z = (int) spot.z() - 96; z < (int) spot.z() + 96; z++) {
                 for (int x = (int) spot.x() - 96; x < (int) spot.x() + 96; x++) {
                     ColumnSample c = core.column(x, z);
-                    int top = waterTop(c);
+                    int top = core.waterTop(x, z); // as the world places it
                     if (top == Integer.MIN_VALUE) continue;
                     wet++;
                     for (int[] o : around) {
                         ColumnSample n = core.column(x + o[0], z + o[1]);
-                        int next = waterTop(n);
+                        int next = core.waterTop(x + o[0], z + o[1]);
                         if (next == Integer.MIN_VALUE) {
-                            if (n.surfaceY() < top && top >= AtlasCore.SEA_LEVEL) open++;
+                            // (A thin skim over a bank level with the block's floor holds: AtlasCore.SKIM.)
+                            boolean skim = n.surfaceY() == top - 1 && AtlasCore.ninths(c.water()) <= AtlasCore.SKIM;
+                            if (n.surfaceY() < top && top >= AtlasCore.SEA_LEVEL && !skim) open++;
                         } else if (top - next >= 2) {
                             if (c.spill()) lip++;
                             else wall++;
@@ -483,7 +485,8 @@ public final class SelfCheck {
             }
         }
         double pct = 100.0 * open / all;
-        check(same && pct > 0.3 && pct < 6 && wetOpen == 0, String.format(
+        // (Up to 25%: the cave rework's deep and abyss aim at 7-20% open, docs/CAVE_RESEARCH.md section 4.)
+        check(same && pct > 0.3 && pct < 25 && wetOpen == 0, String.format(
                 "passages: %.2f%% of the deep open, %d mouth columns, %d opened under water, deterministic %s", pct, mouths, wetOpen, same));
     }
 

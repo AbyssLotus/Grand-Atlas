@@ -491,6 +491,15 @@ def main():
         "step": "lakes",
     })
 
+    # ---- vanilla's carvers off (cave rework C1, 2026-11-17): Grand Atlas's own systems fill the
+    # underground (core/Solution under ordinary country); vanilla's noise caves are off in
+    # world/CaveDamping. Tunnels and canyons cut blind to the terrain only broke river beds open.
+    write("data/grandatlas/neoforge/biome_modifier/no_vanilla_carvers.json", {
+        "type": "neoforge:remove_carvers",
+        "biomes": "#minecraft:is_overworld",
+        "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"],
+    })
+
     # ---- the underground's water (world/DeepWater.java, M7d): cavern lakes, seas, flooded caves.
     # Placed late in decoration (see the step below).
     write("data/grandatlas/worldgen/feature/deep_water.json", {"type": "grandatlas:deep_water"})
@@ -542,6 +551,16 @@ def main():
         "biomes": "#minecraft:is_overworld",
         "features": "grandatlas:fall_detail",
         "step": "local_modifications",
+    })
+
+    # ---- waterfall clearing (world/FallClear.java): after trees, the leaves grown into the falls.
+    write("data/grandatlas/worldgen/feature/fall_clear.json", {"type": "grandatlas:fall_clear"})
+    write("data/grandatlas/worldgen/placed_feature/fall_clear.json", {"feature": "grandatlas:fall_clear", "placement": []})
+    write("data/grandatlas/neoforge/biome_modifier/fall_clear.json", {
+        "type": "neoforge:add_features",
+        "biomes": "#minecraft:is_overworld",
+        "features": "grandatlas:fall_clear",
+        "step": "top_layer_modification",
     })
 
     # ---- crag floaters (world/FloaterCleanup.java): rock the crags' undercuts cut loose.
@@ -674,7 +693,6 @@ for _c in AURORA_COLOURS:
     NEW_BLOCKS[f"aurora_crystal_{_c}"] = ("cube", [f"aurora_crystal_{_c}", f"aurora_crystal_{_c}_1", f"aurora_crystal_{_c}_2"], True,
                                           f"{_c.capitalize()} Aurora Crystal", "pickaxe")
     NEW_BLOCKS[f"aurora_shard_{_c}"] = ("facing_cross", [f"aurora_shard_{_c}"], False, f"{_c.capitalize()} Aurora Shard", "pickaxe")
-    NEW_BLOCKS[f"aurora_veil_{_c}"] = ("silk", [f"aurora_veil_{_c}_tip", f"aurora_veil_{_c}"], False, f"{_c.capitalize()} Aurora Veil", None)
     NEW_BLOCKS[f"shattered_aurora_crystal_{_c}"] = ("cube", [f"shattered_aurora_crystal_{_c}", f"shattered_aurora_crystal_{_c}_1",
                                                     f"shattered_aurora_crystal_{_c}_2", f"shattered_aurora_crystal_{_c}_3"], True, f"Shattered {_c.capitalize()} Aurora Crystal", "pickaxe")
 

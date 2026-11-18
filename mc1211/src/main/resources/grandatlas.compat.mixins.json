@@ -4,7 +4,8 @@
   "package": "com.seaweed.grandatlas.mixin.compat",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "IrisBlockIdsMixin"
+    "IrisBlockIdsMixin",
+    "IrisDeepDarkMixin"
   ],
   "injectors": {
     "defaultRequire": 0

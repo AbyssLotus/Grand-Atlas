@@ -55,10 +55,14 @@ public record DeepWater() implements AtlasFeature {
                 if (!Double.isNaN(lake)) top = Math.max(top, lake);
                 if (!Double.isNaN(piece)) top = Math.max(top, piece);
                 if (!Double.isNaN(table)) top = Math.max(top, table);
+                double cave = core.passages().waterTop(x, z); // karst cave rivers, pools and sumps
+                if (!Double.isNaN(cave)) top = Math.max(top, cave);
             }
         }
-        if (top == Double.NEGATIVE_INFINITY) return false;
-        int ylo = AtlasCore.MIN_Y + 6, yhi = (int) Math.floor(top) + 1, ny = yhi - ylo + 1;
+        if (top == Double.NEGATIVE_INFINITY) return swallet(level, core, x0, z0);
+        // (In a karst system, up through its passages' air too, for the loose water in it.)
+        int over = core.karst().near(x0 + 8, z0 + 8) != null ? 16 : 0;
+        int ylo = AtlasCore.MIN_Y + 6, yhi = (int) Math.floor(top) + 1 + over, ny = yhi - ylo + 1;
         // The core's verdict for every block of the 18x18 area, up to a block over the water.
         byte[] st = new byte[18 * 18 * ny];
         for (int dz = 0; dz < 18; dz++) {
@@ -125,6 +129,17 @@ public record DeepWater() implements AtlasFeature {
                         placed = true;
                     } else {
                         pouring = false;
+                        if (s == Waters.AIR) {
+                            // Loose water standing in a karst passage's open air (a puddle the cave
+                            // dressing left on a ledge that isn't there, a spring opening into the void):
+                            // it hung in the chamber and poured as a curtain (the karst check, 2026-11-17).
+                            BlockState here = level.getBlockState(pos);
+                            if (here.is(Blocks.WATER) && core.passages().karstLevelAt(x, y, z) != -1) {
+                                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                                placed = true;
+                            }
+                            continue;
+                        }
                         if (s == Waters.ROCK && touchesWater(st, ny, dx, dz, y - ylo)) {
                             BlockState here = level.getBlockState(pos);
                             if (here.isAir()) level.setBlock(pos, plug(level, pos), 2);
@@ -134,6 +149,40 @@ public record DeepWater() implements AtlasFeature {
             }
         }
         if (placed) beds(level, st, ny, ylo, x0, z0);
+        // Last: the swallet's water, after the loose water in the passages was cleared (its shaft is
+        // passage air, and the clearing took the fall away).
+        return swallet(level, core, x0, z0) | placed;
+    }
+
+    /**
+     * A sinking stream's swallet (core/Karst): the river's water that stands over or beside the shaft
+     * at the end of its channel becomes ordinary water, so the stream pours down the shaft into the
+     * cave river below as a waterfall (river water never pours: it stood as a wall over the hole).
+     */
+    private static boolean swallet(WorldGenLevel level, AtlasCore core, int x0, int z0) {
+        com.seaweed.grandatlas.core.Karst.KarstSystem sys = core.karst().near(x0 + 8, z0 + 8);
+        if (sys == null || sys.swallet == null) return false;
+        double sx = sys.swallet[0], sz = sys.swallet[1], top = sys.swallet[2];
+        if (sx < x0 - 11 || sx > x0 + 27 || sz < z0 - 11 || sz > z0 + 27) return false;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(), at = new BlockPos.MutableBlockPos();
+        BlockState water = Blocks.WATER.defaultBlockState();
+        boolean placed = false;
+        for (int dz = 0; dz < 16; dz++) {
+            for (int dx = 0; dx < 16; dx++) {
+                int x = x0 + dx, z = z0 + dz;
+                if (Math.hypot(x + 0.5 - sx, z + 0.5 - sz) > 10) continue;
+                for (int y = (int) Math.floor(top) + 1; y >= (int) Math.floor(top) - 6; y--) {
+                    BlockState here = level.getBlockState(pos.set(x, y, z));
+                    if (!here.getFluidState().is(net.minecraft.tags.FluidTags.WATER) || here.is(Blocks.WATER)) continue;
+                    boolean open = level.getBlockState(at.set(x, y - 1, z)).isAir();
+                    for (int[] s : SIDES) open |= level.getBlockState(at.set(x + s[0], y, z + s[1])).isAir();
+                    if (!open) continue;
+                    level.setBlock(pos, water, 2);
+                    level.scheduleTick(pos.immutable(), Fluids.WATER, 0);
+                    placed = true;
+                }
+            }
+        }
         return placed;
     }
 
@@ -165,6 +214,12 @@ public record DeepWater() implements AtlasFeature {
                     if (!still(level.getBlockState(pos.set(x, y, z)))) continue;
                     BlockState bed = level.getBlockState(pos.set(x, y - 1, z));
                     if (!bed.isSolid() || !bed.getFluidState().isEmpty()) continue;
+                    if (bed.is(Blocks.GRASS_BLOCK) || bed.is(Blocks.PODZOL) || bed.is(Blocks.MYCELIUM)) {
+                        // The surface rules grassed a cave floor that the water then covered: a bed of
+                        // gravel, or dirt.
+                        bed = unit(com.seaweed.grandatlas.core.noise.GradientNoise.hash(BED_SEED ^ 7, x, y, z)) < 0.6 ? Blocks.GRAVEL.defaultBlockState() : Blocks.DIRT.defaultBlockState();
+                        level.setBlock(pos, bed, 2);
+                    }
                     int depth = 1;
                     while (k + depth < ny && st[base + k + depth] == Waters.WATER && still(level.getBlockState(pos.set(x, y + depth, z)))) depth++;
                     long h = com.seaweed.grandatlas.core.noise.GradientNoise.hash(BED_SEED, x, y, z);

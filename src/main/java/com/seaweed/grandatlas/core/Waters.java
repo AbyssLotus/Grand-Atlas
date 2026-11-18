@@ -75,6 +75,8 @@ public final class Waters {
             return !Double.isNaN(lake) && y <= lake ? WATER : AIR;
         }
         if (core.passages().carve(c, x, y, z) >= 0) return ROCK;
+        double cave = core.passages().caveWater(x, y, z); // a karst cave river, pool or sump
+        if (!Double.isNaN(cave) && y <= cave) return WATER;
         double t = table(x, z);
         return !Double.isNaN(t) && y <= t ? WATER : AIR;
     }

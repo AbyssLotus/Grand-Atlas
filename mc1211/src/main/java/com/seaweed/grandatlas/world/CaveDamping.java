@@ -28,6 +28,15 @@ public final class CaveDamping implements DensityFunction, CoreHandle.CoreFuncti
      */
     private static final int DEEP = AtlasCore.TERRAIN_FLOOR;
 
+    /**
+     * Vanilla's noise caves are off (cave rework C1, 2026-11-17: the user wants them "as little as
+     * possible"; core/Solution and the other provinces fill the underground). The bias added to every
+     * vanilla cave term is then {@link #OFF}, which no cave value comes near. Dev:
+     * {@code -Dgrandatlas.vanillaCaves=true} brings them back for comparison.
+     */
+    static final boolean VANILLA = Boolean.getBoolean("grandatlas.vanillaCaves");
+    static final double OFF = 10;
+
     /** What a column holds, asked once per column. */
     private record Col(ColumnSample column, double lake, double bed, boolean piece) {}
 
@@ -58,6 +67,7 @@ public final class CaveDamping implements DensityFunction, CoreHandle.CoreFuncti
 
     @Override
     public double compute(FunctionContext context) {
+        if (!VANILLA) return OFF;
         AtlasCore c = CoreHandle.require(core);
         int x = context.blockX(), y = context.blockY(), z = context.blockZ();
         Col col = columns.get(x, z);
@@ -70,6 +80,10 @@ public final class CaveDamping implements DensityFunction, CoreHandle.CoreFuncti
 
     @Override
     public void fillArray(double[] array, ContextProvider provider) {
+        if (!VANILLA) {
+            java.util.Arrays.fill(array, OFF);
+            return;
+        }
         provider.fillAllDirectly(array, this);
     }
 
@@ -86,7 +100,7 @@ public final class CaveDamping implements DensityFunction, CoreHandle.CoreFuncti
 
     @Override
     public double maxValue() {
-        return 2;
+        return VANILLA ? 2 : OFF;
     }
 
     @Override

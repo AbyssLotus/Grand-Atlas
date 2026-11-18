@@ -92,6 +92,10 @@ public final class AtlasCore {
     private final SetPieces setPieces;
     private final SkyIsles skyIsles;
     private final Drainage drainage;
+    private final Karst karst;
+    private final Solution solution;
+    private final Deep deep;
+    private final Moods moods;
     private final Features features;
     private final Map<Macro, ProvinceMosaic> subMosaics = new IdentityHashMap<>();
     private final List<Landform> landforms;
@@ -134,6 +138,11 @@ public final class AtlasCore {
         skyIsles = new SkyIsles(this, GradientNoise.fork(seed, 800));
         drainage = new Drainage(GradientNoise.fork(seed, 80), world, this::sampleBase);
         features = new Features(GradientNoise.fork(seed, 90), this::sampleBase, drainage);
+        karst = new Karst(this, GradientNoise.fork(seed, 900));
+        drainage.sinks = karst::dry; // sinking streams (core/Karst)
+        solution = new Solution(this, GradientNoise.fork(seed, 901));
+        deep = new Deep(this, GradientNoise.fork(seed, 902));
+        moods = new Moods(GradientNoise.fork(seed, 903));
         roughness = GradientNoise.fork(seed, 11);
         caves = GradientNoise.fork(seed, 12);
         variant = GradientNoise.fork(seed, 13);
@@ -194,6 +203,25 @@ public final class AtlasCore {
 
     public Caves caves() {
         return grandCaves;
+    }
+
+    public Karst karst() {
+        return karst;
+    }
+
+    /** The solution caves, the baseline province under ordinary country (cave rework C1). */
+    public Solution solution() {
+        return solution;
+    }
+
+    /** The deep and abyss network (cave rework C1). */
+    public Deep deep() {
+        return deep;
+    }
+
+    /** The moods of the deep and abyss regions (cave rework R2). */
+    public Moods moods() {
+        return moods;
     }
 
     public Drainage drainage() {
@@ -500,7 +528,9 @@ public final class AtlasCore {
             double before = height;
             height = drainage.carve(x, z, height, carve);
             // Water the macro set (a plateau's lake or river) can't stand over a valley cut under it.
-            if (!Double.isNaN(water) && (height < before - 1.5 || carve.near)) water = Double.NaN;
+            // Nor where the river network has taken the lake over (a plateau's lake seeds one of its
+            // own: fitted to its inflows, its ring guarded, its outflow over the spill).
+            if (!Double.isNaN(water) && (height < before - 1.5 || carve.near || carve.lakeNear)) water = Double.NaN;
             if (carve.near) {
                 rough = 0; // 3D roughness would hole the banks and let the water out
                 rock = 0;
@@ -1467,5 +1497,26 @@ public final class AtlasCore {
             cellX = 0;
             cellZ = 0;
         }
+    }
+
+    /** The top water block over a column as the world places it, or {@link Integer#MIN_VALUE} if it has none. */
+    public int waterTop(int x, int z) {
+        ColumnSample c = column(x, z);
+        if (Double.isNaN(c.water()) || c.water() <= c.height()) return Integer.MIN_VALUE;
+        int top = (int) Math.floor(c.water());
+        return top > c.surfaceY() ? top : Integer.MIN_VALUE;
+    }
+
+    /**
+     * Most a river's top block may stand over a bank beside it whose top is level with the block's
+     * floor, in ninths: a sloping surface crosses every whole level somewhere, and at a shallow edge
+     * leaves a skim of water this thin over the bank. It stays put (river water never spreads); more
+     * than this is water standing in the open.
+     */
+    public static final int SKIM = 3;
+
+    /** The water's drawn height in its top block, in ninths (1-8), as the world places it. */
+    public static int ninths(double water) {
+        return Math.max(1, Math.min(8, (int) Math.round((water - Math.floor(water)) * 9)));
     }
 }

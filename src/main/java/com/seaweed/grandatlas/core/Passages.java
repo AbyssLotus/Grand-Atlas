@@ -50,6 +50,7 @@ public final class Passages {
     private static final double NO_SURFACE_BELOW = AtlasCore.TERRAIN_FLOOR - 30;
     static final double BORE_CELL = 2800, RIFT_CELL = 1200;
 
+    static final int LATTICE = 0, KARST = 1, SOLUTION = 2, DEEP = 3;
     static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7;
 
     private final AtlasCore core;
@@ -81,6 +82,17 @@ public final class Passages {
         boolean open;       // may break the surface (entrances, bore mouths)
         double ribs;        // bore: arc length at a (for the rings)
         double minX, maxX, minY, maxY, minZ, maxZ;
+        /** Karst (core/Karst): water filling the piece up to this level (NaN: dry), its level (-1: not karst), and whether it may carve where the ground is wet (a spring, a swallet). */
+        double water = Double.NaN;
+        int karst = -1;
+        boolean wetOk;
+        /** Which system made it: {@link #LATTICE}, {@link #KARST}, {@link #SOLUTION} or {@link #DEEP} (debug). */
+        int province = LATTICE;
+        /** A flat roof along a bedding plane, this fraction of the height over the axis (0: none). */
+        double roof;
+        /** A room's pillars: their spacing (0: none), from {@link #seed}. */
+        double pillars;
+        long seed;
 
         void bounds() {
             double r = Math.max(Math.max(ra, rb), slotW + Math.abs(slotOff)) + 2;
@@ -621,6 +633,143 @@ public final class Passages {
         return cc.colCount == 0 ? Integer.MIN_VALUE : (int) Math.ceil(cc.colHi);
     }
 
+    // ---- inspection (the debug screen, /grandatlas show caves)
+
+    /** The kind of passage whose shape holds (x, y, z), or -1 if none ({@link #kindName}). */
+    public int kindAt(int x, int y, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        double best = 1, bx = x + 0.5, by = y + 0.5, bz = z + 0.5;
+        int kind = -1;
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (by < s.minY || by > s.maxY) continue;
+            double q = shape(s, bx, by, bz);
+            if (q < best) {
+                best = q;
+                kind = s.kind;
+            }
+        }
+        return kind;
+    }
+
+    public static String kindName(int kind) {
+        return switch (kind) {
+            case TUBE -> "tube";
+            case CANYON -> "canyon";
+            case CRAWL -> "crawl";
+            case SHAFT -> "shaft";
+            case BORE -> "worm bore";
+            case CHAMBER -> "chamber";
+            case RIFT -> "rift";
+            case GREAT_RIFT -> "great rift";
+            default -> "none";
+        };
+    }
+
+    /** The passage level a height belongs to (levels are LEVEL apart, give or take their drift). */
+    public static int levelOf(double y) {
+        return (int) Math.round(y / LEVEL);
+    }
+
+    /**
+     * Every passage piece whose bounds come within r of (x, z) across: {ax, ay, az, bx, by, bz,
+     * kind, radius, open ? 1 : 0, water (NaN: dry), karst level (-1: not karst), province, vertical ratio}. For the debug view;
+     * not used by generation.
+     */
+    public void piecesNear(double x, double z, double r, List<double[]> out) {
+        Caches cc = caches.get();
+        cc.trim();
+        java.util.Set<Seg> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        double x0 = x - r, x1 = x + r, z0 = z - r, z1 = z + r;
+        java.util.function.Consumer<List<Seg>> take = list -> {
+            for (Seg s : list) {
+                if (s.maxX < x0 || s.minX > x1 || s.maxZ < z0 || s.minZ > z1 || !seen.add(s)) continue;
+                out.add(new double[] {s.ax, s.ay, s.az, s.bx, s.by, s.bz, s.kind, Math.max(s.ra, s.rb), s.open ? 1 : 0, s.water, s.karst, s.province, s.vr});
+            }
+        };
+        for (int j = GradientNoise.floor(z0 / CELL) - 2; j <= GradientNoise.floor(z1 / CELL) + 2; j++) {
+            for (int i = GradientNoise.floor(x0 / CELL) - 2; i <= GradientNoise.floor(x1 / CELL) + 2; i++) take.accept(edgeCell(cc, i, j));
+        }
+        for (int j = GradientNoise.floor(z0 / RIFT_CELL) - 1; j <= GradientNoise.floor(z1 / RIFT_CELL) + 1; j++) {
+            for (int i = GradientNoise.floor(x0 / RIFT_CELL) - 1; i <= GradientNoise.floor(x1 / RIFT_CELL) + 1; i++) take.accept(riftCell(cc, i, j));
+        }
+        for (int j = GradientNoise.floor(z0 / BORE_CELL) - 1; j <= GradientNoise.floor(z1 / BORE_CELL) + 1; j++) {
+            for (int i = GradientNoise.floor(x0 / BORE_CELL) - 1; i <= GradientNoise.floor(x1 / BORE_CELL) + 1; i++) take.accept(boreCell(cc, i, j));
+        }
+        List<Seg> karst = new ArrayList<>();
+        core.karst().collect(x0, z0, x1, z1, karst);
+        core.solution().collect(x0, z0, x1, z1, karst);
+        core.deep().collect(x0, z0, x1, z1, karst);
+        take.accept(karst);
+    }
+
+    /** Which system made the piece holding (x, y, z): LATTICE, KARST, SOLUTION, or -1 for none (debug). */
+    public int provinceAt(int x, int y, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        double best = 1;
+        int prov = -1;
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (y + 0.5 < s.minY || y + 0.5 > s.maxY) continue;
+            double q = shape(s, x + 0.5, y + 0.5, z + 0.5);
+            if (q < best) {
+                best = q;
+                prov = s.province;
+            }
+        }
+        return prov;
+    }
+
+    /** The karst level of the piece holding (x, y, z), or -1 (debug). */
+    public int karstLevelAt(int x, int y, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        double best = 1;
+        int level = -1;
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (y + 0.5 < s.minY || y + 0.5 > s.maxY) continue;
+            double q = shape(s, x + 0.5, y + 0.5, z + 0.5);
+            if (q < best) {
+                best = q;
+                level = s.karst;
+            }
+        }
+        return level;
+    }
+
+    /**
+     * The water in the passages at (x, y, z): the highest level of any watered piece (a karst cave
+     * river, pool or sump) whose shape holds the block, or NaN. Where two pools meet, the higher
+     * reaches over the lower and pours (world/DeepWater).
+     */
+    public double caveWater(int x, int y, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        double w = Double.NaN;
+        double bx = x + 0.5, by = y + 0.5, bz = z + 0.5;
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (Double.isNaN(s.water) || by < s.minY || by > s.maxY || y > s.water) continue;
+            if (shape(s, bx, by, bz) < 1.05 && !(s.water <= w)) w = s.water;
+        }
+        return w;
+    }
+
+    /** The highest passage water over this column (NaN: none), so world/DeepWater knows how high to look. */
+    public double waterTop(int x, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        double w = Double.NaN;
+        for (int i = 0; i < cc.colCount; i++) {
+            double sw = cc.col[i].water;
+            if (!Double.isNaN(sw) && !(sw <= w)) w = sw;
+        }
+        return w;
+    }
+
     public double carve(ColumnSample c, int x, int y, int z) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
@@ -641,11 +790,20 @@ public final class Passages {
             if (by < s.minY || by > s.maxY) continue;
             // (A mouth is open to the surface, but never in a column at or beside water: its width
             // could reach one from a dry anchor, and the river above ran into the cave.)
-            if (shallow && (!s.open || wet)) continue;
+            if (shallow && (!s.open || wet && !s.wetOk)) continue;
             double q = shape(s, bx, by, bz);
             if (q < 1.4) {
-                double rough = s.kind == BORE ? 0.03 : s.kind == RIFT || s.kind == GREAT_RIFT ? 0.06 : 0.13;
-                q += rough * GradientNoise.noise3(roughSeed, bx / 5.0, by / 4.0, bz / 5.0);
+                if (s.province >= SOLUTION) {
+                    // Solution caves: broad lumps and small scallops, so the walls aren't smooth tubes.
+                    // Flattened along the bedding: ledges and notches that run along the walls, as
+                    // water leaves them, not pockmarks (the user: "dug using TNT").
+                    // Kept faint: the user wants caves "very smooth" (cave rework R1).
+                    q += 0.07 * GradientNoise.noise3(roughSeed, bx / 12.0, by / 3.5, bz / 12.0)
+                            + 0.015 * GradientNoise.noise3(roughSeed ^ 0x5CA1L, bx / 5.0, by / 4.0, bz / 5.0);
+                } else {
+                    double rough = s.kind == BORE ? 0.03 : s.kind == RIFT || s.kind == GREAT_RIFT ? 0.06 : 0.13;
+                    q += rough * GradientNoise.noise3(roughSeed, bx / 5.0, by / 4.0, bz / 5.0);
+                }
                 double rmin = s.kind == RIFT || s.kind == GREAT_RIFT ? Math.max(0.8, Math.min(4, Math.max(s.ra, s.rb) * 0.5))
                         : Math.max(1.2, Math.min(s.ra, s.rb) * Math.min(1, s.vr));
                 best = Math.min(best, (q - 1) * rmin * 0.5);
@@ -716,8 +874,28 @@ public final class Passages {
                 double h = Math.sqrt(cx * cx + cz * cz);
                 double tube = Math.hypot(h / r, oy / rv);
                 // A flat floor of fill: caves are rarely round underfoot. Each passage has its own.
-                double floor = s.kind == CHAMBER ? 0.55 : s.ribs > 0 ? s.ribs : 0.6;
+                double floor = s.kind == CHAMBER ? (s.ribs > 0 ? s.ribs : 0.55) : s.ribs > 0 ? s.ribs : 0.6;
                 double q = Math.max(tube, -oy / (rv * floor));
+                if (s.roof > 0 && oy > 0) q = Math.max(q, oy / (rv * s.roof)); // a bedding-plane roof
+                if (s.pillars > 0 && q < 1) {
+                    // Columns: on a jittered grid round the room's middle, wider at foot and head
+                    // (a stalagmite met by its stalactite), not every cell.
+                    double p = s.pillars;
+                    int gi = (int) Math.floor(cx / p), gj = (int) Math.floor(cz / p);
+                    for (int dj = 0; dj <= 1; dj++) {
+                        for (int di = 0; di <= 1; di++) {
+                            int ci = gi + di - (cx / p - gi < 0.5 ? 1 : 0), cj = gj + dj - (cz / p - gj < 0.5 ? 1 : 0);
+                            long ph = GradientNoise.hash(s.seed, ci, cj);
+                            if ((ph & 0xFF) > 150) continue;
+                            double px = (ci + 0.25 + 0.5 * ((ph >>> 8 & 0xFF) / 255.0)) * p;
+                            double pz = (cj + 0.25 + 0.5 * ((ph >>> 16 & 0xFF) / 255.0)) * p;
+                            if (Math.hypot(px, pz) > r * 0.8) continue; // not hard against the wall
+                            double u = Math.max(0, Math.min(1, (oy + rv * floor) / (rv * (floor + 1))));
+                            double pr = (1.1 + 1.3 * ((ph >>> 24 & 0xFF) / 255.0)) * (1 + 1.6 * (2 * Math.abs(u - 0.5)) * (2 * Math.abs(u - 0.5)));
+                            if (Math.hypot(cx - px, cz - pz) < pr) return 2;
+                        }
+                    }
+                }
                 if (s.slot > 0 && oy < 0) {
                     // The trench: a V below the floor, narrowing as it deepens, off to one side.
                     double bottom = rv * floor + s.slot;
@@ -799,6 +977,9 @@ public final class Passages {
                 }
             }
         }
+        core.karst().collect(x0, z0, x1, z1, cc.chunk); // karst systems (core/Karst)
+        core.solution().collect(x0, z0, x1, z1, cc.chunk); // the solution caves (core/Solution)
+        core.deep().collect(x0, z0, x1, z1, cc.chunk); // the deep and abyss network (core/Deep)
         for (ArrayList<Seg> b : cc.bins) b.clear();
         for (Seg s : cc.chunk) {
             int bx0 = (int) Math.max(0, Math.floor((s.minX - x0) / 4)), bx1 = (int) Math.min(3, Math.floor((s.maxX - x0) / 4));

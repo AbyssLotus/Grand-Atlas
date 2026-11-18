@@ -18,6 +18,21 @@ public class GrandAtlasClient {
     public GrandAtlasClient(IEventBus modBus) {
         modBus.addListener(FMLClientSetupEvent.class, event -> event.enqueueWork(() ->
                 ItemBlockRenderTypes.setRenderLayer(RiverWater.FLUID.get(), RenderType.translucent())));
+        // True darkness in the deep and abyss (cave rework R3): the lightmap (mixin/LightTextureMixin) and a black fog colour.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ViewportEvent.ComputeFogColor.class,
+                com.seaweed.grandatlas.client.DeepDark::colour);
+        if (Boolean.getBoolean("grandatlas.debugCheck")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+                    e -> com.seaweed.grandatlas.client.DebugCheck.tick());
+        }
+        if (Boolean.getBoolean("grandatlas.karstCheck")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+                    e -> com.seaweed.grandatlas.client.KarstCheck.tick());
+        }
+        if (Boolean.getBoolean("grandatlas.solutionCheck")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+                    e -> com.seaweed.grandatlas.client.SolutionCheck.tick());
+        }
         if (Boolean.getBoolean("grandatlas.mixinAudit")) {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> audit());
         }
