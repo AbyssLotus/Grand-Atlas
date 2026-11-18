@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  *   <li>{@code /grandatlas where}: the column's tag stack and what the core decided there</li>
  *   <li>{@code /grandatlas locate <landform|macro|site>}: the nearest province holding that landform, macro, or meso site</li>
+ *   <li>{@code /grandatlas watertest}: test channels of sloped river water in front of you ({@link WaterTest})</li>
  *   <li>{@code /grandatlas seed}: the core seed, for {@code gradlew preview --seed} to render this world</li>
  * </ul>
  */
@@ -38,6 +39,7 @@ public final class AtlasCommands {
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("where").executes(ctx -> where(ctx.getSource())))
                 .then(Commands.literal("seed").executes(ctx -> seed(ctx.getSource())))
+                .then(Commands.literal("watertest").executes(ctx -> WaterTest.build(ctx.getSource())))
                 .then(Commands.literal("locate")
                         .then(Commands.argument("landform", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {

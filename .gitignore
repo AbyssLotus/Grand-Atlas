@@ -20,3 +20,4 @@ assets-src/
 # Third-party mod jars used to build/test the 1.21.1 backport (Vanilla Backport's licence forbids
 # redistributing it); fetched locally, never committed
 backport-deps/
+preview/rivers/

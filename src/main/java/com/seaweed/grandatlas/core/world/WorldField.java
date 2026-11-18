@@ -231,10 +231,22 @@ public final class WorldField {
     private double archipelago(double x, double z, double cont) {
         int ci = GradientNoise.floor(x / ARCH_CELL), cj = GradientNoise.floor(z / ARCH_CELL);
         double out = cont;
-        for (int dj = -2; dj <= 2; dj++) {
-            for (int di = -2; di <= 2; di++) {
-                Arch a = arch(ci + di, cj + dj);
-                if (a == null) continue;
+        // The archipelagos of the 5x5 cells round this one, remembered per cell (cells are 24 km: looking
+        // all 25 up for every column was a tenth of the terrain's time).
+        ArchNear near = archNear;
+        if (near == null || near.i != ci || near.j != cj) {
+            java.util.List<Arch> list = new java.util.ArrayList<>();
+            for (int dj = -2; dj <= 2; dj++) {
+                for (int di = -2; di <= 2; di++) {
+                    Arch a = arch(ci + di, cj + dj);
+                    if (a != null) list.add(a);
+                }
+            }
+            near = new ArchNear(ci, cj, list.toArray(new Arch[0]));
+            archNear = near;
+        }
+        {
+            for (Arch a : near.list) {
                 double dx = x - a.x, dz = z - a.z, reach = a.r * a.stretch * 1.75;
                 if (Math.abs(dx) > reach || Math.abs(dz) > reach) continue;
                 // An irregular outline: an ellipse at its own heading, its edge warped.
@@ -452,6 +464,12 @@ public final class WorldField {
     }
 
     private record Arch(double x, double z, double r, double stretch, double ca, double sa, double scale, double land, long salt) {}
+
+    /** The archipelagos within two cells of cell (i, j), in the order archipelago() looks them up. */
+    private record ArchNear(int i, int j, Arch[] list) {}
+
+    /** The last cell asked about (any thread's: it only saves the lookups). */
+    private volatile ArchNear archNear;
 
     private final Object[] arches = new Object[1 << 10];
     private static final Object NO_ARCH = new Object();

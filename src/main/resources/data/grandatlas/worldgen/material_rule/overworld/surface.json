@@ -130,7 +130,8 @@
         "biome_is": [
           "grandatlas:river",
           "minecraft:frozen_river",
-          "grandatlas:crater_lake"
+          "grandatlas:crater_lake",
+          "grandatlas:glimmer_river"
         ]
       },
       "then_run": {
@@ -381,6 +382,296 @@
             }
           }
         ]
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:volcanic_wastes"
+      },
+      "then_run": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": -0.03,
+                    "max_threshold": 0.03
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:magma_block"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": 0.3,
+                    "max_threshold": 1e+308
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:blackstone"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": -1e+308,
+                    "max_threshold": -0.35
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:smooth_basalt"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:basalt"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:basalt"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:blackstone"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:volcano"
+      },
+      "then_run": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": -0.025,
+                    "max_threshold": 0.025
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:magma_block"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": 0.2,
+                    "max_threshold": 1e+308
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:tuff"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": -1e+308,
+                    "max_threshold": -0.25
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:basalt"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:blackstone"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:blackstone"
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:deep_under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:basalt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:glimmer_vale"
+      },
+      "then_run": {
+        "type": "minecraft:condition",
+        "if_true": "minecraft:on_floor",
+        "then_run": {
+          "type": "minecraft:condition",
+          "if_true": {
+            "type": "minecraft:noise_threshold",
+            "noise": "minecraft:surface",
+            "min_threshold": 0.35,
+            "max_threshold": 1e+308
+          },
+          "then_run": {
+            "type": "minecraft:block",
+            "result_state": "minecraft:moss_block"
+          }
+        }
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:cloud_forest"
+      },
+      "then_run": {
+        "type": "minecraft:condition",
+        "if_true": "minecraft:on_floor",
+        "then_run": {
+          "type": "minecraft:condition",
+          "if_true": {
+            "type": "minecraft:noise_threshold",
+            "noise": "minecraft:surface",
+            "min_threshold": 0.45,
+            "max_threshold": 1e+308
+          },
+          "then_run": {
+            "type": "minecraft:block",
+            "result_state": "minecraft:moss_block"
+          }
+        }
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:tepui_summit"
+      },
+      "then_run": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:on_floor",
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": 0.25,
+                    "max_threshold": 1e+308
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:moss_block"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": 0.05,
+                    "max_threshold": 0.25
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:grass_block"
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:surface",
+                    "min_threshold": -0.3,
+                    "max_threshold": -0.12
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": "minecraft:blackstone"
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": "minecraft:tuff"
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": "minecraft:under_floor",
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": "minecraft:tuff"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "grandatlas:rainbow_mountains"
+      },
+      "then_run": {
+        "type": "grandatlas:rainbow"
       }
     }
   ]

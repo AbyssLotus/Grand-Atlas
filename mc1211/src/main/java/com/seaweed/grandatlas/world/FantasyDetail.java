@@ -164,6 +164,11 @@ public record FantasyDetail() implements AtlasFeature {
                 if (!level.getBlockState(pos).isSolid()) continue;
                 level.setBlock(pos, Blocks.WATER.defaultBlockState(), 2);
                 level.scheduleTick(pos.immutable(), Fluids.WATER, 1);
+                // Its way down off the isle, out from the isle's middle, and a pool where it lands
+                // (it spread over whatever lay below).
+                double ox = x + 0.5 - isle.x(), oz = z + 0.5 - isle.z();
+                int sx = Math.abs(ox) >= Math.abs(oz) ? (ox >= 0 ? 1 : -1) : 0, sz = sx != 0 ? 0 : (oz >= 0 ? 1 : -1);
+                PerchedWater.guide(level, core, x + sx, pos.getY(), z + sz, sx, sz, x0, z0);
                 any = true;
             }
         }
@@ -222,7 +227,15 @@ public record FantasyDetail() implements AtlasFeature {
                 if (!above.isAir() && above.canBeReplaced()) level.setBlock(at.above(k), Blocks.AIR.defaultBlockState(), 2);
             }
             level.setBlock(at, Blocks.WATER.defaultBlockState(), 2);
-            if (f[3] == 1) level.scheduleTick(at, Fluids.WATER, 1);
+            if (f[3] == 1) {
+                level.scheduleTick(at, Fluids.WATER, 1);
+                // Its way down the wall, out from the tepui's middle, and a pool where it lands at the
+                // foot (it spread over the ledges and the ground there).
+                double[] middle = tepui.centre(m);
+                double ox = x + 0.5 - middle[0], oz = z + 0.5 - middle[1];
+                int sx = Math.abs(ox) >= Math.abs(oz) ? (ox >= 0 ? 1 : -1) : 0, sz = sx != 0 ? 0 : (oz >= 0 ? 1 : -1);
+                PerchedWater.guide(level, core, x + sx, at.getY(), z + sz, sx, sz, x0, z0);
+            }
             any = true;
         }
         return any;

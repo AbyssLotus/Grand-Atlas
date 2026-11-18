@@ -35,7 +35,7 @@ public class RiverWaterFluid extends WaterFluid {
     @Override
     protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
         super.createFluidStateDefinition(builder);
-        builder.add(RiverWater.FLOW);
+        builder.add(RiverWater.FLOW, RiverWater.SURFACE);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class RiverWaterFluid extends WaterFluid {
 
     @Override
     public int getAmount(FluidState fluidState) {
-        return 8;
+        return fluidState.getValue(RiverWater.SURFACE); // the drawn height: the renderer slopes the surface between blocks
     }
 
     @Override
@@ -69,7 +69,15 @@ public class RiverWaterFluid extends WaterFluid {
         if (fluidState.getValue(RiverWater.FLOW).held()) return; // a hanging lake, a rising fall
         for (Direction d : LiquidBlock.POSSIBLE_FLOW_DIRECTIONS) {
             BlockState next = level.getBlockState(pos.relative(d));
-            if (next.getFluidState().isEmpty() && next.canBeReplaced(Fluids.FLOWING_WATER)) {
+            // Air over lower water of its own (the next block down a sloping river, or the pool below
+            // a lip) isn't an opening: the surface just runs on down. Air over anything else is.
+            // Nor is air on a bank level with this block's floor, beside a thin skim: a sloping river's
+            // shallow edge (com.seaweed.grandatlas.core.AtlasCore.SKIM).
+            BlockState under = d == Direction.DOWN ? null : level.getBlockState(pos.relative(d).below());
+            boolean skimEdge = under != null && fluidState.getValue(RiverWater.SURFACE) <= com.seaweed.grandatlas.core.AtlasCore.SKIM
+                    && under.isSolid() && under.getFluidState().isEmpty();
+            if (next.getFluidState().isEmpty() && next.canBeReplaced(Fluids.FLOWING_WATER) && !skimEdge
+                    && !(d != Direction.DOWN && isSame(level.getFluidState(pos.relative(d).below()).getType()))) {
                 level.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
                 return;
             }
@@ -101,6 +109,18 @@ public class RiverWaterFluid extends WaterFluid {
             }
             return;
         }
+        if (fluidState.getValue(RiverWater.FLOW) == RiverFlow.DOWN) {
+            // A waterfall: spray off its foot, and its rush heard close by.
+            if (random.nextInt(4) == 0 && !level.getBlockState(pos.below()).is(RiverWater.BLOCK.get())) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SPLASH, pos.getX() + random.nextDouble(), pos.getY() + 0.1,
+                        pos.getZ() + random.nextDouble(), 0.0, 0.1, 0.0);
+            }
+            if (random.nextInt(40) == 0) {
+                level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.WATER_AMBIENT, SoundSource.AMBIENT,
+                        0.5F + random.nextFloat() * 0.3F, 0.8F + random.nextFloat() * 0.3F, false);
+            }
+            return;
+        }
         // A running river is heard at its surface; a still pool or lake isn't.
         if (fluidState.getValue(RiverWater.FLOW) != RiverFlow.NONE && random.nextInt(48) == 0 && level.isEmptyBlock(pos.above())) {
             level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.WATER_AMBIENT, SoundSource.AMBIENT,
@@ -110,6 +130,7 @@ public class RiverWaterFluid extends WaterFluid {
 
     @Override
     public BlockState createLegacyBlock(FluidState fluidState) {
-        return RiverWater.BLOCK.get().defaultBlockState().setValue(RiverWater.FLOW, fluidState.getValue(RiverWater.FLOW));
+        return RiverWater.BLOCK.get().defaultBlockState().setValue(RiverWater.FLOW, fluidState.getValue(RiverWater.FLOW))
+                .setValue(RiverWater.SURFACE, fluidState.getValue(RiverWater.SURFACE));
     }
 }

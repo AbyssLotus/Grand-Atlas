@@ -14,3 +14,6 @@ Textures drawn by hand. They win over the ones `tools/textures.py` paints from c
 Hand-drawn so far (2026-11-14): the glowcap, the glowcap block and its two variants, and the blue
 aurora crystal (three variants) and shard, and the blue shattered crystal (four variants: a new
 `_3` was added for it, 2026-11-16).
+
+2026-11-16: the aurora crystal block redrawn (blue, `aurora_crystal_blue.png` and `_1`, `_2`), and amber sap
+(`amber_sap.png`, `amber_sap_1.png`; `amber_sap_2` is still the generated one).

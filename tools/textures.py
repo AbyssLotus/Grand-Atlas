@@ -448,36 +448,6 @@ def amber_sap(variant=0):
     return im
 
 
-def aurora_veil(colour, tip):
-    """A curtain of aurora light: soft streaks of the colour that sway a little and shimmer along
-    their length, translucent, the tip fading to nothing (as an aurora's curtain fades at its lower
-    edge). Seamless top to bottom, so a curtain of any length runs on without a seam."""
-    import math
-    pal = AURORA[colour]
-    im = img()
-    rnd = random.Random(9100 + len(colour) * 7 + (1 if tip else 0))
-    shimmer = value_noise(9200 + len(colour), 4)
-    centres = [rnd.random() * N for _ in range(5)]
-    widths = [0.8 + 1.4 * rnd.random() for _ in centres]
-    for y in range(N):
-        sway = 0.6 * math.sin(y / N * math.pi * 2)
-        for x in range(N):
-            s = 0.0
-            for c, w in zip(centres, widths):
-                d = min(abs(x + 0.5 - (c + sway) % N), N - abs(x + 0.5 - (c + sway) % N))
-                s = max(s, max(0.0, 1 - d / w))
-            if s <= 0.05:
-                continue
-            v = s * (0.55 + 0.45 * shimmer(x, y))
-            k = 4 if v > 0.8 else 3 if v > 0.5 else 2
-            fade = (1 - y / N) ** 1.4 if tip else 1.0
-            a = int((60 + 170 * v) * fade)
-            if a < 12:
-                continue
-            put(im, x, y, pal[k], a)
-    return im
-
-
 def lum(c):
     return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255
 
@@ -507,7 +477,6 @@ MATERIALS = {
     # Glassy, a little subsurface, and every pixel glows (brighter tones more).
     "aurora_crystal": (0.9, 12, 170, lambda c: int(min(254, 30 + 225 * lum(c)))),
     "aurora_shard": (0.92, 12, 180, lambda c: int(min(254, 40 + 214 * lum(c)))),
-    "aurora_veil": (0.5, 10, 120, lambda c: int(min(254, 120 + 130 * lum(c)))),
     "amber_sap": (0.88, 14, 200, lambda c: int(min(254, 30 + 200 * lum(c)))),
     "shattered_aurora_crystal": (0.7, 12, 150, lambda c: int(min(254, 20 + 200 * lum(c)))),
 }
@@ -580,8 +549,6 @@ for _c in AURORA:
     TEXTURES[f"aurora_crystal_{_c}_1"] = (lambda c: lambda: aurora_crystal(c, 1))(_c)
     TEXTURES[f"aurora_crystal_{_c}_2"] = (lambda c: lambda: aurora_crystal(c, 2))(_c)
     TEXTURES[f"aurora_shard_{_c}"] = (lambda c: lambda: aurora_shard(c))(_c)
-    TEXTURES[f"aurora_veil_{_c}"] = (lambda c: lambda: aurora_veil(c, False))(_c)
-    TEXTURES[f"aurora_veil_{_c}_tip"] = (lambda c: lambda: aurora_veil(c, True))(_c)
     TEXTURES[f"shattered_aurora_crystal_{_c}"] = (lambda c: lambda: aurora_shattered(c, 0))(_c)
     TEXTURES[f"shattered_aurora_crystal_{_c}_1"] = (lambda c: lambda: aurora_shattered(c, 1))(_c)
     TEXTURES[f"shattered_aurora_crystal_{_c}_2"] = (lambda c: lambda: aurora_shattered(c, 2))(_c)

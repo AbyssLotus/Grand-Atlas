@@ -127,6 +127,29 @@ tasks.register('mapServer', JavaExec) {
     args = (project.findProperty('args') ?: '').toString().tokenize()
 }
 
+//   gradlew riverViews -Pargs="preview/rivers"      -> close-up maps of mountain river valleys
+tasks.register('riverViews', JavaExec) {
+    group = 'grandatlas'
+    description = 'Close-up shaded maps of river valleys, and a count of steps in the water surface.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.output
+    mainClass = 'com.seaweed.grandatlas.core.preview.RiverViews'
+    workingDir = projectDir
+    maxHeapSize = '4g'
+    args = (project.findProperty('args') ?: '').toString().tokenize()
+}
+
+tasks.register('finProbe', JavaExec) {
+    group = 'grandatlas'
+    description = 'Finds rock fins standing beside rivers, and what cut round them.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.output
+    mainClass = 'com.seaweed.grandatlas.core.preview.FinProbe'
+    workingDir = projectDir
+    maxHeapSize = '4g'
+    args = (project.findProperty('args') ?: '').toString().tokenize()
+}
+
 tasks.register('checkCore', JavaExec) {
     group = 'grandatlas'
     description = 'Determinism, continuity and bounds checks on the terrain core.'

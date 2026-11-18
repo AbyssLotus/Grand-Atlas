@@ -78,7 +78,18 @@
         "river": "grandatlas:river",
         "salt_marsh": "grandatlas:salt_marsh",
         "pebble_beach": "grandatlas:pebble_beach",
-        "crater_lake": "grandatlas:crater_lake"
+        "crater_lake": "grandatlas:crater_lake",
+        "misty_peaks": "grandatlas:misty_peaks",
+        "cloud_forest": "grandatlas:cloud_forest",
+        "volcanic_wastes": "grandatlas:volcanic_wastes",
+        "volcano": "grandatlas:volcano",
+        "silverwood": "grandatlas:silverwood",
+        "glimmer_vale": "grandatlas:glimmer_vale",
+        "glimmer_river": "grandatlas:glimmer_river",
+        "sky_garden": "grandatlas:sky_garden",
+        "tepui_summit": "grandatlas:tepui_summit",
+        "rainbow_mountains": "grandatlas:rainbow_mountains",
+        "spotted_lake": "grandatlas:spotted_lake"
       }
     }
   }

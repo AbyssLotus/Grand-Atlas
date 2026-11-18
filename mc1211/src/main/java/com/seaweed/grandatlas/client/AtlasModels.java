@@ -206,7 +206,7 @@ public final class AtlasModels {
     /**
      * The Aurora Vault's crystal spike: a chunk of the crystal bed under the hanging lake (glass for its
      * water), and from it a great spike of aurora crystal hanging down, banded through the aurora's
-     * colours, shards bristling along it and veils of light hanging beside it.
+     * colours, shards bristling along it.
      */
     private static Model auroraSpike() {
         Model m = new Model();
@@ -236,14 +236,6 @@ public final class AtlasModels {
                     if (rnd.nextDouble() < 0.6) m.set(x, y - 1, z, shard(rnd.nextInt(5), Direction.DOWN));
                     break;
                 }
-            }
-        }
-        // veils of light hanging from the bed
-        for (int[] at : new int[][] {{6, 2}, {-6, -1}, {2, 6}, {-3, -6}, {5, -5}}) {
-            int len = 5 + rnd.nextInt(7), col = rnd.nextInt(5);
-            for (int k = 1; k <= len; k++) {
-                BlockState veil = ModBlocks.AURORA_VEIL[col].get().defaultBlockState().setValue(GlowwormSilkBlock.TIP, k == len);
-                if (!m.has(at[0], top - k, at[1])) m.set(at[0], top - k, at[1], veil);
             }
         }
         return m;

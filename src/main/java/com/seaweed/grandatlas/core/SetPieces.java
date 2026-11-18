@@ -907,21 +907,6 @@ public final class SetPieces {
         return new double[] {s.pX + s.swayA * Math.sin(t + s.swayP), s.pZ + s.swayA * Math.sin(t * 0.77 + s.swayQ)};
     }
 
-    /** An aurora veil starts under the hanging lake here: its length in blocks, or 0. Curtains run in thin waving ribbons. */
-    public int veilLength(int x, int z) {
-        Col c = column(x, z);
-        Site v = null;
-        for (Site s : c.sites) if (s.kind == VAULT) v = s;
-        if (v == null || !c.vLake) return 0;
-        double along = (x - v.x) * Math.cos(v.bandA + 0.3) + (z - v.z) * Math.sin(v.bandA + 0.3);
-        double across = (x - v.x) * -Math.sin(v.bandA + 0.3) + (z - v.z) * Math.cos(v.bandA + 0.3);
-        double w = across / 11.0 + 2.2 * Fractal.fbm(GradientNoise.fork(v.h, 60), along / 45.0, across / 45.0, 2);
-        double edge = Math.abs(w - Math.rint(w));
-        if (edge > 0.09) return 0;
-        double len = 3 + 11 * (0.5 + 0.5 * Fractal.fbm(GradientNoise.fork(v.h, 61), x / 14.0, z / 14.0, 2)) * (1 - edge / 0.09);
-        return (int) len;
-    }
-
     /** Which aurora colour a lake-bed block takes (0 green .. 4 rose): ribbons that wave across the lake. */
     public int auroraBand(int x, int z) {
         Col c = column(x, z);

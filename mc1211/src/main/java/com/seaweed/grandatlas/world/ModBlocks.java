@@ -81,8 +81,6 @@ public final class ModBlocks {
     public static final DeferredBlock<Block>[] AURORA_CRYSTAL = new DeferredBlock[AURORA_COLOURS.length];
     @SuppressWarnings("unchecked")
     public static final DeferredBlock<AmethystClusterBlock>[] AURORA_SHARD = new DeferredBlock[AURORA_COLOURS.length];
-    @SuppressWarnings("unchecked")
-    public static final DeferredBlock<AuroraVeilBlock>[] AURORA_VEIL = new DeferredBlock[AURORA_COLOURS.length];
     /** What an aurora crystal drops when mined without Silk Touch: the crystal broken into shards. */
     @SuppressWarnings("unchecked")
     public static final DeferredBlock<Block>[] SHATTERED_AURORA = new DeferredBlock[AURORA_COLOURS.length];
@@ -96,9 +94,6 @@ public final class ModBlocks {
             SHATTERED_AURORA[i] = BLOCKS.registerBlock("shattered_aurora_crystal_" + AURORA_COLOURS[i], Block::new,
                     BlockBehaviour.Properties.of().mapColor(map).instrument(NoteBlockInstrument.CHIME)
                             .strength(1.2F).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).lightLevel(s -> 8));
-            AURORA_VEIL[i] = BLOCKS.registerBlock("aurora_veil_" + AURORA_COLOURS[i], AuroraVeilBlock::new,
-                    BlockBehaviour.Properties.of().mapColor(map).replaceable().noCollission().noOcclusion().instabreak()
-                            .sound(SoundType.AMETHYST_CLUSTER).lightLevel(s -> 7).pushReaction(PushReaction.DESTROY));
             AURORA_SHARD[i] = BLOCKS.registerBlock("aurora_shard_" + AURORA_COLOURS[i], p -> new AmethystClusterBlock(7.0F, 3.0F, p),
                     BlockBehaviour.Properties.of().mapColor(map).forceSolidOn().noOcclusion()
                             .sound(SoundType.AMETHYST_CLUSTER).strength(1.5F).lightLevel(s -> 7).pushReaction(PushReaction.DESTROY));
@@ -112,7 +107,6 @@ public final class ModBlocks {
             list.add(AURORA_CRYSTAL[i]);
             list.add(SHATTERED_AURORA[i]);
             list.add(AURORA_SHARD[i]);
-            list.add(AURORA_VEIL[i]);
         }
         return list;
     }

@@ -18,6 +18,17 @@
     "grandatlas:river",
     "grandatlas:salt_marsh",
     "grandatlas:pebble_beach",
-    "grandatlas:crater_lake"
+    "grandatlas:crater_lake",
+    "grandatlas:misty_peaks",
+    "grandatlas:cloud_forest",
+    "grandatlas:volcanic_wastes",
+    "grandatlas:volcano",
+    "grandatlas:silverwood",
+    "grandatlas:glimmer_vale",
+    "grandatlas:glimmer_river",
+    "grandatlas:sky_garden",
+    "grandatlas:tepui_summit",
+    "grandatlas:rainbow_mountains",
+    "grandatlas:spotted_lake"
   ]
 }

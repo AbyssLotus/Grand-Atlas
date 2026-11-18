@@ -94,6 +94,16 @@ public record FallDetail() implements AtlasFeature {
                 if (near.spill() || !Double.isNaN(near.water()) && c.water() - near.water() > 3) continue;
                 if (drop < 1.2 || roll(x, 0, z, 11) > 0.035 * Math.min(2, drop / 2)) continue;
                 double r = 1.1 + 1.3 * roll(x, 1, z, 12);
+                // Only where the water runs past it on both sides: in a narrow stream a boulder filled the
+                // channel from bank to bank and dammed it (the user: "rocks block flow").
+                int ir0 = (int) Math.ceil(r);
+                double px = -c.flowZ() / fl, pz = c.flowX() / fl;
+                boolean room = true;
+                for (int side = -1; side <= 1 && room; side += 2) {
+                    ColumnSample beside = core.column(x + (int) Math.round(side * (ir0 + 2) * px), z + (int) Math.round(side * (ir0 + 2) * pz));
+                    room = !Double.isNaN(beside.water()) && beside.water() > beside.height() + 0.5;
+                }
+                if (!room) continue;
                 double top = c.water() + 0.4 + 1.2 * roll(x, 2, z, 13), bottom = c.height() - 1;
                 double cy = Math.max(bottom + r * 0.6, top - r);
                 boolean mossy = c.temperature() > -0.3 && c.humidity() > -0.2;

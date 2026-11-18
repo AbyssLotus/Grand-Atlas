@@ -45,6 +45,21 @@
       {
         "model": "grandatlas:block/shattered_aurora_crystal_rose_2",
         "y": 270
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_rose_3"
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_rose_3",
+        "y": 90
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_rose_3",
+        "y": 180
+      },
+      {
+        "model": "grandatlas:block/shattered_aurora_crystal_rose_3",
+        "y": 270
       }
     ]
   }

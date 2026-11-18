@@ -47,7 +47,6 @@ FAMILIES = [
     ("Aurora crystal blocks", lambda s: s.startswith("aurora_crystal_"), "Aurora crystal block (Aurora Vaults, crystal gardens). _1/_2 are random variants."),
     ("Shattered aurora crystal", lambda s: s.startswith("shattered_aurora_crystal_"), "Shattered aurora crystal: the crazed skin near a spire's tip, drops shards."),
     ("Aurora shards", lambda s: s.startswith("aurora_shard_"), "Aurora shard: the small crystal cluster (cross model, like amethyst clusters)."),
-    ("Aurora veils", lambda s: s.startswith("aurora_veil_"), "Aurora veil: the hanging glowing curtain; _tip is its bottom end."),
     ("Amber sap", lambda s: s.startswith("amber_sap"), "Amber sap: glowing sap veining the Worldroot."),
     ("Cave blocks", lambda s: s.startswith(("abyssal_sand", "selenite_block", "glowcap_block", "cinder_moss", "hoarfrost")),
      "Cave biome ground and blocks."),

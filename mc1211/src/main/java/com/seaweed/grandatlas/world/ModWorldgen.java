@@ -56,6 +56,7 @@ public final class ModWorldgen {
         FEATURE_TYPES.register("perched_water", () -> AtlasFeature.adapt(new PerchedWater()));
         FEATURE_TYPES.register("micro_detail", () -> AtlasFeature.adapt(new MicroDetail()));
         FEATURE_TYPES.register("fall_detail", () -> AtlasFeature.adapt(new FallDetail()));
+        FEATURE_TYPES.register("fall_clear", () -> AtlasFeature.adapt(new FallClear()));
         FEATURE_TYPES.register("floater_cleanup", () -> AtlasFeature.adapt(new FloaterCleanup()));
         FEATURE_TYPES.register("steep_rock", () -> AtlasFeature.adapt(new SteepRock()));
         FEATURE_TYPES.register("country_detail", () -> AtlasFeature.adapt(new CountryDetail()));

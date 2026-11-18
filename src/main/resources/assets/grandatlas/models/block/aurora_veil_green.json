@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cross",
-  "textures": {
-    "cross": "grandatlas:block/aurora_veil_green_tip"
-  }
-}

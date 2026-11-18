@@ -49,6 +49,7 @@ public final class ModWorldgen {
         FEATURE_TYPES.register("perched_water", () -> PerchedWater.CODEC);
         FEATURE_TYPES.register("micro_detail", () -> MicroDetail.CODEC);
         FEATURE_TYPES.register("fall_detail", () -> FallDetail.CODEC);
+        FEATURE_TYPES.register("fall_clear", () -> FallClear.CODEC);
         FEATURE_TYPES.register("floater_cleanup", () -> FloaterCleanup.CODEC);
         FEATURE_TYPES.register("steep_rock", () -> SteepRock.CODEC);
         FEATURE_TYPES.register("country_detail", () -> CountryDetail.CODEC);
