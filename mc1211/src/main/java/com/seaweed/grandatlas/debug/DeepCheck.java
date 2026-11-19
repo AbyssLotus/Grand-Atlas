@@ -36,6 +36,7 @@ public final class DeepCheck {
     /** The spiral galleries (R7) checked: {x, top y, z, bottom y, radius}. */
     private static List<double[]> spirals = new ArrayList<>();
     private static final List<long[]> forced = new ArrayList<>();
+    private static int[] mountain;
     /** Chunks still to force: one a tick, as forcing generates the chunk there and then (the watchdog stopped a whole batch). */
     private static final java.util.ArrayDeque<long[]> queue = new java.util.ArrayDeque<>();
     private static int t, loadedAt = -1;
@@ -50,7 +51,7 @@ public final class DeepCheck {
             onDone.run();
             return;
         }
-        String[] at = System.getProperty("grandatlas.deepAt", "-78000,-48000").split(",");
+        String[] at = System.getProperty("grandatlas.deepAt", "88000,-90001").split(",");
         double cx = Double.parseDouble(at[0]), cz = Double.parseDouble(at[1]);
         List<double[]> all = new ArrayList<>();
         core.deep().falls(cx - 1500, cz - 1500, cx + 1500, cz + 1500, all);
@@ -72,6 +73,24 @@ public final class DeepCheck {
                     queue.add(new long[] {fx + dx, fz + dz});
                     forced.add(new long[] {fx + dx, fz + dz});
                 }
+            }
+        }
+        // A mountain nearby (ground over y 250), for the upper caves' andesite, diorite and granite.
+        mountain = null;
+        search:
+        for (int ring = 0; ring < 30; ring++) {
+            for (int k = 0; k < Math.max(1, ring * 8); k++) {
+                double a = k * 2 * Math.PI / Math.max(1, ring * 8), mx = cx + Math.cos(a) * ring * 128, mz = cz + Math.sin(a) * ring * 128;
+                if (core.column((int) mx, (int) mz).height() > 250) {
+                    mountain = new int[] {(int) mx >> 4, (int) mz >> 4};
+                    break search;
+                }
+            }
+        }
+        if (mountain != null) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+                queue.add(new long[] {mountain[0] + dx, mountain[1] + dz});
+                forced.add(new long[] {mountain[0] + dx, mountain[1] + dz});
             }
         }
         // R7: the two nearest spiral galleries, their whole drum loaded, walked top to bottom in the world.
@@ -100,6 +119,41 @@ public final class DeepCheck {
     /** The upper caves' rock (chalk, clay, soil): the wall blocks round a few passages in those regions near the forced chunks. */
     private static String rockCheck(ServerLevel level, AtlasCore core) {
         StringBuilder sb = new StringBuilder("upper cave rock:");
+        // andesite, diorite and granite above y 60 (in the rock and showing on walls)
+        int[] inRock = new int[3], shown = new int[3];
+        String[] names = {"andesite", "diorite", "granite"};
+        for (long[] c : forced) {
+            if (!level.getChunkSource().hasChunk((int) c[0], (int) c[1])) continue;
+            if (mountain == null || Math.abs(c[0] - mountain[0]) > 1 || Math.abs(c[1] - mountain[1]) > 1) continue; // the mountain's chunks only
+            for (int x = (int) c[0] * 16; x < (int) c[0] * 16 + 16; x++) {
+                for (int z = (int) c[1] * 16; z < (int) c[1] * 16 + 16; z++) {
+                    for (int y = 60; y < 700; y++) {
+                        String id = BuiltInRegistries.BLOCK.getKey(level.getBlockState(new BlockPos(x, y, z)).getBlock()).getPath();
+                        for (int k = 0; k < 3; k++) {
+                            if (!id.equals(names[k])) continue;
+                            inRock[k]++;
+                            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+                                if (level.getBlockState(new BlockPos(x, y, z).relative(d)).isAir()) {
+                                    shown[k]++;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        sb.append(mountain == null ? " (no mountain nearby)" : String.format(" mountain at chunk %d %d,", mountain[0], mountain[1]));
+        sb.append(String.format(" above y 60: andesite %d (%d showing), diorite %d (%d), granite %d (%d)", inRock[0], shown[0], inRock[1], shown[1], inRock[2], shown[2]));
+        // the locate command's cave targets, from the first checked chunk
+        if (!forced.isEmpty()) {
+            int lx = (int) forced.get(0)[0] * 16, lz = (int) forced.get(0)[1] * 16;
+            for (String id : new java.util.TreeSet<>(CaveLocate.IDS)) {
+                long t0 = System.nanoTime();
+                String found = CaveLocate.find(core, id, lx, lz);
+                sb.append(String.format("%n  locate %s: %s (%d ms)", id, found == null ? "NOTHING FOUND" : found, (System.nanoTime() - t0) / 1_000_000));
+            }
+        }
         int done = 0;
         for (long[] c : forced) {
             if (done >= 30) break;

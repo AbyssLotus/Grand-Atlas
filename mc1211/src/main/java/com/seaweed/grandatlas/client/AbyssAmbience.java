@@ -51,26 +51,33 @@ public final class AbyssAmbience {
             sampleIn = 40;
         }
         // particles: a few a tick at most, round the player
-        int tries = R.nextFloat() < s ? 2 : 0;
+        // (full-bright kinds where they'd otherwise vanish in the dark: the user saw only the sparkles, 2026-11-19)
+        int tries = R.nextFloat() < s ? 3 : 0;
         for (int i = 0; i < tries; i++) {
             double px = mc.player.getX() + (R.nextDouble() - 0.5) * 24, py = y + (R.nextDouble() - 0.4) * 12, pz = mc.player.getZ() + (R.nextDouble() - 0.5) * 24;
             BlockPos bp = BlockPos.containing(px, py, pz);
             if (!mc.level.getBlockState(bp).isAir()) continue;
             switch (air) {
-                case AWE -> { if (R.nextInt(6) == 0) mote(mc, ParticleTypes.END_ROD, px, py, pz, 0.004); }
-                case FEAR -> mote(mc, ParticleTypes.WHITE_ASH, px, py, pz, 0);
-                case COZY -> { if (R.nextInt(3) == 0) mc.level.addParticle(ParticleTypes.SMALL_FLAME, px, py, pz, 0, 0.01 + R.nextDouble() * 0.02, 0); }
-                case CLEVER -> { if (R.nextInt(5) == 0) mote(mc, ParticleTypes.WAX_OFF, px, py, pz, 0.01); }
+                case AWE -> { if (R.nextInt(4) == 0) mote(mc, R.nextInt(3) == 0 ? ParticleTypes.GLOW : ParticleTypes.END_ROD, px, py, pz, 0.004); }
+                case FEAR -> {
+                    if (R.nextInt(3) == 0) mc.level.addParticle(ParticleTypes.FALLING_OBSIDIAN_TEAR, px, py, pz, 0, 0, 0);
+                    else mote(mc, ParticleTypes.WHITE_ASH, px, py, pz, 0);
+                }
+                case COZY -> {
+                    if (R.nextInt(2) == 0) mc.level.addParticle(ParticleTypes.SMALL_FLAME, px, py, pz, 0, 0.01 + R.nextDouble() * 0.02, 0);
+                    else if (R.nextInt(12) == 0) mc.level.addParticle(ParticleTypes.LAVA, px, py, pz, 0, 0, 0);
+                }
+                case CLEVER -> { if (R.nextInt(3) == 0) mote(mc, ParticleTypes.ELECTRIC_SPARK, px, py, pz, 0.02); }
                 case HORROR -> {
                     BlockState under = mc.level.getBlockState(bp.below());
-                    if (under.isSolid() && R.nextInt(4) == 0) mc.level.addParticle(ParticleTypes.SOUL, px, bp.getY() + 0.1, pz, 0, 0.02 + R.nextDouble() * 0.02, 0);
-                    else if (R.nextInt(3) == 0) mote(mc, ParticleTypes.ASH, px, py, pz, 0);
+                    if (under.isSolid() && R.nextInt(2) == 0) mc.level.addParticle(ParticleTypes.SOUL, px, bp.getY() + 0.1, pz, 0, 0.02 + R.nextDouble() * 0.02, 0);
+                    else if (R.nextInt(3) == 0) mc.level.addParticle(ParticleTypes.SCULK_SOUL, px, py, pz, 0, 0.01, 0);
                 }
             }
         }
         // a sound now and then, off in the dark
         if (--nextSound > 0) return;
-        nextSound = 260 + R.nextInt(520);
+        nextSound = 160 + R.nextInt(240); // every 8-20 s (was 13-39 s: heard once in a whole visit, 2026-11-19)
         String id = switch (air) {
             case AWE -> "block.amethyst_block.chime";
             case FEAR -> "ambient.basalt_deltas.additions";
@@ -78,9 +85,9 @@ public final class AbyssAmbience {
             case CLEVER -> "ambient.warped_forest.additions";
             case HORROR -> R.nextInt(8) == 0 ? "entity.warden.heartbeat" : "ambient.soul_sand_valley.additions";
         };
-        double a = R.nextDouble() * Math.PI * 2, d = 8 + R.nextDouble() * 10;
+        double a = R.nextDouble() * Math.PI * 2, d = 5 + R.nextDouble() * 7;
         mc.getSoundManager().play(new SimpleSoundInstance(ResourceLocation.withDefaultNamespace(id), SoundSource.AMBIENT,
-                (float) (0.35 + 0.3 * s), 0.55f + R.nextFloat() * 0.25f, R, false, 0, SoundInstance.Attenuation.LINEAR,
+                (float) (0.7 + 0.4 * s), 0.55f + R.nextFloat() * 0.25f, R, false, 0, SoundInstance.Attenuation.LINEAR,
                 mc.player.getX() + Math.cos(a) * d, y + (R.nextDouble() - 0.3) * 6, mc.player.getZ() + Math.sin(a) * d, false));
     }
 

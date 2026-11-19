@@ -1149,13 +1149,14 @@ def respread(jar):
         mods[0][key] = new
         write(f"data/minecraft/worldgen/placed_feature/{name}.json", f)
     # Andesite, diorite and granite in the mountains too: vanilla's upper blobs (one chunk in six, y 64-128)
-    # spread over Grand Atlas's tall ground, y 64-640, two a chunk. Most caves lie outside vanilla's band,
+    # spread over Grand Atlas's tall ground, y 64-640. Most caves lie outside vanilla's band,
     # so the user never saw andesite (2026-11-18).
     for rock in ("andesite", "diorite", "granite"):
         f = placed(f"ore_{rock}_upper")
         rf = [m for m in f["placement"] if m["type"] == "minecraft:rarity_filter"]
         assert rf and rf[0]["chance"] == 6, f
-        f["placement"] = [{"type": "minecraft:count", "count": 2} if m is rf[0] else m for m in f["placement"]]
+        # 16 a chunk: about vanilla's lower-band density (2 per 60 levels); 2 a chunk was too sparse to meet a cave (2026-11-19)
+        f["placement"] = [{"type": "minecraft:count", "count": 16} if m is rf[0] else m for m in f["placement"]]
         height_mod(f)["height"] = U(64, 640)
         write(f"data/minecraft/worldgen/placed_feature/ore_{rock}_upper.json", f)
     # Deeper is richer, as in Terraria (the user, 2026-11-18: "more danger but also more loot"): extra ore

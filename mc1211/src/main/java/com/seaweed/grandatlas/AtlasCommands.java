@@ -56,7 +56,8 @@ public final class AtlasCommands {
                                                     java.util.Arrays.stream(MesoKind.values()).map(MesoKind::id),
                                                     com.seaweed.grandatlas.core.world.WorldField.ISLAND_SEAS.stream(),
                                                     java.util.stream.Stream.of("karst", "swallet", "worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave", "aurora_vault", "aurora_well", "worldroot", "titan_skull", "sky_isles"),
-                                                    com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.stream()).flatMap(s -> s), builder);
+                                                    com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.stream(),
+                                                    com.seaweed.grandatlas.debug.CaveLocate.IDS.stream().sorted()).flatMap(s -> s), builder);
                                 })
                                 .executes(ctx -> locate(ctx.getSource(), StringArgumentType.getString(ctx, "landform"))))));
     }
@@ -116,6 +117,15 @@ public final class AtlasCommands {
         AtlasCore core = coreOrFail(source);
         if (core == null) return 0;
         BlockPos pos = BlockPos.containing(source.getPosition());
+        if (com.seaweed.grandatlas.debug.CaveLocate.IDS.contains(id)) {
+            String found = com.seaweed.grandatlas.debug.CaveLocate.find(core, id, pos.getX(), pos.getZ());
+            if (found == null) {
+                source.sendFailure(Component.literal("No " + id.replace('_', ' ') + " found nearby."));
+                return 0;
+            }
+            located(source, found);
+            return 1;
+        }
         if (com.seaweed.grandatlas.world.AtlasAssets.LOCATABLE.contains(id)) {
             int[] w = com.seaweed.grandatlas.world.AtlasAssets.nearest(core, id, pos.getX(), pos.getZ());
             if (w == null) {
