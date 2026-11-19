@@ -24,6 +24,16 @@ public class GrandAtlas {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.server.ServerStartedEvent.class,
                     e -> com.seaweed.grandatlas.debug.CaveSurvey.start(e.getServer(), line -> {}, () -> e.getServer().halt(false)));
         }
+        // The caveShape dev run: the shape of the open space, vanilla's and ours (debug/CaveShape), then stop.
+        if (Boolean.getBoolean("grandatlas.caveShape")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.server.ServerStartedEvent.class,
+                    e -> com.seaweed.grandatlas.debug.CaveShape.start(e.getServer(), () -> e.getServer().halt(false)));
+        }
+        // The deepCheck dev run: generate falls of the deep network, let fluids run, report, stop (debug/DeepCheck).
+        if (Boolean.getBoolean("grandatlas.deepCheck")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.server.ServerStartedEvent.class,
+                    e -> com.seaweed.grandatlas.debug.DeepCheck.start(e.getServer(), () -> e.getServer().halt(false)));
+        }
         ModWorldgen.DENSITY_FUNCTION_TYPES.register(modBus);
         ModWorldgen.BIOME_SOURCES.register(modBus);
         ModWorldgen.FEATURE_TYPES.register(modBus);

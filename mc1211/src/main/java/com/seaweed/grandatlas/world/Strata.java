@@ -69,7 +69,8 @@ public enum Strata implements SurfaceRules.RuleSource {
     private static final BlockState SCULK = Blocks.SCULK.defaultBlockState();
     private static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
     private static final BlockState OBSIDIAN = Blocks.OBSIDIAN.defaultBlockState();
-    private static final BlockState CRYING_OBSIDIAN = Blocks.CRYING_OBSIDIAN.defaultBlockState();
+    /** Violet cracks that give no light (crying obsidian lit the awe abyss up: the user, 2026-11-18). */
+    private static final BlockState AMETHYST = Blocks.AMETHYST_BLOCK.defaultBlockState();
     private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
     private static final BlockState GILDED = Blocks.GILDED_BLACKSTONE.defaultBlockState();
     private static final BlockState SOUL_SOIL = Blocks.SOUL_SOIL.defaultBlockState();
@@ -126,7 +127,7 @@ public enum Strata implements SurfaceRules.RuleSource {
                 };
             }
             return switch (mood) {
-                case AWE -> crack ? CRYING_OBSIDIAN : n > 0.2 ? OBSIDIAN : BLACKSTONE;     // faint violet cracks
+                case AWE -> crack ? AMETHYST : n > 0.2 ? OBSIDIAN : BLACKSTONE;            // violet cracks, dark till lit
                 case FEAR -> n > 0 ? BASALT_STATE : BLACKSTONE;
                 case COZY -> !floor && crack ? MAGMA : n > 0 ? TUFF_STATE : SMOOTH_BASALT;  // ember seams in the walls
                 case CLEVER -> crack ? GILDED : band(x, y, z, BLACKSTONE, BASALT_STATE, SMOOTH_BASALT); // gold veins

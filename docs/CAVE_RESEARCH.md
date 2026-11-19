@@ -623,6 +623,79 @@ Lumina's minimum light where there's no skylight is `(0.005625 + brightness * 0.
 so it drops to near nothing and block light alone shows the rock. For truly black (all caves, not
 just the deep) the user can set Lumina's Cave Lighting to 0. Not seen in game.
 
+### R4, something every few dozen blocks, 2026-11-18 (test38)
+
+`world/DeepDetail` (feature `grandatlas:deep_detail`, vegetal_decoration, every overworld biome):
+per chunk, points drawn inside the core's passages (6 in the deep, 9 in the abyss) drop to the floor
+and get a vignette by the region's mood, vanilla blocks only:
+
+| Mood | Deep | Abyss |
+|---|---|---|
+| Awe | stalactites over stalagmites, some joined into columns | obsidian spires crying at the tip |
+| Fear | cobwebs in corners; remains (a skull, bones) | remains (wither skulls too); a lone soul lantern on a chain |
+| Cozy | a drip pool under its stalactite; moss nooks with glow lichen and glow berries | a small lava hearth in the floor |
+| Clever | amethyst hollows; a fossil spine and ribs set into the wall | a boulder balanced on a basalt stalk |
+| Horror | sculk round a sensor, now and then a shrieker (can't summon a warden) | bone heaps with skulls; soul fire on soul soil |
+
+Not seen in game yet.
+
+### R4 variety and R5, 2026-11-18 (test40, test41)
+
+**R4, three times the kinds** (the user meant variety, not count; the count is back to 2 a chunk in
+the deep and 3 in the abyss): 47 vignettes, four to six a mood in each band, picked evenly. New ones:
+awe - flowstone curtains, rimstone pools, opened geodes, calcite columns, basalt organ pipes, obsidian
+arches, weeping walls; fear - collapse rubble, a camp gone wrong, hanging chains, an iron-barred cage,
+chained remains, a maw of dripstone teeth; cozy - mushroom groves, a spring seeping from the wall,
+spore-blossom grottos, root curtains, hot springs over magma, warped and crimson gardens, lava
+trickling from the wall; clever - an ore seam, stepping stones, a boulder hung on a chain, a basalt
+causeway, floating stones, a tinted-glass window; horror - sculk veins round a catalyst, hidden
+silverfish stone, a rare spawner den, a candle ritual, wither roses, a giant ribcage.
+
+**R5, vertical drama and fire** (test41):
+- **Falls down tall shafts** (`core/Deep`): up to two a cell, a shaft from a junction down two or three
+  levels (90-165 blocks), likelier and wider in awe (radius 4.5-7), lava mostly in the abyss. Water
+  falls land in a plunge pool (a basin and a bowl, the core's water two blocks deep); lava falls on a
+  floor of magma. `world/DeepDetail` sets an arc of the shaft's wall 6 under the top junction to
+  water or lava, which pours down the wall.
+- **Magma rivers**: in the abyss, wide tubes and canyons of the deep network where a broad noise runs
+  high carry a two-block channel of lava in their floor, so a river runs on through piece after piece.
+- **Hanging forests**: 40% of chunks, in a room 9+ tall, a dense patch of stalactites (cave vines
+  in cozy regions, weeping vines in the abyss's horror).
+
+All bands still over the bar (deep 6.58%, abyss 7.04%); core self-checks pass. Not seen in game.
+
+### R5 checked on a headless server, 2026-11-18 (test42)
+
+`gradlew :mc1211:runDeepCheck` (debug/DeepCheck; the user allowed booting a dev server): finds falls
+on fresh ground (`grandatlas.deepAt`, change it for ground not yet generated), forces the chunks
+round them with non-blocking tickets (`setChunkForced` blocks the server thread, and a cold
+region's first chunk overran the 60 s watchdog), lets fluids run 500 ticks, and writes
+`run/grandatlas/deep_check.txt`: each fall's sources, fluid down the shaft, the shaft's middle
+column block by block, the pool; fluid hanging over air away from falls; the vignettes' blocks.
+
+What it found and what changed:
+- Water falls work: sources in the wall, water down the full shaft, pools of 220-1,190 blocks.
+- No fluid hangs over air anywhere else (0 in every run).
+- Falls below the regional water table (core/Waters) were drowned sumps: now no fall starts within
+  14 of the table, a table between top and foot is the plunge pool, and lava doesn't fall into it.
+- The source finder missed wide or rough shafts and walls wearing the abyss's mood rock (obsidian,
+  sculk, soul soil): it now heads out from the middle to the first wall block of any solid kind.
+- Lava falls flow about a block every 30 ticks, so a 100-block fall takes a few minutes to reach
+  the floor.
+- The vignettes, hanging forests and magma rivers all appear (skulls, campfires, chains, cages,
+  spore blossoms, amethyst, spawners, candles, wither roses, ~1,000 pointed dripstone in 45 chunks).
+
+### Lava curtains, 2026-11-18 (test43)
+
+The user: lava curtains "with a small gap so people can pass through". A new abyss vignette (awe,
+fear and cozy lists): lava pours from the roof straight across the passage (across the way the open
+air runs furthest, wall to wall, 5-20 wide) with a two-block gap in the middle. Each lava column's
+source is a roof block held on every side but its underside; it lands in a one-block trench of still
+lava cut into the floor under it, so the lava doesn't spread into the gap, whose floor stays rock.
+The headless check sees them (lava sources pouring from a roof, 4-28 in 45 chunks). Falls' sources
+now try 6, 9, 12 and 15 under the top junction until one holds (one shaft had a room opening the
+rock at 6); every fall in the last run got its source.
+
 ### Phase C1: speleo-provinces and a connected backbone
 
 - Pick the province per region from the land above (landform, province, climate, karst/sinkhole
@@ -812,3 +885,18 @@ vanilla's caves off.
 - Lava tube features: [USGS Bulletin 1673](https://pubs.usgs.gov/bul/1673/report.pdf);
   [Britannica: volcanic and tectonic caves](https://www.britannica.com/science/cave/Volcanic-and-tectonic-caves).
 - The rest (cave kinds, vadose and phreatic forms, speleothems, life zones) is standard speleology.
+
+## Feedback fixes and the redesign call, 2026-11-18 (test44)
+
+- Chain-hung boulders removed (the user: "look stupid"). Deep clever vignettes are now amethyst,
+  fossil, stepping stones and ore seams.
+- Glow cut outside cozy: the awe abyss's wall cracks are amethyst block (violet, no light) instead
+  of crying obsidian (2,227 blocks per 45 chunks before, 0 after). Spires, arches and the weeping
+  wall are plain obsidian; calcite columns carry dripstone, not glow lichen; amethyst vignettes and
+  geodes grow small and medium buds (light 1-2), not clusters.
+- Ores: DeepCheck now counts ores showing on cave walls. Below -64 they showed 2.4 (deep) and 1.0
+  (abyss) per 1000 wall blocks against 9.5 above. Two causes: the mood skins weren't ore-replaceable
+  (added to deepslate_ore_replaceables) and the M7a re-spread had thinned the deep ores (iron,
+  gold, lapis, redstone counts raised). After: 5.3 deep, 2.9 abyss.
+- New `debug/CaveShape` (`runCaveShape`): the shape spectrum of the open space, vanilla against
+  ours. It confirmed the user's "in-between" complaint; the redesign is in docs/CAVE_REDESIGN.md.

@@ -399,12 +399,13 @@ public final class Solution {
         double y = (a.y + b.y) / 2;
         boolean shallow = gMid - y < 50;
         double len = Math.hypot(a.x - b.x, a.z - b.z);
-        double r = 3.4 + 2.6 * rnd.next();
-        if (y < 0) r *= 1.15;
+        // Heavy-tailed widths (docs/CAVE_REDESIGN.md): mostly modest, a few wide trunks, some tight.
+        double r = Rooms.lognormal(rnd.nextLong(), 0, 3.4, 0.4, 1.4, 8);
+        if (y < 0) r *= 1.1;
         double roll = rnd.next();
         Karst.Style st;
-        if (roll < 0.05 && len < 45) {
-            st = Karst.Style.tube(1.8 + 0.6 * rnd.next(), 0.65, 0.4); // a short crawl
+        if (roll < 0.09 && len < 60) {
+            st = Karst.Style.tube(1.45 + 0.2 * rnd.next(), 0.8, 0.45); // a crawl at crouch height
         } else if (roll < 0.2) {
             // A wide low gallery under a flat bedding-plane roof.
             st = Karst.Style.tube(r * 1.6, 0.5 + 0.12 * rnd.next(), 0.5).bedding(0.55 + 0.2 * rnd.next());
@@ -422,51 +423,23 @@ public final class Solution {
         Karst.walk(out, a.x, a.y, a.z, b.x, b.y, b.z, rnd.nextLong(), st.at(-1), null);
     }
 
-    /** A room at a junction: likelier where three or more passages meet. */
+    /** Rooms the solution caves draw from where three or more passages meet, and elsewhere. */
+    private static final int[] JUNCTION = {Rooms.BREAKDOWN, Rooms.CROSSROADS, Rooms.RAMIFORM, Rooms.PILLARS, Rooms.DOME};
+    private static final int[] ALONG = {Rooms.KEYHOLE, Rooms.GALLERY, Rooms.CANYON, Rooms.RAMIFORM, Rooms.TERRACES, Rooms.BOWL,
+            Rooms.FISSURES, Rooms.FINS, Rooms.AVEN, Rooms.BRIDGE};
+
+    /** A room at a junction (a library room, core/Rooms): likelier where three or more passages meet, bigger there. */
     private void room(List<Passages.Seg> out, Node n, Ground ground, Karst.Rng rnd) {
-        double chance = n.degree >= 3 ? 0.5 : n.degree == 2 ? 0.16 : 0.24;
+        double chance = n.degree >= 3 ? 0.75 : n.degree == 2 ? 0.4 : 0.4;
         if (unit(n.h, 11) >= chance) return;
         double g = ground.at(n.x, n.z)[0];
-        double kind = unit(n.h, 12);
-        double r, vr, roof = 0, pillars = 0;
-        int blobs;
-        if (kind < 0.35) { // a column hall: wide and fairly low, its roof held up on columns
-            r = 13 + 9 * unit(n.h, 13);
-            vr = 0.36 + 0.12 * unit(n.h, 14);
-            roof = 0.75;
-            pillars = 8 + 5 * unit(n.h, 16);
-            blobs = 1;
-        } else if (kind < 0.8) { // a breakdown room: overlapping blobs, the roof fallen to a flat bed
-            r = 8 + 7 * unit(n.h, 13);
-            vr = 0.55 + 0.25 * unit(n.h, 14);
-            roof = 0.5 + 0.2 * unit(n.h, 17);
-            blobs = 2 + (int) (unit(n.h, 15) * 2);
-        } else { // a side chamber
-            r = 6 + 3 * unit(n.h, 13);
-            vr = 0.6 + 0.2 * unit(n.h, 14);
-            blobs = 1;
-        }
-        if (n.y < 0) r *= 1.2;
-        double room = g - ground.roofCover(n.x, n.z) - 1 - n.y;
-        if (r * vr > room) r = room / vr;
-        if (r < 4) return;
-        for (int b = 0; b < blobs; b++) {
-            double rb = b == 0 ? r : r * (0.45 + 0.35 * unit(n.h, 20 + b));
-            double ang = unit(n.h, 24 + b) * 2 * Math.PI, off = b == 0 ? 0 : r * (0.5 + 0.4 * unit(n.h, 28 + b));
-            Passages.Seg s = new Passages.Seg();
-            s.ax = s.bx = n.x + Math.cos(ang) * off;
-            s.az = s.bz = n.z + Math.sin(ang) * off;
-            s.ay = s.by = n.y + rb * vr * 0.35;
-            s.ra = s.rb = rb;
-            s.vr = vr;
-            s.roof = roof;
-            s.pillars = b == 0 ? pillars : 0;
-            s.seed = n.h ^ b;
-            s.ribs = 0.3; // a flat floor across most of the room
-            s.kind = Passages.CHAMBER;
-            s.bounds();
-            out.add(s);
-        }
+        int[] arch = n.degree >= 3 ? JUNCTION : ALONG;
+        int a = arch[(int) (unit(n.h, 12) * arch.length)];
+        double w = Rooms.lognormal(n.h, 13, (n.degree >= 3 ? 24 : 18) * (n.y < 0 ? 1.15 : 1), 0.45, 9, 40);
+        double floorY = n.y - 1.5;
+        double maxH = g - ground.roofCover(n.x, n.z) - 1 - floorY;
+        if (maxH < 5) return;
+        out.add(Passages.Seg.of(Rooms.make(n.h ^ 0x501DL, n.x, floorY, n.z, w, maxH, a)));
     }
 
     /** Avens (chimneys rising from a junction's roof) and pits (shafts dropping from its floor). */

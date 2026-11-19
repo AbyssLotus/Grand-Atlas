@@ -63,6 +63,18 @@ neoForge {
             programArgument '--nogui'
             systemProperty 'grandatlas.caveSurvey', 'true'
         }
+        // The shape of the open space, vanilla's caves against ours, then stops (debug/CaveShape).
+        caveShape {
+            server()
+            programArgument '--nogui'
+            systemProperty 'grandatlas.caveShape', 'true'
+        }
+        // Generates falls of the deep network on fresh ground, lets fluids run, reports, stops (debug/DeepCheck).
+        deepCheck {
+            server()
+            programArgument '--nogui'
+            systemProperty 'grandatlas.deepCheck', 'true'
+        }
         // Loads every mixin target of every mod in run/mods and exits: GrandAtlasClient.audit
         audit {
             client()

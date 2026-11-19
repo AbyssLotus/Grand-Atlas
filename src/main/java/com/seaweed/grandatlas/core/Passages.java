@@ -51,10 +51,10 @@ public final class Passages {
     static final double BORE_CELL = 2800, RIFT_CELL = 1200;
 
     static final int LATTICE = 0, KARST = 1, SOLUTION = 2, DEEP = 3;
-    static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7;
+    static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7, ROOM = 8;
 
     private final AtlasCore core;
-    private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed;
+    private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed, noodleSeed;
     private final ThreadLocal<Caches> caches = ThreadLocal.withInitial(Caches::new);
 
     Passages(AtlasCore core, long seed) {
@@ -66,6 +66,7 @@ public final class Passages {
         roughSeed = GradientNoise.fork(seed, 5);
         boreSeed = GradientNoise.fork(seed, 6);
         riftSeed = GradientNoise.fork(seed, 7);
+        noodleSeed = GradientNoise.fork(seed, 8);
     }
 
     // ---- geometry
@@ -93,6 +94,27 @@ public final class Passages {
         /** A room's pillars: their spacing (0: none), from {@link #seed}. */
         double pillars;
         long seed;
+        /** {@link #ROOM}: the room from the library (core/Rooms). */
+        Rooms.Room room;
+
+        /** A piece holding a library room. */
+        static Seg of(Rooms.Room r) {
+            Seg s = new Seg();
+            s.kind = ROOM;
+            s.room = r;
+            s.ax = s.bx = r.cx;
+            s.az = s.bz = r.cz;
+            s.ay = s.by = r.floorY;
+            s.ra = s.rb = r.reach();
+            s.vr = 1;
+            s.minX = r.minX;
+            s.maxX = r.maxX;
+            s.minY = r.minY;
+            s.maxY = r.maxY;
+            s.minZ = r.minZ;
+            s.maxZ = r.maxZ;
+            return s;
+        }
 
         void bounds() {
             double r = Math.max(Math.max(ra, rb), slotW + Math.abs(slotOff)) + 2;
@@ -132,6 +154,9 @@ public final class Passages {
         int colCount;
         double colLo, colHi;
         double lakeLevel, lakeBed; // a cavern lake over this column (NaN level: none)
+        int noodleHi = Integer.MIN_VALUE; // the highest y noodles may reach here (under the rock cover)
+        double colWaterTop; // the highest water of any watered piece in the column (NaN: none)
+        double sealBelow = Double.NaN; // at a water table's edge: no cave at or under this y (NaN: not an edge)
         // which of the column's first 64 candidates reach each 16-block band of height
         final long[] ybins = new long[(1024 - AtlasCore.MIN_Y) / 16 + 1];
 
@@ -255,22 +280,13 @@ public final class Passages {
             }
             // Chambers: rooms where passages meet, bigger deeper down, squashed by their own amount
             // (vanilla's rooms: 0.1-0.9), some made of two or three overlapping blobs.
-            if (unit(h, 13) < 0.2) {
-                double r = (6 + 9 * unit(h, 14)) * (ay < AtlasCore.ABYSS_TOP ? 1.5 : ay < 0 ? 1.25 : 1);
-                int blobs = unit(h, 18) < 0.4 ? 2 + (int) (unit(h, 19) * 2) : 1;
-                for (int b = 0; b < blobs; b++) {
-                    double rb = b == 0 ? r : r * (0.45 + 0.4 * unit(h, 40 + b));
-                    double ang = unit(h, 44 + b) * 2 * Math.PI, off = b == 0 ? 0 : r * (0.5 + 0.4 * unit(h, 48 + b));
-                    Seg s = new Seg();
-                    s.ax = s.bx = ax + Math.cos(ang) * off;
-                    s.ay = s.by = ay + rb * 0.25 + (b == 0 ? 0 : (unit(h, 52 + b) - 0.5) * r * 0.5);
-                    s.az = s.bz = az + Math.sin(ang) * off;
-                    s.ra = s.rb = rb;
-                    s.vr = 0.35 + 0.45 * unit(h, 15 + b * 3);
-                    s.kind = CHAMBER;
-                    s.bounds();
-                    list.add(s);
-                }
+            if (unit(h, 13) < 0.4) {
+                // A library room (core/Rooms), heavy-tailed in size, bigger deeper down.
+                double w = Rooms.lognormal(h, 14, ay < 0 ? 24 : 20, 0.45, 9, 40);
+                double floorY = ay - 1.5;
+                ColumnSample rc = ay > NO_SURFACE_BELOW ? core.column((int) Math.floor(ax), (int) Math.floor(az)) : null;
+                double maxH = rc == null ? 30 : rc.height() - (rc.isOcean() ? 40 : rc.nearWater() ? 34 : 26) - floorY;
+                if (maxH >= 5) list.add(Seg.of(Rooms.make(h ^ 0x1A77L, ax, floorY, az, w, maxH, -1)));
             }
             // Dead ends: a spur that wanders off and tapers to nothing, like vanilla's tunnels.
             if (unit(h, 31) < 0.3) {
@@ -316,13 +332,15 @@ public final class Passages {
         } else {
             kind = rnd.next() < 0.08 + 0.35 * st ? CANYON : TUBE;
         }
-        double base = depth < AtlasCore.ABYSS_TOP ? 4.5 + 4 * rnd.next() : depth < 0 ? 3.2 + 3.5 * rnd.next() : 2.4 + 2.8 * rnd.next();
+        // Heavy-tailed widths (cave redesign, docs/CAVE_REDESIGN.md): mostly modest, now and then wide,
+        // never all one middling size (they were uniform draws in narrow bands).
+        double base = Rooms.lognormal(h ^ 0x1D7L, 0, depth < AtlasCore.ABYSS_TOP ? 4.2 : depth < 0 ? 3.2 : 2.8, 0.4, 1.4, 9);
         if (rnd.next() < 0.1) base *= 1 + 2 * rnd.next() * rnd.next(); // vanilla's "weird thickness": the odd fat one
-        if (kind == CRAWL) base = 1.7 + 0.8 * rnd.next();
+        if (kind == CRAWL) base = 1.45 + 0.2 * rnd.next(); // crouch height (the user: the smallest passages)
         if (kind == SHAFT) base = Math.max(2.5, base * 0.9);
         if (spur) base *= 0.8;
-        double width = 0.75 + 0.55 * rnd.next();          // per passage, like vanilla's multipliers
-        double vr = kind == CRAWL ? 0.62 : (0.55 + 0.4 * rnd.next()) * (kind == CANYON ? 1.1 : 1);
+        double width = kind == CRAWL ? 1 : 0.85 + 0.3 * rnd.next(); // per passage (the lognormal carries the spread now)
+        double vr = kind == CRAWL ? 0.8 : (0.55 + 0.4 * rnd.next()) * (kind == CANYON ? 1.1 : 1);
         double floor = 0.45 + 0.35 * rnd.next();            // how far down the flat floor sits
         long noise = GradientNoise.fork(h, 77);
         // A bulge or two: a passage swells into a small room somewhere along it.
@@ -374,6 +392,7 @@ public final class Passages {
             double bump = 1 + bulge * Math.exp(-sq((travelled - bulgeAt) / 10));
             double taper = spur ? Math.max(0.25, Math.sin(Math.PI * Math.min(1, travelled / len) * 0.5 + Math.PI * 0.5)) : 1;
             double r = base * width * along * bump * taper;
+            if (kind == CRAWL && !spur) r = Math.max(1.4, r); // stays passable at a crouch
             if (open && last) r *= 1.15;
             Seg s = new Seg();
             s.ax = x;
@@ -623,14 +642,14 @@ public final class Passages {
     public int lowest(int x, int z) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
-        return cc.colCount == 0 ? Integer.MAX_VALUE : (int) Math.floor(cc.colLo);
+        return Math.min(cc.colCount == 0 ? Integer.MAX_VALUE : (int) Math.floor(cc.colLo), NOODLE_LO);
     }
 
     /** The highest y any passage reaches in this column (MIN_VALUE if none). */
     public int highest(int x, int z) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
-        return cc.colCount == 0 ? Integer.MIN_VALUE : (int) Math.ceil(cc.colHi);
+        return Math.max(cc.colCount == 0 ? Integer.MIN_VALUE : (int) Math.ceil(cc.colHi), cc.noodleHi);
     }
 
     // ---- inspection (the debug screen, /grandatlas show caves)
@@ -663,6 +682,7 @@ public final class Passages {
             case CHAMBER -> "chamber";
             case RIFT -> "rift";
             case GREAT_RIFT -> "great rift";
+            case ROOM -> "room";
             default -> "none";
         };
     }
@@ -773,13 +793,24 @@ public final class Passages {
     public double carve(ColumnSample c, int x, int y, int z) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
-        if (cc.colCount == 0 || y < cc.colLo || y > cc.colHi) return Caves.NONE;
         // No passage through a cavern lake's bed (8 blocks of it kept) or its water.
         if (!Double.isNaN(cc.lakeLevel) && y >= cc.lakeBed - 8 && y <= cc.lakeLevel + 1) return Caves.NONE;
+        if (!Double.isNaN(cc.sealBelow) && y <= cc.sealBelow + 1) return Caves.NONE;
         double cover = c.height() - y;
         boolean wet = c.nearWater() || c.isOcean() || !Double.isNaN(c.water());
         boolean shallow = cover < (wet ? 26 : 10);
-        double best = Caves.NONE;
+        double best = shallow ? Caves.NONE : noodle(x, y, z);
+        if (best < 0.5) {
+            // Never under a pool or flooded passage: a noodle beneath its floor hung the water over air.
+            for (int i = 0; i < cc.colCount; i++) {
+                Seg s = cc.col[i];
+                if (!Double.isNaN(s.water) && y <= s.water + 1 && y >= s.minY - 8) {
+                    best = Caves.NONE;
+                    break;
+                }
+            }
+        }
+        if (cc.colCount == 0 || y < cc.colLo || y > cc.colHi) return best;
         double bx = x + 0.5, by = y + 0.5, bz = z + 0.5;
         boolean indexed = cc.colCount <= 64;
         long mask = indexed ? cc.ybins[Math.max(0, Math.min(cc.ybins.length - 1, (y - AtlasCore.MIN_Y) >> 4))] : 0;
@@ -791,6 +822,17 @@ public final class Passages {
             // (A mouth is open to the surface, but never in a column at or beside water: its width
             // could reach one from a dry anchor, and the river above ran into the cave.)
             if (shallow && (!s.open || wet && !s.wetOk)) continue;
+            // A dry piece never breaks the wall of a pool or flooded passage below its water (a room or a
+            // wide passage cutting one poured it out over the air: DeepCheck's hanging water, test45-47).
+            // Karst's own pieces are exempt: its rivers run on into dry passages by design.
+            boolean guard = !Double.isNaN(cc.colWaterTop) && by <= cc.colWaterTop + 1 && Double.isNaN(s.water) && s.province != KARST;
+            if (s.kind == ROOM) {
+                double rv = 0.5 * s.room.sdf(bx, by, bz); // (carve values are about half a block's distance)
+                if (rv < best && guard && poolShell(cc, bx, by, bz)) continue;
+                best = Math.min(best, rv);
+                continue;
+            }
+            if (guard && poolShell(cc, bx, by, bz)) continue;
             double q = shape(s, bx, by, bz);
             if (q < 1.4) {
                 if (s.province >= SOLUTION) {
@@ -812,6 +854,44 @@ public final class Passages {
         return best;
     }
 
+    // ---- noodles (cave redesign: vanilla's thinnest caves, everywhere; the user, 2026-11-18)
+
+    /** Dev: {@code -Dgrandatlas.noNoodles=true} leaves them out. */
+    static final boolean NOODLES = !Boolean.getBoolean("grandatlas.noNoodles");
+    static final int NOODLE_LO = AtlasCore.MIN_Y + 12;
+
+    /**
+     * Noodles: thin winding tunnels 1-3 across, where two smooth noises both cross zero (vanilla's
+     * noodle caves work the same way), switched on and off by region and thickening a little where
+     * the switch is strong. Most of the world has them; nothing else makes the small end of the
+     * spectrum (docs/CAVE_REDESIGN.md: vanilla's middle points thinner than r 1.5 were 63%, ours 11%).
+     */
+    double noodle(int x, int y, int z) {
+        if (!NOODLES || y < NOODLE_LO) return Caves.NONE;
+        double gate = GradientNoise.noise3(noodleSeed, x / 260.0, y / 140.0, z / 260.0);
+        if (gate < -0.2) return Caves.NONE;
+        double a = GradientNoise.noise3(noodleSeed ^ 0xA1L, x / 44.0, y / 30.0, z / 44.0);
+        if (Math.abs(a) > 0.1) return Caves.NONE;
+        double b = GradientNoise.noise3(noodleSeed ^ 0xB2L, x / 44.0, y / 30.0, z / 44.0);
+        double t = 0.035 + 0.03 * smoothstep(-0.2, 0.4, gate);
+        return (Math.max(Math.abs(a), Math.abs(b)) - t) * 10;
+    }
+
+    /**
+     * In the rock shell (about two blocks) round a watered piece, at or under its water: where a dry
+     * room cut a plunge pool's wall, the pool poured into the room (DeepCheck's hanging water, test45).
+     */
+    private static boolean poolShell(Caches cc, double x, double y, double z) {
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (s.kind == ROOM || Double.isNaN(s.water) || y > s.water + 1 || y < s.minY - 8) continue;
+            double q = shape(s, x, y, z);
+            double scale = Math.max(1.5, Math.max(s.ra, s.rb) * Math.min(1, s.vr));
+            if (q >= 1 && q < 1 + 2.5 / scale) return true;
+        }
+        return false;
+    }
+
     /** Normalised distance from a segment's surface (1 on it, under 1 inside). */
     private static double shape(Seg s, double x, double y, double z) {
         double ex = s.bx - s.ax, ey = s.by - s.ay, ez = s.bz - s.az;
@@ -819,6 +899,7 @@ public final class Passages {
         double t = l2 < 1e-6 ? 0 : Math.max(0, Math.min(1, ((x - s.ax) * ex + (y - s.ay) * ey + (z - s.az) * ez) / l2));
         double ox = x - (s.ax + ex * t), oy = y - (s.ay + ey * t), oz = z - (s.az + ez * t);
         double r = s.ra + (s.rb - s.ra) * t;
+        if (s.kind == ROOM) return 1 + s.room.sdf(x, y, z) / 4;
         switch (s.kind) {
             case BORE -> {
                 // Round, with faint rings like a worm's segments.
@@ -917,6 +998,10 @@ public final class Passages {
         cc.colCount = 0;
         cc.lakeLevel = core.megaCaverns().water(x, z);
         cc.lakeBed = Double.isNaN(cc.lakeLevel) ? 0 : core.megaCaverns().floor(x, z);
+        if (NOODLES) {
+            ColumnSample nc = core.column(x, z);
+            cc.noodleHi = (int) Math.floor(nc.height() - ((nc.nearWater() || nc.isOcean() || !Double.isNaN(nc.water())) ? 26 : 10));
+        }
         cc.colLo = Double.MAX_VALUE;
         cc.colHi = -Double.MAX_VALUE;
         double px = x + 0.5, pz = z + 0.5;
@@ -930,6 +1015,26 @@ public final class Passages {
             cc.col[cc.colCount++] = s;
             cc.colLo = Math.min(cc.colLo, s.minY);
             cc.colHi = Math.max(cc.colHi, s.maxY);
+        }
+        // A water table's edge (core/Waters): caves stop at a plug of rock under the water instead of
+        // pouring it out at every level they cross (the redesign's noodles and rooms crossed the edges
+        // everywhere: 83-191 hanging sources a DeepCheck run, 2026-11-18).
+        cc.sealBelow = Double.NaN;
+        double tHere = core.waters().table(x, z);
+        if (!Double.isNaN(tHere)) {
+            int[][] off = {{3, 0}, {-3, 0}, {0, 3}, {0, -3}};
+            for (int[] o : off) {
+                double t = core.waters().table(x + o[0], z + o[1]);
+                if (Double.isNaN(t) || t < tHere - 0.5) {
+                    cc.sealBelow = tHere;
+                    break;
+                }
+            }
+        }
+        cc.colWaterTop = Double.NaN;
+        for (int i = 0; i < cc.colCount; i++) {
+            double w = cc.col[i].water;
+            if (!Double.isNaN(w) && !(w <= cc.colWaterTop)) cc.colWaterTop = w;
         }
         java.util.Arrays.fill(cc.ybins, 0L);
         for (int i = 0; i < Math.min(64, cc.colCount); i++) {

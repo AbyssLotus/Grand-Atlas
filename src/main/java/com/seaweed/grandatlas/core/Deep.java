@@ -47,6 +47,8 @@ public final class Deep {
     static final class Cell {
         final List<Passages.Seg> segs = new ArrayList<>();
         final HashMap<Long, List<Passages.Seg>> bins = new HashMap<>();
+        /** Falls down tall shafts (R5): {x, y of the top junction, z, 1 lava / 0 water, shaft radius}. */
+        final List<double[]> falls = new ArrayList<>();
         double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
     }
 
@@ -90,6 +92,18 @@ public final class Deep {
         return prev != null ? prev : c;
     }
 
+    /** The falls (R5) whose shaft tops lie in the box: {x, top y, z, lava ? 1 : 0, radius}. */
+    public void falls(double x0, double z0, double x1, double z1, List<double[]> out) {
+        if (OFF) return;
+        for (int cj = cellOf(z0); cj <= cellOf(z1); cj++) {
+            for (int ci = cellOf(x0); ci <= cellOf(x1); ci++) {
+                for (double[] f : cell(ci, cj).falls) {
+                    if (f[0] >= x0 && f[0] < x1 && f[2] >= z0 && f[2] < z1) out.add(f);
+                }
+            }
+        }
+    }
+
     /** Every deep piece whose bounds meet the box, added once each. */
     void collect(double x0, double z0, double x1, double z1, List<Passages.Seg> out) {
         if (OFF) return;
@@ -122,8 +136,10 @@ public final class Deep {
         int parent = -1, degree;
         final long h;
         Moods.Mood mood;
-        int room = -1;      // the room planned here: HALL, BREAKDOWN, DOME, LOW, or -1
+        int room = -1;      // the room planned here: an archetype of core/Rooms, or -1
+        double roomW;       // its width (blocks)
         boolean squeeze;    // a tight passage leads into its room
+        int desc;           // junctions upstream of it in the level's tree (passages grow downstream)
 
         Node(double x, double y, double z, boolean gate, long h) {
             this.x = x;
@@ -193,7 +209,11 @@ public final class Deep {
                     nodes.get(best).degree++;
                 }
             }
-            for (Node n : nodes) if (!n.gate) plan(n);
+            // Flow: each junction counts those that drain through it, so passages grow toward the trunk.
+            for (int a = 0; a < nodes.size(); a++) {
+                for (int q = nodes.get(a).parent, guard = 0; q >= 0 && guard < nodes.size(); q = nodes.get(q).parent, guard++) nodes.get(q).desc++;
+            }
+            for (Node n : nodes) if (!n.gate) plan(n, k);
             for (Node n : nodes) {
                 if (n.parent < 0) continue;
                 Node p = nodes.get(n.parent);
@@ -234,6 +254,57 @@ public final class Deep {
                 Karst.Style st = unit(a.h, 41) < 0.5 ? Karst.Style.canyon(3.2 + 2 * unit(a.h, 42), 1.0, 0.5) : Karst.Style.tube(3 + 2 * unit(a.h, 42), 0.9, 0.5);
                 Karst.walk(out, up[0], up[1], up[2], a.x, a.y, a.z, a.h ^ 0xD0E1L, st.varied().at(-1), null);
             }
+        }
+
+        // R5, vertical drama: falls down shafts two or three levels tall, into a plunge pool (water) or
+        // onto a floor of magma (lava). Likelier in awe, wider there; lava mostly in the abyss.
+        for (int t = 0; t < 2; t++) {
+            if (levels.size() < 3) break;
+            int k0 = (int) (rnd.next() * (levels.size() - 2));
+            int k1 = Math.min(levels.size() - 1, k0 + 2 + (rnd.next() < 0.4 ? 1 : 0));
+            List<Node> topL = levels.get(k0), botL = levels.get(k1);
+            if (topL.isEmpty() || botL.isEmpty()) continue;
+            Node a = topL.get((int) (rnd.next() * topL.size()));
+            if (a.gate || a.mood == null) continue;
+            double chance = switch (a.mood) {
+                case AWE -> 0.9;
+                case COZY -> 0.5;
+                case CLEVER, FEAR -> 0.35;
+                case HORROR -> 0.3;
+            };
+            if (rnd.next() >= chance) continue;
+            Node b = nearest(botL, a.x, a.z, 80);
+            if (b == null) continue;
+            boolean lava = abyss(k1) ? rnd.next() < 0.75 && a.mood != Moods.Mood.COZY : a.mood == Moods.Mood.FEAR && rnd.next() < 0.4;
+            // The regional water table (core/Waters) floods every cave under it: no fall from under it
+            // (the shaft is a drowned sump there, the deep check found), and where it lies between the
+            // top and the foot the flooded part is the plunge pool. Lava doesn't fall into it.
+            double table = core.waters().table((int) Math.floor(a.x), (int) Math.floor(a.z));
+            boolean flooded = !Double.isNaN(table) && table > b.y;
+            if (!Double.isNaN(table) && table > a.y - 14) continue;
+            if (flooded && lava) continue;
+            double r = (a.mood == Moods.Mood.AWE ? 4.5 + 2.5 * rnd.next() : 3 + 1.5 * rnd.next()) * (abyss(k1) ? 1.2 : 1);
+            double fx = a.x + (rnd.next() - 0.5) * 3, fz = a.z + (rnd.next() - 0.5) * 3, foot = b.y;
+            Karst.walk(out, a.x, a.y + 2, a.z, fx, foot + r, fz, rnd.nextLong(), Karst.Style.shaft(r).at(-1), null); // (ends a radius up: no pocket under the pool)
+            // The pool at the foot: a flat-floored basin, and a bowl in it, the water two above the floor.
+            double pr = r + 3 + 3 * rnd.next();
+            for (int bowl = 0; bowl < 2; bowl++) {
+                Passages.Seg s = new Passages.Seg();
+                double rb = bowl == 0 ? pr : pr * 0.6, vr = bowl == 0 ? 0.55 : 0.5;
+                s.ax = s.bx = fx;
+                s.az = s.bz = fz;
+                s.ay = s.by = (bowl == 0 ? foot : foot - 2) + rb * vr * 0.3;
+                s.ra = s.rb = rb;
+                s.vr = vr;
+                s.ribs = 0.3;
+                s.kind = Passages.CHAMBER;
+                if (!lava && !flooded) s.water = foot + 2.2;
+                s.bounds();
+                out.add(s);
+            }
+            // Out of the basin to the level's junction, leaving above the water so the pool holds.
+            Karst.walk(out, fx, foot + 4, fz, b.x, b.y, b.z, rnd.nextLong(), Karst.Style.tube(2.6 + rnd.next(), 0.8, 0.5).varied().at(-1), null);
+            cell.falls.add(new double[] {a.x, a.y, a.z, lava ? 1 : 0, r});
         }
 
         // Into the nearest mega-cavern: a grand passage from the junction nearest it.
@@ -339,8 +410,6 @@ public final class Deep {
         }
     }
 
-    static final int HALL = 0, BREAKDOWN = 1, DOME = 2, LOW = 3;
-
     private static double loopChance(Moods.Mood m) {
         return switch (m) {
             case CLEVER -> 0.55;
@@ -362,26 +431,37 @@ public final class Deep {
         };
     }
 
-    /** Which room (if any) a junction gets, by its mood; and whether a squeeze leads into it. */
-    private void plan(Node n) {
+    /** The library archetypes (core/Rooms) each mood draws its rooms from. */
+    private static int[] archetypes(Moods.Mood m) {
+        return switch (m) {
+            case AWE -> new int[] {Rooms.DOME, Rooms.BRIDGE, Rooms.CANYON, Rooms.AVEN, Rooms.PILLARS, Rooms.RAMIFORM};
+            case COZY -> new int[] {Rooms.GALLERY, Rooms.TERRACES, Rooms.BOWL, Rooms.RAMIFORM, Rooms.PILLARS};
+            case CLEVER -> new int[] {Rooms.FISSURES, Rooms.KEYHOLE, Rooms.FINS, Rooms.TERRACES, Rooms.CROSSROADS};
+            case FEAR -> new int[] {Rooms.BREAKDOWN, Rooms.FISSURES, Rooms.CANYON, Rooms.FINS};
+            case HORROR -> new int[] {Rooms.BREAKDOWN, Rooms.RAMIFORM, Rooms.BOWL, Rooms.FINS};
+        };
+    }
+
+    /**
+     * Which room (if any) a junction gets, its size, and whether a squeeze leads into it. Sizes are
+     * heavy-tailed (lognormal), bigger where passages meet: a few big rooms a cell, many small ones
+     * (docs/CAVE_REDESIGN.md). Big rooms are entered through a squeeze most of the time.
+     */
+    private void plan(Node n, int k) {
         double chance = switch (n.mood) {
-            case AWE -> 0.5;
-            case COZY -> 0.45;
-            case CLEVER -> 0.3;
-            case FEAR -> 0.12;
-            case HORROR -> 0.15;
+            case AWE -> 0.55;
+            case COZY -> 0.5;
+            case CLEVER -> 0.4;
+            case FEAR -> 0.25;
+            case HORROR -> 0.3;
         };
-        if (n.degree >= 3) chance += 0.15;
+        if (n.degree >= 3) chance += 0.25;
         if (unit(n.h, 11) >= chance) return;
-        double r = unit(n.h, 12);
-        n.room = switch (n.mood) {
-            case AWE -> r < 0.55 ? DOME : HALL;
-            case COZY -> r < 0.7 ? LOW : HALL;
-            case CLEVER -> r < 0.6 ? HALL : BREAKDOWN;
-            case FEAR, HORROR -> BREAKDOWN;
-        };
-        // Contrast: a tight squeeze before a big room, now and then (not every time).
-        n.squeeze = n.room != BREAKDOWN && unit(n.h, 13) < 0.35;
+        int[] arch = archetypes(n.mood);
+        n.room = arch[(int) (unit(n.h, 12) * arch.length)];
+        double median = (abyss(k) ? 24 : 20) * (n.degree >= 3 ? 1.2 : 1);
+        n.roomW = Rooms.lognormal(n.h, 14, median, 0.45, 9, 40);
+        n.squeeze = n.roomW > 22 ? unit(n.h, 13) < 0.7 : unit(n.h, 13) < 0.2;
     }
 
     /** A passage between two junctions of level k, shaped by the mood where it starts. */
@@ -390,15 +470,19 @@ public final class Deep {
         Moods.Mood m = a.mood;
         Karst.Style st;
         if (tight && Math.hypot(a.x - b.x, a.z - b.z) < 80) {
-            st = Karst.Style.tube(1.8 + 0.5 * rnd.next(), 0.75, 0.45); // the squeeze
+            st = Karst.Style.tube(1.45, 0.8, 0.45); // the squeeze: crouch height, the compression before the room
         } else {
-            double r = (ab ? 5.5 + 3 * rnd.next() : 4.6 + 2.4 * rnd.next()) * passageScale(m);
+            // Heavy-tailed widths, growing downstream with the junctions that drain through (a branchwork
+            // cave's trunk is its biggest passage): tributaries tight, trunks wide.
+            double flow = 1 + 0.28 * Math.log(1 + Math.max(a.desc, b.desc));
+            double r = Rooms.lognormal(rnd.nextLong(), 0, ab ? 3.8 : 3.2, 0.4, 1.4, 7) * flow * passageScale(m);
+            r = Math.min(r, ab ? 11 : 9);
             double roll = rnd.next();
-            double crawl = m == Moods.Mood.HORROR ? 0.25 : m == Moods.Mood.FEAR ? 0.2 : 0.04;
+            double crawl = m == Moods.Mood.HORROR ? 0.25 : m == Moods.Mood.FEAR ? 0.2 : 0.06;
             double gallery = m == Moods.Mood.COZY ? 0.45 : 0.12;
             double canyon = m == Moods.Mood.AWE ? 0.45 : m == Moods.Mood.FEAR ? 0.4 : m == Moods.Mood.HORROR ? 0.3 : 0.25;
-            if (roll < crawl) {
-                st = Karst.Style.tube(1.8 + 0.6 * rnd.next(), 0.65, 0.4);
+            if (roll < crawl && flow < 1.5) {
+                st = Karst.Style.tube(1.45 + 0.2 * rnd.next(), 0.8, 0.45); // a crawl at crouch height
             } else if (roll < crawl + gallery) {
                 st = Karst.Style.tube(r * 1.4, 0.45 + 0.1 * rnd.next(), 0.5).bedding(0.6 + 0.2 * rnd.next()); // wide and low
             } else if (roll < crawl + gallery + canyon) {
@@ -412,55 +496,13 @@ public final class Deep {
         Karst.walk(out, a.x, a.y, a.z, b.x, b.y, b.z, rnd.nextLong(), st.varied().at(-1), null);
     }
 
-    /** The room planned at a junction. Sizes are for feeling, not bulk (the user: Rule of Cool is not Rule of Big). */
+    /** The room planned at a junction: a library room (core/Rooms), its floor at the passages' floor. */
     private void room(List<Passages.Seg> out, int k, Node n) {
         if (n.room < 0) return;
-        double scale = abyss(k) ? 1.3 : 1.0;
-        double r, vr, roof = 0, pillars = 0;
-        int blobs = 1;
-        switch (n.room) {
-            case HALL -> { // on columns
-                r = (10 + 8 * unit(n.h, 14)) * scale;
-                vr = 0.4 + 0.15 * unit(n.h, 15);
-                roof = 0.8;
-                pillars = 8 + 5 * unit(n.h, 16);
-            }
-            case DOME -> { // tall and round: awe looks up
-                r = (6 + 4 * unit(n.h, 14)) * scale;
-                vr = 1.0 + 0.4 * unit(n.h, 15);
-            }
-            case LOW -> { // low and wide under a flat roof: shelter
-                r = (8 + 6 * unit(n.h, 14)) * scale;
-                vr = 0.33 + 0.08 * unit(n.h, 15);
-                roof = 0.7;
-            }
-            default -> { // breakdown: overlapping blobs under a fallen-flat roof
-                r = (7 + 5 * unit(n.h, 14)) * scale;
-                vr = 0.55 + 0.25 * unit(n.h, 15);
-                roof = 0.5 + 0.2 * unit(n.h, 17);
-                blobs = 2 + (int) (unit(n.h, 18) * 2);
-            }
-        }
-        double room = ground(n.x, n.z) - 30 - n.y;
-        if (r * vr > room) r = room / vr;
-        if (r < 4) return;
-        for (int b = 0; b < blobs; b++) {
-            double rb = b == 0 ? r : r * (0.45 + 0.35 * unit(n.h, 20 + b));
-            double ang = unit(n.h, 24 + b) * 2 * Math.PI, off = b == 0 ? 0 : r * (0.5 + 0.4 * unit(n.h, 28 + b));
-            Passages.Seg s = new Passages.Seg();
-            s.ax = s.bx = n.x + Math.cos(ang) * off;
-            s.az = s.bz = n.z + Math.sin(ang) * off;
-            s.ay = s.by = n.y + rb * vr * 0.3;
-            s.ra = s.rb = rb;
-            s.vr = vr;
-            s.roof = roof;
-            s.pillars = b == 0 ? pillars : 0;
-            s.seed = n.h ^ b;
-            s.ribs = 0.3; // a flat floor across most of the room (no bowl of terraces)
-            s.kind = Passages.CHAMBER;
-            s.bounds();
-            out.add(s);
-        }
+        double floorY = n.y - 1.5;
+        double maxH = ground(n.x, n.z) - 30 - floorY;
+        if (maxH < 5) return;
+        out.add(Passages.Seg.of(Rooms.make(n.h ^ 0x400DL, n.x, floorY, n.z, n.roomW, maxH, n.room)));
     }
 
     /** Dead ends, pits and avens, by mood: horror and fear have the dead ends and pits, awe the avens. */

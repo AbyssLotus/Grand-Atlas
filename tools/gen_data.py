@@ -500,6 +500,17 @@ def main():
         "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"],
     })
 
+    # ---- small things to stumble on in the deep and abyss passages (world/DeepDetail, cave rework R4),
+    # after the cave dressing.
+    write("data/grandatlas/worldgen/feature/deep_detail.json", {"type": "grandatlas:deep_detail"})
+    write("data/grandatlas/worldgen/placed_feature/deep_detail.json", {"feature": "grandatlas:deep_detail", "placement": []})
+    write("data/grandatlas/neoforge/biome_modifier/deep_detail.json", {
+        "type": "neoforge:add_features",
+        "biomes": "#minecraft:is_overworld",
+        "features": "grandatlas:deep_detail",
+        "step": "vegetal_decoration",
+    })
+
     # ---- the underground's water (world/DeepWater.java, M7d): cavern lakes, seas, flooded caves.
     # Placed late in decoration (see the step below).
     write("data/grandatlas/worldgen/feature/deep_water.json", {"type": "grandatlas:deep_water"})
@@ -1073,14 +1084,16 @@ def cave_biomes(jar):
 # out, and the ones anchored to the bottom would all crowd the new floor. Each entry: feature ->
 # (new height range, or None to keep it, (count or rarity, vanilla's value, ours)). Counts keep
 # about vanilla's density per level over the new range. Blackstone and basalt take deepslate ores.
+# Iron, gold, lapis and redstone were doubled again (2026-11-18): cave walls below -64 showed a quarter
+# of the ore of those above (DeepCheck census, the user: "there are like no ores").
 ORES = {
-    "ore_iron_small":     (U(-512, 72), ("count", 10, 43)),
-    "ore_gold":           (T(-300, 32), ("count", 4, 14)),       # peak about -134, in the deep
+    "ore_iron_small":     (U(-512, 72), ("count", 10, 90)),
+    "ore_gold":           (T(-300, 32), ("count", 4, 28)),       # peak about -134, in the deep
     "ore_gold_lower":     (U(-512, -400), ("count", {"type": "minecraft:uniform", "max_inclusive": 1, "min_inclusive": 0},
                                             {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 0})),
     "ore_lapis":          (T(-200, 32), ("count", 2, 7)),
-    "ore_lapis_buried":   (U(-512, 64), ("count", 4, 18)),
-    "ore_redstone":       (U(-512, 15), ("count", 4, 27)),
+    "ore_lapis_buried":   (U(-512, 64), ("count", 4, 30)),
+    "ore_redstone":       (U(-512, 15), ("count", 4, 50)),
     # ore_redstone_lower stays anchored to the bottom: rich redstone at the floor, as in vanilla.
     "ore_diamond":        (T(-600, 0), ("count", 7, 26)),         # peak about -300, in the abyss
     "ore_diamond_buried": (T(-600, 0), ("count", 4, 15)),
@@ -1094,6 +1107,9 @@ ORES = {
     "monster_room_deep":  (None, ("count", 4, 35)),
     "spring_water":       (None, ("count", 25, 69)),
 }
+# Deep riches (Terraria's rule: deeper is richer): (configured ore, placements a chunk in the deep, in the abyss).
+DEEP_RICHES = [("ore_iron", 16, 50), ("ore_gold", 10, 40), ("ore_redstone", 8, 30), ("ore_lapis", 4, 10),
+               ("ore_copper_small", 4, 6), ("ore_diamond_small", 2, 4), ("ore_diamond_medium", 0, 1)]
 # Cave-biome features, placed from the bottom to y 256 and filtered to their biome: given the
 # biome's own band, with the count scaled by the new band over vanilla's 320.
 LUSH_DRIPSTONE = ["cave_vines", "classic_vines_cave_feature", "lush_caves_ceiling_vegetation", "lush_caves_clay",
@@ -1132,6 +1148,31 @@ def respread(jar):
         assert mods and mods[0][key] == old, (name, mods, old)
         mods[0][key] = new
         write(f"data/minecraft/worldgen/placed_feature/{name}.json", f)
+    # Andesite, diorite and granite in the mountains too: vanilla's upper blobs (one chunk in six, y 64-128)
+    # spread over Grand Atlas's tall ground, y 64-640, two a chunk. Most caves lie outside vanilla's band,
+    # so the user never saw andesite (2026-11-18).
+    for rock in ("andesite", "diorite", "granite"):
+        f = placed(f"ore_{rock}_upper")
+        rf = [m for m in f["placement"] if m["type"] == "minecraft:rarity_filter"]
+        assert rf and rf[0]["chance"] == 6, f
+        f["placement"] = [{"type": "minecraft:count", "count": 2} if m is rf[0] else m for m in f["placement"]]
+        height_mod(f)["height"] = U(64, 640)
+        write(f"data/minecraft/worldgen/placed_feature/ore_{rock}_upper.json", f)
+    # Deeper is richer, as in Terraria (the user, 2026-11-18: "more danger but also more loot"): extra ore
+    # in the deep and more again in the abyss, so ore per block rises band by band (about 2.4 per chunk
+    # and level above -64, 3.4 in the deep, 4.4 in the abyss, by the DeepCheck census).
+    riches = []
+    for feature, deep, abyss in DEEP_RICHES:
+        for band, count, lo, hi in (("deep", deep, -250, -64), ("abyss", abyss, -506, -250)):
+            if count == 0:
+                continue
+            name = f"riches_{band}_{feature.removeprefix('ore_')}"
+            write(f"data/grandatlas/worldgen/placed_feature/{name}.json", {"feature": f"minecraft:{feature}", "placement": [
+                {"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+                {"type": "minecraft:height_range", "height": U(lo, hi)}, {"type": "minecraft:biome"}]})
+            riches.append(f"grandatlas:{name}")
+    write("data/grandatlas/neoforge/biome_modifier/deep_riches.json", {
+        "type": "neoforge:add_features", "biomes": "#minecraft:is_overworld", "features": riches, "step": "underground_ores"})
     for names, band in CAVE_BANDS:
         k = (band["max_inclusive"]["absolute"] - band["min_inclusive"]["absolute"]) / 320
         for name in names:
@@ -1175,7 +1216,11 @@ def respread(jar):
 
     # The abyss's rock: carved, overgrown and given ores like the rest of the deep stone.
     write("data/minecraft/tags/block/base_stone_overworld.json", {"replace": False, "values": ["minecraft:blackstone", "minecraft:basalt"]})
-    write("data/minecraft/tags/block/deepslate_ore_replaceables.json", {"replace": False, "values": ["minecraft:blackstone", "minecraft:basalt"]})
+    # + the deep's mood wall skins (world/Strata): without them ores could not form in any cave wall below
+    # -64, 2.4 showing per 1000 wall blocks against 9.5 above (DeepCheck, 2026-11-18: the user, "no ores").
+    write("data/minecraft/tags/block/deepslate_ore_replaceables.json", {"replace": False, "values": ["minecraft:blackstone", "minecraft:basalt",
+        "minecraft:calcite", "minecraft:dripstone_block", "minecraft:smooth_basalt", "minecraft:packed_mud", "minecraft:sculk",
+        "minecraft:obsidian", "minecraft:soul_soil"]})
 
 
 def salt_flat_surface():
