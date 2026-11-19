@@ -724,6 +724,31 @@ public final class Passages {
         take.accept(karst);
     }
 
+    /**
+     * The library rooms (core/Rooms; not the rooms smashed into them) that meet the box, or with
+     * {@code focalOnly} those whose focal spot lies in it: for the rooms' dressing plans (world/DeepDetail).
+     */
+    public void rooms(double x0, double z0, double x1, double z1, boolean focalOnly, List<Rooms.Room> out) {
+        Caches cc = caches.get();
+        cc.trim();
+        List<Seg> pieces = new ArrayList<>();
+        int i0 = GradientNoise.floor(x0 / CELL), i1 = GradientNoise.floor(x1 / CELL), j0 = GradientNoise.floor(z0 / CELL), j1 = GradientNoise.floor(z1 / CELL);
+        for (int j = j0 - 2; j <= j1 + 2; j++) for (int i = i0 - 2; i <= i1 + 2; i++) pieces.addAll(edgeCell(cc, i, j));
+        core.solution().collect(x0, z0, x1, z1, pieces);
+        core.deep().collect(x0, z0, x1, z1, pieces);
+        java.util.Set<Rooms.Room> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        for (Seg s : pieces) {
+            if (s.kind != ROOM || !seen.add(s.room)) continue;
+            Rooms.Room r = s.room;
+            if (focalOnly) {
+                double[] f = r.focal();
+                if (f[0] >= x0 && f[0] < x1 && f[2] >= z0 && f[2] < z1) out.add(r);
+            } else if (r.maxX >= x0 && r.minX <= x1 && r.maxZ >= z0 && r.minZ <= z1) {
+                out.add(r);
+            }
+        }
+    }
+
     /** Which system made the piece holding (x, y, z): LATTICE, KARST, SOLUTION, or -1 for none (debug). */
     public int provinceAt(int x, int y, int z) {
         Caches cc = caches.get();

@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import com.seaweed.grandatlas.core.AtlasCore;
 import com.seaweed.grandatlas.core.ColumnSample;
 import com.seaweed.grandatlas.core.Moods;
+import com.seaweed.grandatlas.core.Rooms;
+import com.seaweed.grandatlas.core.noise.GradientNoise;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -34,7 +36,7 @@ import net.minecraft.world.level.material.Fluids;
 public record DeepDetail() implements AtlasFeature {
     public static final MapCodec<DeepDetail> CODEC = MapCodec.unit(DeepDetail::new);
     /** Vignettes a chunk: in the deep, and in the abyss. */
-    static final int DEEP = 2, ABYSS = 3;
+    static final int DEEP = 1, ABYSS = 2; // (passages only: the rooms carry their own dressing plans now)
 
     @Override
     public MapCodec<DeepDetail> codec() {
@@ -48,6 +50,13 @@ public record DeepDetail() implements AtlasFeature {
         int x0 = origin.getX() & ~15, z0 = origin.getZ() & ~15;
         // R5, vertical drama and fire: the falls' sources, magma rivers, hanging forests.
         boolean placed = falls(level, core, x0, z0) | magmaRivers(level, core, x0, z0) | hangingForests(level, core, random, x0, z0);
+        // The rooms' dressing plans (cave redesign, layer 4): background dressing for every room that
+        // meets the chunk, and a focal piece with its supporting pieces for those whose focal spot is here.
+        java.util.List<Rooms.Room> meet = new java.util.ArrayList<>(), here = new java.util.ArrayList<>();
+        core.passages().rooms(x0, z0, x0 + 16, z0 + 16, false, meet);
+        core.passages().rooms(x0, z0, x0 + 16, z0 + 16, true, here);
+        for (Rooms.Room rm : meet) placed |= ambient(level, rm, x0, z0);
+        for (Rooms.Room rm : here) placed |= dress(level, core, rm);
         int deep = 0, abyss = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int t = 0; t < 160 && (deep < DEEP || abyss < ABYSS); t++) {
@@ -57,6 +66,7 @@ public record DeepDetail() implements AtlasFeature {
             if (ab ? abyss >= ABYSS : deep >= DEEP) continue;
             ColumnSample c = core.column(x, z);
             if (core.passages().carve(c, x, y, z) >= 0 || !level.getBlockState(pos.set(x, y, z)).isAir()) continue;
+            if (inRoom(meet, x, y, z)) continue; // rooms have their plans
             // Down to the floor (and the roof over it), within a passage's height.
             int floor = y;
             while (floor > y - 24 && level.getBlockState(pos.set(x, floor - 1, z)).isAir()) floor--;
@@ -75,6 +85,189 @@ public record DeepDetail() implements AtlasFeature {
             }
         }
         return placed;
+    }
+
+    // ---- the rooms' dressing plans (cave redesign, docs/CAVE_REDESIGN.md layer 4)
+
+    /** A vignette placed at a floor block (the air on it), with the roof's y over it (-9999: none in reach). */
+    private interface V {
+        boolean place(WorldGenLevel level, RandomSource r, BlockPos at, int roof);
+    }
+
+    // Focal pieces: the big ones, at the room's focal spot (where its template says you see it walking in).
+    private static final V[] F_UPPER = {(l, r, a, f) -> dripstones(l, r, a, f, 6, true), DeepDetail::curtain, (l, r, a, f) -> rimstones(l, r, a),
+            DeepDetail::dripPool, (l, r, a, f) -> mushrooms(l, r, a), (l, r, a, f) -> fossil(l, r, a), (l, r, a, f) -> geode(l, r, a),
+            DeepDetail::calciteColumn, DeepDetail::roots};
+    private static final V[][] F_DEEP = {
+            /* AWE */ {DeepDetail::calciteColumn, (l, r, a, f) -> geode(l, r, a), (l, r, a, f) -> rimstones(l, r, a), DeepDetail::curtain,
+                    (l, r, a, f) -> dripstones(l, r, a, f, 7, true)},
+            /* FEAR */ {DeepDetail::deadCamp, DeepDetail::chains, (l, r, a, f) -> rubble(l, r, a), (l, r, a, f) -> remains(l, r, a, false)},
+            /* COZY */ {DeepDetail::sporeGrotto, DeepDetail::mossNook, DeepDetail::dripPool, (l, r, a, f) -> mushrooms(l, r, a),
+                    (l, r, a, f) -> seep(l, r, a, false), DeepDetail::roots},
+            /* CLEVER */ {(l, r, a, f) -> fossil(l, r, a), (l, r, a, f) -> oreSeam(l, r, a), (l, r, a, f) -> amethyst(l, r, a),
+                    (l, r, a, f) -> steppingStones(l, r, a)},
+            /* HORROR */ {(l, r, a, f) -> sculk(l, r, a, true), (l, r, a, f) -> veinWeb(l, r, a), (l, r, a, f) -> spawnerDen(l, r, a),
+                    (l, r, a, f) -> bones(l, r, a, false)}};
+    private static final V[][] F_ABYSS = {
+            /* AWE */ {DeepDetail::spire, DeepDetail::organ, DeepDetail::arch, DeepDetail::lavaCurtain, (l, r, a, f) -> weepingWall(l, r, a)},
+            /* FEAR */ {(l, r, a, f) -> cage(l, r, a), DeepDetail::maw, DeepDetail::chainedRemains, (l, r, a, f) -> lantern(l, a, f), DeepDetail::lavaCurtain},
+            /* COZY */ {(l, r, a, f) -> hearth(l, r, a), (l, r, a, f) -> hotSpring(l, r, a), (l, r, a, f) -> netherGarden(l, r, a),
+                    (l, r, a, f) -> seep(l, r, a, true)},
+            /* CLEVER */ {DeepDetail::balanced, (l, r, a, f) -> causeway(l, r, a), DeepDetail::floatingStones, (l, r, a, f) -> tintedWindow(l, r, a)},
+            /* HORROR */ {(l, r, a, f) -> ritual(l, r, a), DeepDetail::ribcage, (l, r, a, f) -> witherRoses(l, r, a), (l, r, a, f) -> soulFire(l, r, a),
+                    (l, r, a, f) -> bones(l, r, a, true)}};
+    // Supporting pieces: small, near the focal one, in keeping with it.
+    private static final V[] S_UPPER = {(l, r, a, f) -> dripstones(l, r, a, f, 3, false), (l, r, a, f) -> mushrooms(l, r, a)};
+    private static final V[][] S_DEEP = {
+            {(l, r, a, f) -> dripstones(l, r, a, f, 3, false), DeepDetail::curtain},
+            {DeepDetail::cobwebs, (l, r, a, f) -> remains(l, r, a, false)},
+            {(l, r, a, f) -> mushrooms(l, r, a), DeepDetail::roots},
+            {(l, r, a, f) -> amethyst(l, r, a), (l, r, a, f) -> oreSeam(l, r, a)},
+            {(l, r, a, f) -> bones(l, r, a, false), (l, r, a, f) -> infested(l, r, a), DeepDetail::cobwebs}};
+    private static final V[][] S_ABYSS = {
+            {(l, r, a, f) -> dripstones(l, r, a, f, 3, false)},
+            {(l, r, a, f) -> remains(l, r, a, true), DeepDetail::cobwebs},
+            {(l, r, a, f) -> netherGarden(l, r, a)},
+            {(l, r, a, f) -> causeway(l, r, a)},
+            {(l, r, a, f) -> bones(l, r, a, true), (l, r, a, f) -> witherRoses(l, r, a)}};
+
+    /** Whether (x, y, z) is inside one of the rooms (the passages' darts leave rooms to their plans). */
+    private static boolean inRoom(java.util.List<Rooms.Room> rooms, int x, int y, int z) {
+        for (Rooms.Room rm : rooms) {
+            if (x < rm.minX || x > rm.maxX || z < rm.minZ || z > rm.maxZ || y < rm.minY || y > rm.maxY) continue;
+            if (rm.sdf(x + 0.5, y + 0.5, z + 0.5) < 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * A room's plan: most rooms get no focal piece (plain makes the special ones special); great halls
+     * always do, big rooms often. Rooms near each other never repeat a focal kind: within a 192-block
+     * square the kinds are dealt out in a shuffled order, one to each room. One to three supporting
+     * pieces stand near the focal one.
+     */
+    private static boolean dress(WorldGenLevel level, AtlasCore core, Rooms.Room rm) {
+        RandomSource r = RandomSource.create(rm.seed());
+        double chance = rm.great() ? 1 : rm.w > 26 ? 0.6 : 0.3;
+        if (r.nextDouble() >= chance) return false;
+        double[] f = rm.focal();
+        int fx = (int) Math.floor(f[0]), fz = (int) Math.floor(f[2]);
+        Moods.Mood mood = core.moods().at(fx, rm.floorY, fz);
+        boolean ab = rm.floorY < AtlasCore.ABYSS_TOP;
+        V[] focal = mood == null ? F_UPPER : (ab ? F_ABYSS : F_DEEP)[mood.ordinal()];
+        V[] support = mood == null ? S_UPPER : (ab ? S_ABYSS : S_DEEP)[mood.ordinal()];
+        // deal the kinds out round the rooms of the square, so neighbours differ
+        int ci = Math.floorDiv(fx, 192), cj = Math.floorDiv(fz, 192);
+        java.util.List<Rooms.Room> cell = new java.util.ArrayList<>();
+        core.passages().rooms(ci * 192, cj * 192, ci * 192 + 192, cj * 192 + 192, true, cell);
+        cell.sort((a, b) -> a.cx != b.cx ? Double.compare(a.cx, b.cx) : a.cz != b.cz ? Double.compare(a.cz, b.cz) : Double.compare(a.floorY, b.floorY));
+        int ord = 0;
+        for (int i = 0; i < cell.size(); i++) {
+            Rooms.Room c = cell.get(i);
+            if (c == rm || c.cx == rm.cx && c.cz == rm.cz && c.floorY == rm.floorY) ord = i;
+        }
+        int[] perm = shuffled(focal.length, GradientNoise.hash(0xF0CAL, ci, cj));
+        V pick = focal[perm[ord % focal.length]];
+        boolean any = false;
+        BlockPos at = floorNear(level, fx, (int) Math.floor(f[1]), fz);
+        if (at != null) any = pick.place(level, r, at, roofOver(level, at));
+        int n = 1 + r.nextInt(3);
+        for (int k = 0; k < n; k++) {
+            double a = r.nextDouble() * 2 * Math.PI, d = 4 + r.nextDouble() * Math.min(8, rm.w * 0.3);
+            BlockPos p = floorNear(level, (int) Math.floor(f[0] + Math.cos(a) * d), (int) Math.floor(f[1]), (int) Math.floor(f[2] + Math.sin(a) * d));
+            if (p != null) any |= support[r.nextInt(support.length)].place(level, r, p, roofOver(level, p));
+        }
+        return any;
+    }
+
+    private static int[] shuffled(int n, long seed) {
+        int[] p = new int[n];
+        for (int i = 0; i < n; i++) p[i] = i;
+        RandomSource r = RandomSource.create(seed);
+        for (int i = n - 1; i > 0; i--) {
+            int j = r.nextInt(i + 1), t = p[i];
+            p[i] = p[j];
+            p[j] = t;
+        }
+        return p;
+    }
+
+    /** The floor (the air block on it) at (x, z) within a dozen below y, or a few above. */
+    private static BlockPos floorNear(WorldGenLevel level, int x, int y, int z) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y + 4, z);
+        for (int i = 0; i < 18; i++, p.move(0, -1, 0)) {
+            if (level.getBlockState(p).isAir() && solid(level, p.below())) return p.immutable();
+        }
+        return null;
+    }
+
+    private static int roofOver(WorldGenLevel level, BlockPos at) {
+        int roof = roofAt(level, at.getX(), at.getY(), at.getZ());
+        return roof == Integer.MIN_VALUE ? -9999 : roof;
+    }
+
+    /**
+     * Background dressing in patches, by how the room formed (its archetype): rubble on breakdown
+     * floors, flowstone in the wet domes and avens, a scoured gravel bed in canyons and keyholes, clay
+     * flats in galleries and bowls. Only on the part of the room inside this chunk.
+     */
+    private static boolean ambient(WorldGenLevel level, Rooms.Room rm, int x0, int z0) {
+        int a = rm.template.archetype;
+        int lx = Math.max(x0, (int) Math.floor(rm.minX)), hx = Math.min(x0 + 15, (int) Math.floor(rm.maxX));
+        int lz = Math.max(z0, (int) Math.floor(rm.minZ)), hz = Math.min(z0 + 15, (int) Math.floor(rm.maxZ));
+        if (lx > hx || lz > hz) return false;
+        RandomSource r = RandomSource.create(rm.seed() ^ ((long) x0 * 341873128712L + (long) z0 * 132897987541L));
+        long ns = rm.seed() ^ 0xA3B1L;
+        int samples = Math.min(60, (hx - lx + 1) * (hz - lz + 1) / 5);
+        boolean any = false;
+        for (int t = 0; t < samples; t++) {
+            int x = lx + r.nextInt(hx - lx + 1), z = lz + r.nextInt(hz - lz + 1);
+            if (GradientNoise.noise2(ns, x / 7.0, z / 7.0) < 0.15) continue; // patches, not speckle
+            BlockPos at = floorNear(level, x, (int) Math.floor(rm.floorY) + 2, z);
+            if (at == null || rm.sdf(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5) > 0.5) continue;
+            BlockPos bed = at.below();
+            switch (a) {
+                case Rooms.BREAKDOWN, Rooms.FINS -> { // fallen blocks
+                    if (r.nextInt(3) == 0) {
+                        level.setBlock(at, (r.nextBoolean() ? Blocks.COBBLED_DEEPSLATE : Blocks.TUFF).defaultBlockState(), 2);
+                        if (r.nextInt(4) == 0 && level.getBlockState(at.above()).isAir()) level.setBlock(at.above(), Blocks.COBBLED_DEEPSLATE.defaultBlockState(), 2);
+                    } else if (stone(level, bed)) {
+                        level.setBlock(bed, Blocks.GRAVEL.defaultBlockState(), 2);
+                    }
+                    any = true;
+                }
+                case Rooms.DOME, Rooms.AVEN, Rooms.PILLARS, Rooms.BRIDGE -> { // flowstone: wet rooms
+                    if (stone(level, bed)) level.setBlock(bed, Blocks.DRIPSTONE_BLOCK.defaultBlockState(), 2);
+                    if (r.nextInt(3) == 0) {
+                        int top = roofAt(level, x, at.getY(), z);
+                        if (top != Integer.MIN_VALUE && top - at.getY() > 5) hang(level, x, top, z, 1 + r.nextInt(4), Direction.DOWN, false);
+                    }
+                    any = true;
+                }
+                case Rooms.CANYON, Rooms.KEYHOLE -> { // a stream bed, scoured
+                    if (stone(level, bed)) {
+                        level.setBlock(bed, (r.nextInt(4) == 0 ? Blocks.COARSE_DIRT : Blocks.GRAVEL).defaultBlockState(), 2);
+                        any = true;
+                    }
+                }
+                case Rooms.GALLERY, Rooms.BOWL, Rooms.TERRACES -> { // still water once stood here: clay flats
+                    if (stone(level, bed)) {
+                        level.setBlock(bed, (a == Rooms.TERRACES && r.nextBoolean() ? Blocks.CALCITE : Blocks.CLAY).defaultBlockState(), 2);
+                        any = true;
+                    }
+                }
+                default -> { // a few drips
+                    if (r.nextInt(6) == 0) {
+                        int top = roofAt(level, x, at.getY(), z);
+                        if (top != Integer.MIN_VALUE && top - at.getY() > 4) {
+                            hang(level, x, top, z, 1 + r.nextInt(3), Direction.DOWN, false);
+                            any = true;
+                        }
+                    }
+                }
+            }
+        }
+        return any;
     }
 
     // ---- R5: vertical drama and fire

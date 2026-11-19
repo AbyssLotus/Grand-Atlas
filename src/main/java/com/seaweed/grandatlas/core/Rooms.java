@@ -419,6 +419,16 @@ public final class Rooms {
             }
         }
 
+        /** The room's own seed (its dressing plan is drawn from it: world/DeepDetail). */
+        public long seed() {
+            return noise;
+        }
+
+        /** True for a great hall (wider than the normal 40-block cap). */
+        public boolean great() {
+            return w > 40.5;
+        }
+
         /** The horizontal radius that holds the whole room, from its centre. */
         public double reach() {
             return Math.max(Math.max(cx - minX, maxX - cx), Math.max(cz - minZ, maxZ - cz));

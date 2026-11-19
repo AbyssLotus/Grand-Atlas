@@ -48,7 +48,7 @@ public final class DeepCheck {
             onDone.run();
             return;
         }
-        String[] at = System.getProperty("grandatlas.deepAt", "30000,-60000").split(",");
+        String[] at = System.getProperty("grandatlas.deepAt", "36000,-66000").split(",");
         double cx = Double.parseDouble(at[0]), cz = Double.parseDouble(at[1]);
         List<double[]> all = new ArrayList<>();
         core.deep().falls(cx - 1500, cz - 1500, cx + 1500, cz + 1500, all);
@@ -264,5 +264,6 @@ public final class DeepCheck {
             "brown_mushroom", "red_mushroom", "mushroom_stem", "amethyst_cluster", "large_amethyst_bud", "calcite", "sculk_sensor",
             "sculk_shrieker", "sculk_catalyst", "sculk_vein", "infested_deepslate", "spawner", "obsidian", "crying_obsidian", "tinted_glass",
             "magma_block", "warped_nylium", "crimson_nylium", "warped_fungus", "crimson_fungus", "polished_basalt", "gilded_blackstone",
-            "deepslate_copper_ore", "deepslate_iron_ore", "deepslate_gold_ore", "mossy_cobblestone", "weeping_vines", "weeping_vines_plant");
+            "deepslate_copper_ore", "deepslate_iron_ore", "deepslate_gold_ore", "mossy_cobblestone", "weeping_vines", "weeping_vines_plant",
+            "clay", "cobbled_deepslate", "dripstone_block", "coarse_dirt");
 }

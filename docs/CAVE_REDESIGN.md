@@ -328,3 +328,24 @@ shaft whose top opens straight into a room can still go without a source (1 in 5
 - **Andesite, diorite, granite**: vanilla's upper blobs (one chunk in six, y 64-128) now two a chunk
   over y 64-640, so mountain caves have them (the user never saw andesite: most caves are outside
   vanilla's band).
+
+### 2026-11-18, test49: loose ends and the rooms' dressing plans (layer 4)
+
+- Lattice passages: lognormal widths too (median 2.8 / 3.2 / 4.2 by depth); crawls at crouch height
+  with a floor of r 1.4 so the wobble can't pinch them shut.
+- Falls with no wall to pour from (the shaft opens straight into a room) pour from a sealed roof
+  block over the shaft instead.
+- Water-table edges (core/Waters) are sealed: caves stop at a plug of rock under the water where the
+  table changes within 3 blocks, instead of pouring at every level they cross. Every dry piece (not
+  karst's own) leaves the shell round a pool or flooded passage alone. DeepCheck: 0 hanging sources
+  in most runs; one run showed a 10-block sheet of held river water (doesn't flow; open).
+- Committed the cave work through test47 + these fixes (3b65cf2, branch cave-rework). The Potted
+  Monster / Crystal Eel mob work is left uncommitted for its own session.
+- **Dressing plans:** world/DeepDetail dresses each library room: background dressing for every room
+  meeting a chunk, by archetype (breakdown/fins: rubble and gravel; dome/aven/pillars/bridge:
+  flowstone floor and drips; canyon/keyhole: a gravel stream bed; gallery/bowl/terraces: clay or
+  calcite flats; others: a few drips), in noise patches; a focal piece at the template's focal spot
+  (great halls always, rooms over 26 wide 60%, others 30%), from the mood's focal list (deep, abyss,
+  or a natural list above -64), dealt out so rooms in the same 192-block square never repeat a kind;
+  one to three supporting pieces near it. The old darts now dress passages only (1 deep, 2 abyss a
+  chunk) and skip rooms.
