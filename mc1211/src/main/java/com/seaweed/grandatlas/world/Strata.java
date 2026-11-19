@@ -74,6 +74,14 @@ public enum Strata implements SurfaceRules.RuleSource {
     private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
     private static final BlockState GILDED = Blocks.GILDED_BLACKSTONE.defaultBlockState();
     private static final BlockState SOUL_SOIL = Blocks.SOUL_SOIL.defaultBlockState();
+    private static final BlockState DIORITE = Blocks.DIORITE.defaultBlockState();
+    private static final BlockState CLAY_BLOCK = Blocks.CLAY.defaultBlockState();
+    private static final BlockState ROOTED_DIRT = Blocks.ROOTED_DIRT.defaultBlockState();
+    private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
+    private static final BlockState COARSE_DIRT = Blocks.COARSE_DIRT.defaultBlockState();
+    private static final BlockState[] CLAY_BANDS = {Blocks.TERRACOTTA.defaultBlockState(), Blocks.BROWN_TERRACOTTA.defaultBlockState(),
+            Blocks.WHITE_TERRACOTTA.defaultBlockState(), Blocks.LIGHT_GRAY_TERRACOTTA.defaultBlockState(), Blocks.BROWN_TERRACOTTA.defaultBlockState(),
+            Blocks.ORANGE_TERRACOTTA.defaultBlockState()};
     /** How close to a passage's surface the wall rock changes (the carve's distance-like value). */
     private static final double SKIN = 0.9;
 
@@ -104,12 +112,12 @@ public enum Strata implements SurfaceRules.RuleSource {
                 sz = z;
                 skinColumn = core.column(x, z);
             }
-            double d = core.passages().carve(skinColumn, x, y, z);
+            double d = core.passages().carveWalls(skinColumn, x, y, z); // (noodles keep plain rock: cheaper, and they're thin)
             if (d < 0 || d > SKIN) return null;
             com.seaweed.grandatlas.core.Moods.Mood mood = core.moods().at(x, y, z);
             if (mood == null) return null;
             boolean abyss = y < com.seaweed.grandatlas.core.AtlasCore.ABYSS_TOP;
-            boolean floor = core.passages().carve(skinColumn, x, y + 1, z) < 0;
+            boolean floor = core.passages().carveWalls(skinColumn, x, y + 1, z) < 0;
             // Patches a few blocks across, smooth (no speckle); a rarer accent on top.
             double n = GradientNoise.noise3(GradientNoise.fork(seed, 50), x / 9.0, y / 6.0, z / 9.0);
             // Accents follow cracks: thin sheets where a noise crosses zero cut the walls in lines that
@@ -153,11 +161,47 @@ public enum Strata implements SurfaceRules.RuleSource {
             return b < 2 ? p : b < 4 ? q : r;
         }
 
+        // ---- the upper caves' rock (core/Passages rockProvince): chalk, clay or soil walls
+        private int ux = Integer.MIN_VALUE, uz = Integer.MIN_VALUE, uProv;
+        private com.seaweed.grandatlas.core.ColumnSample uCol;
+
+        private @Nullable BlockState upperSkin(int x, int y, int z) {
+            if (x != ux || z != uz) {
+                ux = x;
+                uz = z;
+                uProv = core.passages().rockProvince(x, z);
+                uCol = uProv == 0 ? null : core.column(x, z);
+            }
+            if (uProv == 0) return null;
+            double top = uCol.height();
+            if (y > top - 6) return null;                                                     // the ground's own layers stay
+            if (uProv == com.seaweed.grandatlas.core.Passages.ROCK_SOIL && top - y > 34) return null; // soil only near the surface
+            double d = core.passages().carveWalls(uCol, x, y, z);
+            if (d < 0 || d > SKIN) return null;
+            boolean floor = core.passages().carveWalls(uCol, x, y + 1, z) < 0;
+            double n = GradientNoise.noise3(GradientNoise.fork(seed, 60), x / 8.0, y / 5.0, z / 8.0);
+            return switch (uProv) {
+                case com.seaweed.grandatlas.core.Passages.ROCK_CHALK -> n > 0.3 ? DIORITE : CALCITE;
+                case com.seaweed.grandatlas.core.Passages.ROCK_CLAY -> floor ? (n > 0.2 ? CLAY_BLOCK : PACKED_MUD) : clayBand(x, y, z);
+                default -> n > 0.25 ? ROOTED_DIRT : n > -0.35 ? DIRT : COARSE_DIRT;
+            };
+        }
+
+        /** Banded clay: terracotta in layers a block or two thick that wander a little, as clay beds do. */
+        private BlockState clayBand(int x, int y, int z) {
+            double w = y + 2.5 * GradientNoise.noise2(GradientNoise.fork(seed, 61), x / 30.0, z / 30.0);
+            int b = Math.floorMod((int) Math.floor(w / 1.7), 6);
+            return CLAY_BANDS[b];
+        }
+
         @Override
         public @Nullable BlockState tryApply(int x, int y, int z) {
             if (y < BEDROCK_TOP) return null;
             if (core != null && y < com.seaweed.grandatlas.core.Moods.TOP) {
                 BlockState skin = skin(x, y, z);
+                if (skin != null) return skin;
+            } else if (core != null && y < context.getMinSurfaceLevel() + 40) {
+                BlockState skin = upperSkin(x, y, z);
                 if (skin != null) return skin;
             }
             if (y > TOP) {

@@ -374,3 +374,35 @@ shaft whose top opens straight into a room can still go without a source (1 in 5
   with night vision (run/screenshots/deep_*.png). Dev server watchdog off in run/server.properties
   (the deep check's walks can take longer than 60 s on fresh ground).
 - Volume: every band still over the bar (deep 130%, abyss 125%). Core self-check passes.
+
+### 2026-11-19, test51: R8 and the last of the cave plan (the cave work is complete)
+
+- **R8, the abyss as another world** (client/AbyssAmbience): below y -250 the air changes, read from
+  the rock round the player (each mood wears its own rock in the abyss): awe, faint drifting motes
+  and a far-off amethyst chime; fear, falling ash and the deltas' rumble; cozy, rising embers and the
+  crimson forest's murmur; clever, glints and the warped forest's whisper; horror, souls rising off
+  the ground, the soul valley's wail, now and then a heartbeat. Sparse and faint; sounds pitched low.
+  Client only (works on any server). Fog isn't used: Distant Horizons turns vanilla fog off.
+- **Upper cave rock** (core/Passages `rockProvince`, world/Strata `upperSkin`): above the deep, caves
+  in chalk country have white calcite and diorite walls, in clay country banded terracotta over clay
+  and packed-mud floors, in soil country (shallow caves only, within 34 of the ground) dirt, coarse
+  and rooted dirt with roots hanging from the roofs; each about a sixth of the land. The skins use
+  the noodle-free carve (`carveWalls`), so they don't pay for the noodles' noise; the deep's mood
+  skins too. Chalk and clay are stone-ore replaceable. DeepCheck "upper cave rock": chalk walls 73-100%
+  calcite/diorite where sampled.
+- **Green at the mouths** (world/DeepDetail `upperDetail`): cave floors within a few blocks of an
+  opening to the sky take grass, moss and ferns.
+- **Cenotes join the caves** (core/Karst): a dry side passage leaves a cenote's wall 3.5 above its
+  pool for the nearest karst junction: from the caves you come out on a ledge over the pool; nothing
+  drains.
+- **Fixes:** spawner dens are focal pieces only and the deep's dungeons went from 35 to 24 a chunk
+  column (DeepCheck: 26 -> 11 spawners per 45 chunks); the colossus's ribs are gap-free lines four
+  apart; the "hanging" river water was a set piece's held lake (on purpose; DeepCheck no longer
+  counts held water); cave-biome dressing leaves spiral galleries clear (a magma chamber's basalt
+  columns had blocked a ledge).
+- Checks: core self-check passes; DeepCheck on fresh ground: 0 hanging water, all four spirals tested
+  walkable top to bottom in the world; dev-client screenshots of a spiral and a colossus (with the
+  new ribs).
+
+Not done by design: mood-coloured fog (DH disables vanilla fog); abyss-only mobs (the Crystal Eel and
+Potted Monster from the mob session cover cave life).

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:calcite",
+    "minecraft:packed_mud",
+    "minecraft:terracotta",
+    "minecraft:brown_terracotta",
+    "minecraft:white_terracotta",
+    "minecraft:light_gray_terracotta",
+    "minecraft:orange_terracotta"
+  ]
+}

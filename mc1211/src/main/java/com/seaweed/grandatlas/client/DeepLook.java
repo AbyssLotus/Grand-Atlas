@@ -24,6 +24,8 @@ public final class DeepLook {
     private static volatile double[] spiral; // x top z bottom radius
     private static volatile double[] story;  // focal x y z, room yaw, room width
     private static volatile String storyKind = "";
+    private static volatile double[] rock;    // an upper cave in chalk or clay country: x y z, heading
+    private static volatile String rockKind = "";
 
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
@@ -38,7 +40,7 @@ public final class DeepLook {
                 server("effect give @s night_vision infinite 0 true");
                 server("time set noon");
                 server("gamerule doDaylightCycle false");
-                String[] at = System.getProperty("grandatlas.deepLookAt", "-20000,140000").split(",");
+                String[] at = System.getProperty("grandatlas.deepLookAt", "70000,52000").split(",");
                 server("tp @s " + at[0] + " 100 " + at[1]);
             }
             case 100 -> find();
@@ -62,7 +64,13 @@ public final class DeepLook {
             case 2500 -> { if (f != null) shot("deep_story_" + storyKind.replace(' ', '_')); }
             case 2510 -> { if (f != null) tp(f[0] + 6, f[1] + 9, f[2] + 6, 135, 40); }
             case 2900 -> { if (f != null) shot("deep_story_" + storyKind.replace(' ', '_') + "_2"); }
-            case 2920 -> mc.stop();
+            case 2910 -> {
+                double[] k = rock;
+                if (k == null) return;
+                tp(k[0], k[1], k[2], (float) Math.toDegrees(k[3]) - 90, 10);
+            }
+            case 3400 -> { if (rock != null) shot("deep_rock_" + rockKind); }
+            case 3420 -> mc.stop();
             default -> { }
         }
     }
@@ -92,6 +100,26 @@ public final class DeepLook {
                     bd = d;
                     best = rm;
                     bestKind = k;
+                }
+            }
+            // an upper cave in chalk or clay country: a passage piece well under the ground there
+            outer:
+            for (int ring = 0; ring < 24; ring++) {
+                for (int k = 0; k < 8 * Math.max(1, ring); k++) {
+                    double a = k * 2 * Math.PI / (8 * Math.max(1, ring)), rx = cx + Math.cos(a) * ring * 64, rz = cz + Math.sin(a) * ring * 64;
+                    int prov = core.passages().rockProvince((int) rx, (int) rz);
+                    if (prov != com.seaweed.grandatlas.core.Passages.ROCK_CHALK && prov != com.seaweed.grandatlas.core.Passages.ROCK_CLAY) continue;
+                    List<double[]> pieces = new ArrayList<>();
+                    core.passages().piecesNear(rx, rz, 40, pieces);
+                    for (double[] g : pieces) {
+                        double mx = (g[0] + g[3]) / 2, my = (g[1] + g[4]) / 2, mz = (g[2] + g[5]) / 2;
+                        double ground = core.column((int) mx, (int) mz).height();
+                        if (g[6] > 1 || g[7] < 3 || my < -60 || my > ground - 14) continue; // a tube or canyon, roomy, above the deep, under the ground
+                        if (core.passages().rockProvince((int) mx, (int) mz) != prov) continue;
+                        rock = new double[] {mx, my, mz, Math.atan2(g[5] - g[2], g[3] - g[0])};
+                        rockKind = prov == com.seaweed.grandatlas.core.Passages.ROCK_CHALK ? "chalk" : "clay";
+                        break outer;
+                    }
                 }
             }
             if (best != null) {

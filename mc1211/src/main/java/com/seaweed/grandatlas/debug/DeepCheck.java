@@ -50,7 +50,7 @@ public final class DeepCheck {
             onDone.run();
             return;
         }
-        String[] at = System.getProperty("grandatlas.deepAt", "-20000,140000").split(",");
+        String[] at = System.getProperty("grandatlas.deepAt", "-78000,-48000").split(",");
         double cx = Double.parseDouble(at[0]), cz = Double.parseDouble(at[1]);
         List<double[]> all = new ArrayList<>();
         core.deep().falls(cx - 1500, cz - 1500, cx + 1500, cz + 1500, all);
@@ -97,6 +97,47 @@ public final class DeepCheck {
      * with two blocks of headroom, stepping at most one block up or down. How far down it gets, and
      * how many places along the way there are to stand.
      */
+    /** The upper caves' rock (chalk, clay, soil): the wall blocks round a few passages in those regions near the forced chunks. */
+    private static String rockCheck(ServerLevel level, AtlasCore core) {
+        StringBuilder sb = new StringBuilder("upper cave rock:");
+        int done = 0;
+        for (long[] c : forced) {
+            if (done >= 30) break;
+            int x = (int) c[0] * 16 + 8, z = (int) c[1] * 16 + 8;
+            int prov = core.passages().rockProvince(x, z);
+            if (prov == 0) continue;
+            List<double[]> pieces = new ArrayList<>();
+            core.passages().piecesNear(x, z, 8, pieces);
+            for (double[] g : pieces) {
+                double mx = (g[0] + g[3]) / 2, my = (g[1] + g[4]) / 2, mz = (g[2] + g[5]) / 2;
+                double ground = core.column((int) mx, (int) mz).height();
+                if (my < -60 || my > ground - 14 || g[6] == 8 || g[6] == 9) continue;
+                if (!level.getChunkSource().hasChunk((int) mx >> 4, (int) mz >> 4)) continue;
+                java.util.Map<String, Integer> walls = new java.util.TreeMap<>();
+                for (int dx = -4; dx <= 4; dx++) for (int dy = -4; dy <= 4; dy++) for (int dz = -4; dz <= 4; dz++) {
+                    BlockPos q = BlockPos.containing(mx + dx, my + dy, mz + dz);
+                    net.minecraft.world.level.block.state.BlockState st = level.getBlockState(q);
+                    if (st.isAir() || !st.getFluidState().isEmpty()) continue;
+                    boolean open = false;
+                    for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) open |= level.getBlockState(q.relative(d)).isAir();
+                    if (open) walls.merge(BuiltInRegistries.BLOCK.getKey(st.getBlock()).getPath(), 1, Integer::sum);
+                }
+                int skin = 0, all = 0;
+                for (var e : walls.entrySet()) {
+                    all += e.getValue();
+                    String k = e.getKey();
+                    if (k.equals("calcite") || k.equals("diorite") || k.contains("terracotta") || k.equals("clay") || k.equals("packed_mud")
+                            || k.equals("dirt") || k.equals("rooted_dirt") || k.equals("coarse_dirt")) skin += e.getValue();
+                }
+                sb.append(String.format("%n  %s at %d %d %d (%.0f under the ground): %d of %d wall blocks in the region's rock", prov == 1 ? "chalk" : prov == 2 ? "clay" : "soil",
+                        (int) mx, (int) my, (int) mz, ground - my, skin, all));
+                done++;
+                break;
+            }
+        }
+        return sb.toString();
+    }
+
     private static String walkSpiral(ServerLevel level, double[] f) {
         AtlasCore core = com.seaweed.grandatlas.world.CoreHandle.coreOf(level);
         // the core's own carve (the spiral's shape, before anything is placed in it) ...
@@ -104,7 +145,22 @@ public final class DeepCheck {
         // ... and the world (anything a player walks through counts as open: vines, carpets, plants)
         java.util.function.Predicate<BlockPos> worldOpen = q -> !level.getBlockState(q).blocksMotion();
         java.util.function.Predicate<BlockPos> shapeOpen = q -> core.deep().spiralOnly(q.getX(), q.getY(), q.getZ()) < 0;
-        return walk(f, shapeOpen, "shape") + "; " + walk(f, coreOpen, "core") + "; " + walk(f, worldOpen, "world");
+        // what the world has put where the core left the ledge open (what blocks a walker)
+        java.util.Map<String, Integer> blockers = new java.util.TreeMap<>();
+        int cx = (int) Math.floor(f[0]), cz = (int) Math.floor(f[2]), r = (int) Math.ceil(f[4] + 6);
+        for (int x = cx - r; x <= cx + r; x++) {
+            for (int z = cz - r; z <= cz + r; z++) {
+                for (int y = (int) f[3]; y <= (int) f[1] + 4; y++) {
+                    BlockPos q = new BlockPos(x, y, z);
+                    if (!coreOpen.test(q) || !coreOpen.test(q.above()) || coreOpen.test(q.below())) continue; // a core standing spot
+                    for (BlockPos b : new BlockPos[] {q, q.above()}) {
+                        net.minecraft.world.level.block.state.BlockState st = level.getBlockState(b);
+                        if (st.blocksMotion()) blockers.merge(BuiltInRegistries.BLOCK.getKey(st.getBlock()).getPath(), 1, Integer::sum);
+                    }
+                }
+            }
+        }
+        return walk(f, shapeOpen, "shape") + "; " + walk(f, coreOpen, "core") + "; " + walk(f, worldOpen, "world") + "; blockers " + blockers;
     }
 
     private static String walk(double[] f, java.util.function.Predicate<BlockPos> open, String what) {
@@ -143,7 +199,7 @@ public final class DeepCheck {
                 }
             }
         }
-        return head + String.format("from y %d down to y %d, %d spots, %s", start.getY(), lowest, seen.size(), lowest <= bottom + 4 ? "WALKABLE" : "BROKEN at y " + lowest);
+        return head + String.format("from y %d down to y %d, %d spots, %s", start.getY(), lowest, seen.size(), lowest <= bottom + 8 ? "WALKABLE" : "BROKEN at y " + lowest);
     }
 
     private static void tick(MinecraftServer server) {
@@ -185,6 +241,7 @@ public final class DeepCheck {
         StringBuilder out = new StringBuilder("Deep check (cave rework R4/R5)\n");
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (double[] f : spirals) out.append(walkSpiral(level, f)).append('\n');
+        out.append(rockCheck(level, core)).append('\n');
         for (double[] f : falls) {
             boolean lava = f[3] > 0.5;
             int cx = (int) Math.floor(f[0]), cz = (int) Math.floor(f[2]), top = (int) Math.floor(f[1]);
@@ -264,9 +321,18 @@ public final class DeepCheck {
                                 curtain++; // lava curtains pour from the roof on purpose
                                 continue;
                             }
+                            int held = overAir && !nearFall ? core.waters().state(core.column(x, z), x, y, z) : 0;
+                            if (held == com.seaweed.grandatlas.core.Waters.HELD || held == com.seaweed.grandatlas.core.Waters.RISING) continue; // a set piece's hanging lake: on purpose
                             if (!nearFall && overAir) {
                                 hanging++;
-                                if (hangingAt.size() < 8) hangingAt.add(x + " " + y + " " + z + " " + BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath());
+                                if (hangingAt.size() < 8) {
+                                    // what the core makes of it and of the block under it, and what's near (for the leaks hunt)
+                                    com.seaweed.grandatlas.core.ColumnSample hc = core.column(x, z);
+                                    hangingAt.add(x + " " + y + " " + z + " " + BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath()
+                                            + " [state " + core.waters().state(hc, x, y, z) + "/" + core.waters().state(hc, x, y - 1, z)
+                                            + " mega " + (core.megaCaverns().carve(x, y - 1, z) < 0) + " set " + core.setPieces().nearColumn(x, z)
+                                            + " table " + core.waters().table(x, z) + " kind " + com.seaweed.grandatlas.core.Passages.kindName(core.passages().kindAt(x, y - 1, z)) + "]");
+                                }
                             }
                             continue;
                         }

@@ -509,8 +509,32 @@ public final class Karst {
         }
 
         // ---- the ways in: the sinkholes' shafts, and the swallet
+        // Cenotes keep their pools: a dry side passage leaves the shaft's wall 3.5 above the water (the
+        // pool stands extra over the floor, 8-14 under the rim) and runs to the nearest junction, so
+        // from the caves you come out on a ledge over the pool, and nothing drains (2026-11-19).
         for (MicroFeature m : site.micros()) {
-            if (m.kind != MicroKind.SINKHOLE) continue; // cenotes keep their pools (whose level is only known later)
+            if (m.kind != MicroKind.CENOTE) continue;
+            double y = m.ground - m.h + m.extra + 3.5;
+            Node best = null;
+            double bd = Double.MAX_VALUE;
+            for (List<Node> nodes : trees) {
+                for (Node n : nodes) {
+                    if (n.y > y - 4 || n.y < y - 60 || (n == root && spring != null)) continue;
+                    double dd = Math.hypot(n.x - m.x, n.z - m.z) + 0.3 * (y - n.y);
+                    if (dd < bd) {
+                        bd = dd;
+                        best = n;
+                    }
+                }
+            }
+            if (best == null || bd > 160) continue;
+            double dx = best.x - m.x, dz = best.z - m.z, dl = Math.max(1, Math.hypot(dx, dz));
+            double sx = m.x + dx / dl * m.r * 0.85, sz = m.z + dz / dl * m.r * 0.85;
+            walk(out, sx, y, sz, best.x, best.y + 2, best.z, GradientNoise.hash(h ^ 0xCE0L, (int) m.x, (int) m.z),
+                    Style.tube(2.3, 0.8, 0.5).open().wetOk().at(-1), null);
+        }
+        for (MicroFeature m : site.micros()) {
+            if (m.kind != MicroKind.SINKHOLE) continue; // (cenotes: above)
             double top = m.ground - m.h + 2;
             Node best = null;
             double bd = Double.MAX_VALUE;

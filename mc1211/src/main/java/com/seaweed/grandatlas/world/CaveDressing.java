@@ -121,7 +121,7 @@ public record CaveDressing() implements AtlasFeature {
                 for (int y = qy0 * 4; y <= qy1 * 4 + 3; y++) {
                     BlockState here = level.getBlockState(pos.set(x, y, z));
                     BiomeKind b = cells[((y >> 2) - qy0) * 16 + (dz >> 2) * 4 + (dx >> 2)];
-                    if (b != null && here.isAir()) {
+                    if (b != null && here.isAir() && !core.passages().inSpiral(x, y, z)) { // (a spiral's ledge stays clear: its spikes blocked the way)
                         boolean floor = solid(below);
                         boolean ceiling = solid(level.getBlockState(pos.set(x, y + 1, z)));
                         dress(level, core, c, b, x, y, z, floor, ceiling);

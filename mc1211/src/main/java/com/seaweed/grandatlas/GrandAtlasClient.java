@@ -29,6 +29,9 @@ public class GrandAtlasClient {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
                     e -> com.seaweed.grandatlas.client.KarstCheck.tick());
         }
+        // The abyss's own air (cave rework R8): particles and sound by the rock round the player.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+                e -> com.seaweed.grandatlas.client.AbyssAmbience.tick());
         if (Boolean.getBoolean("grandatlas.deepLook")) {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
                     e -> com.seaweed.grandatlas.client.DeepLook.tick());

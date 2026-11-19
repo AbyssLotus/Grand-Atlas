@@ -1104,7 +1104,7 @@ ORES = {
     "ore_gravel":         (None, ("count", 14, 56)),
     "amethyst_geode":     (U(-506, 30), ("rarity", 24, 4)),
     "fossil_lower":       (None, ("rarity", 64, 7)),
-    "monster_room_deep":  (None, ("count", 4, 35)),
+    "monster_room_deep":  (None, ("count", 4, 24)),  # (was 35: spawners crowded the deep with the rooms' dens, 2026-11-19)
     "spring_water":       (None, ("count", 25, 69)),
 }
 # Deep riches (Terraria's rule: deeper is richer): (configured ore, placements a chunk in the deep, in the abyss).
@@ -1218,6 +1218,10 @@ def respread(jar):
     write("data/minecraft/tags/block/base_stone_overworld.json", {"replace": False, "values": ["minecraft:blackstone", "minecraft:basalt"]})
     # + the deep's mood wall skins (world/Strata): without them ores could not form in any cave wall below
     # -64, 2.4 showing per 1000 wall blocks against 9.5 above (DeepCheck, 2026-11-18: the user, "no ores").
+    # + the upper caves' chalk and clay walls (world/Strata upperSkin), so ores still show in them.
+    write("data/minecraft/tags/block/stone_ore_replaceables.json", {"replace": False, "values": ["minecraft:calcite", "minecraft:packed_mud",
+        "minecraft:terracotta", "minecraft:brown_terracotta", "minecraft:white_terracotta", "minecraft:light_gray_terracotta",
+        "minecraft:orange_terracotta"]})
     write("data/minecraft/tags/block/deepslate_ore_replaceables.json", {"replace": False, "values": ["minecraft:blackstone", "minecraft:basalt",
         "minecraft:calcite", "minecraft:dripstone_block", "minecraft:smooth_basalt", "minecraft:packed_mud", "minecraft:sculk",
         "minecraft:obsidian", "minecraft:soul_soil"]})

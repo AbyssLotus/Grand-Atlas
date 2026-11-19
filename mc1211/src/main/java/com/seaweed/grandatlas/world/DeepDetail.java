@@ -57,6 +57,7 @@ public record DeepDetail() implements AtlasFeature {
         core.passages().rooms(x0, z0, x0 + 16, z0 + 16, true, here);
         for (Rooms.Room rm : meet) placed |= ambient(level, rm, x0, z0);
         for (Rooms.Room rm : here) placed |= dress(level, core, rm);
+        placed |= upperDetail(level, core, random, x0, z0);
         int deep = 0, abyss = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int t = 0; t < 160 && (deep < DEEP || abyss < ABYSS); t++) {
@@ -364,18 +365,28 @@ public record DeepDetail() implements AtlasFeature {
             if (((int) Math.floor(t)) % 3 == 0) any |= put(level, x0, z0, p.above(), bone);
         }
         // ribs: arches over the spine from floor to floor, a few missing or snapped short
-        for (double t = -len * 0.28; t <= len * 0.3; t += 3) {
-            if (r.nextInt(6) == 0) continue;
+        // (drawn as gap-free one-block lines, four apart, so each rib reads as a rib: the first
+        // version's staircase arcs three apart read as a heap, test50)
+        for (double t = -len * 0.28; t <= len * 0.3; t += 4) {
             double u = t / (len / 2);
             double span = (4 + len * 0.16) * Math.sqrt(Math.max(0.2, 1 - u * u));
             double h = hr * Math.sqrt(Math.max(0.3, 1 - u * u));
-            double broken = r.nextInt(4) == 0 ? 0.35 + r.nextDouble() * 0.4 : 1; // how much of the arch is left
+            double broken = r.nextInt(7) == 0 ? 0.4 + r.nextDouble() * 0.3 : 1; // now and then one side snapped short
+            int ribX = (int) Math.floor(at.getX() + 0.5 + ux * t), ribZ = (int) Math.floor(at.getZ() + 0.5 + uz * t);
             for (int side = -1; side <= 1; side += 2) {
                 double phiEnd = Math.PI / 2 * (side == 1 ? broken : 1);
-                for (double phi = 0; phi <= phiEnd; phi += 0.06) {
+                BlockPos last = null;
+                int steps = (int) Math.ceil((span + h) * 2.5);
+                for (int k = 0; k <= steps; k++) {
+                    double phi = phiEnd * (1 - (double) k / steps); // from the floor up to the top of the arch
                     double lat = span * Math.cos(phi) * side, ht = h * Math.sin(phi);
-                    BlockPos p = BlockPos.containing(at.getX() + 0.5 + ux * t + px * lat, fy + ht, at.getZ() + 0.5 + uz * t + pz * lat);
+                    BlockPos p = BlockPos.containing(ribX + 0.5 + px * lat, fy + ht, ribZ + 0.5 + pz * lat);
+                    if (last != null && p.distManhattan(last) > 1) {
+                        // fill the step so the line stays joined face to face
+                        any |= put(level, x0, z0, new BlockPos(p.getX(), last.getY(), p.getZ()), bone);
+                    }
                     any |= put(level, x0, z0, p, bone);
+                    last = p;
                 }
             }
         }
@@ -584,6 +595,56 @@ public record DeepDetail() implements AtlasFeature {
                     any = true;
                 }
             }
+        }
+        return any;
+    }
+
+    // ---- the upper caves: roots in soil country, green at the mouths (2026-11-19)
+
+    /**
+     * In the soil caves (core/Passages rockProvince), roots hang from the dirt roofs; and on any cave
+     * floor within a few blocks of an opening to the sky, grass, moss and ferns take hold where the
+     * light gets in.
+     */
+    private static boolean upperDetail(WorldGenLevel level, AtlasCore core, RandomSource r, int x0, int z0) {
+        boolean any = false;
+        int prov = core.passages().rockProvince(x0 + 8, z0 + 8);
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int t = 0; t < 48; t++) {
+            int x = x0 + r.nextInt(16), z = z0 + r.nextInt(16);
+            int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+            int y = top - 3 - r.nextInt(32);
+            if (y < AtlasCore.MIN_Y + 20 || !level.getBlockState(p.set(x, y, z)).isAir()) continue;
+            if (core.passages().carve(core.column(x, z), x, y, z) >= 0) continue;
+            int roof = roofAt(level, x, y, z);
+            if (prov == com.seaweed.grandatlas.core.Passages.ROCK_SOIL && top - y < 34 && roof != Integer.MIN_VALUE) {
+                BlockState above = level.getBlockState(p.set(x, roof + 1, z));
+                if (above.is(Blocks.DIRT) || above.is(Blocks.ROOTED_DIRT) || above.is(Blocks.COARSE_DIRT)) {
+                    int len = 1 + r.nextInt(3);
+                    for (int i = 0; i < len; i++) {
+                        if (!level.getBlockState(p.set(x, roof - i, z)).isAir()) break;
+                        level.setBlock(p, Blocks.HANGING_ROOTS.defaultBlockState(), 2);
+                    }
+                    any = true;
+                }
+            }
+            // near an opening to the sky? (a column within 4 whose open air comes down near this height)
+            BlockPos fl = floorNear(level, x, y, z);
+            if (fl == null || top - fl.getY() > 24) continue;
+            boolean lit = false;
+            for (int k = 0; k < 8 && !lit; k++) {
+                int sx = x + (k % 3 - 1) * 4, sz = z + (k / 3 - 1) * 4;
+                lit = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, sx, sz) <= fl.getY() + 3;
+            }
+            if (!lit) continue;
+            BlockPos bed = fl.below();
+            if (!stone(level, bed) && !level.getBlockState(bed).is(Blocks.DIRT)) continue;
+            if (!level.getFluidState(fl).isEmpty()) continue;
+            level.setBlock(bed, (r.nextInt(3) == 0 ? Blocks.MOSS_BLOCK : Blocks.GRASS_BLOCK).defaultBlockState(), 2);
+            int roll = r.nextInt(5);
+            if (roll == 0) level.setBlock(fl, Blocks.SHORT_GRASS.defaultBlockState(), 2);
+            else if (roll == 1) level.setBlock(fl, Blocks.FERN.defaultBlockState(), 2);
+            any = true;
         }
         return any;
     }
@@ -813,7 +874,7 @@ public record DeepDetail() implements AtlasFeature {
                 case 0 -> sculk(level, r, at, r.nextInt(4) == 0);
                 case 1 -> veinWeb(level, r, at);
                 case 2 -> infested(level, r, at);
-                default -> r.nextInt(3) == 0 ? spawnerDen(level, r, at) : bones(level, r, at, false);
+                default -> bones(level, r, at, false); // (spawner dens are focal pieces only now: 26 a 45-chunk sample was too many)
             };
         };
     }

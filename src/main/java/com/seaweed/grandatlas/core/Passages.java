@@ -54,7 +54,7 @@ public final class Passages {
     static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7, ROOM = 8, SPIRAL = 9;
 
     private final AtlasCore core;
-    private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed, noodleSeed;
+    private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed, noodleSeed, rockSeed;
     private final ThreadLocal<Caches> caches = ThreadLocal.withInitial(Caches::new);
 
     Passages(AtlasCore core, long seed) {
@@ -67,6 +67,25 @@ public final class Passages {
         boreSeed = GradientNoise.fork(seed, 6);
         riftSeed = GradientNoise.fork(seed, 7);
         noodleSeed = GradientNoise.fork(seed, 8);
+        rockSeed = GradientNoise.fork(seed, 9);
+    }
+
+    // ---- the upper caves' rock (2026-11-19: the last of the cave plan's provinces)
+
+    public static final int ROCK_PLAIN = 0, ROCK_CHALK = 1, ROCK_CLAY = 2, ROCK_SOIL = 3;
+
+    /**
+     * The rock the caves above the deep are cut in, by broad region (about a kilometre across):
+     * chalk (white: calcite and diorite), clay (banded terracotta over clay floors), soil (dirt and
+     * roots, only in the shallow caves: world/Strata limits it), or plain stone. Most country is
+     * plain; each kind covers roughly a sixth. world/Strata skins the walls, world/DeepDetail hangs
+     * the soil caves' roots.
+     */
+    public int rockProvince(int x, int z) {
+        double a = GradientNoise.noise2(rockSeed, x / 1100.0, z / 1100.0);
+        if (a > 0.3) return ROCK_CHALK;
+        if (a < -0.3) return ROCK_CLAY;
+        return GradientNoise.noise2(rockSeed ^ 0x501L, x / 700.0, z / 700.0) > 0.28 ? ROCK_SOIL : ROCK_PLAIN;
     }
 
     // ---- geometry
@@ -844,6 +863,15 @@ public final class Passages {
     }
 
     public double carve(ColumnSample c, int x, int y, int z) {
+        return carve(c, x, y, z, true);
+    }
+
+    /** As {@link #carve}, without the noodles: for the wall skins (world/Strata), which a noodle doesn't need and which would pay for its noise on every block. */
+    public double carveWalls(ColumnSample c, int x, int y, int z) {
+        return carve(c, x, y, z, false);
+    }
+
+    private double carve(ColumnSample c, int x, int y, int z, boolean noodles) {
         Caches cc = caches.get();
         if (x != cc.cx || z != cc.cz) column(cc, x, z);
         // No passage through a cavern lake's bed (8 blocks of it kept) or its water.
@@ -852,7 +880,7 @@ public final class Passages {
         double cover = c.height() - y;
         boolean wet = c.nearWater() || c.isOcean() || !Double.isNaN(c.water());
         boolean shallow = cover < (wet ? 26 : 10);
-        double best = shallow ? Caves.NONE : noodle(x, y, z);
+        double best = shallow || !noodles ? Caves.NONE : noodle(x, y, z);
         if (best < 0.5) {
             // Never under a pool or flooded passage: a noodle beneath its floor hung the water over air.
             for (int i = 0; i < cc.colCount; i++) {
