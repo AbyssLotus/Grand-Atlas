@@ -349,3 +349,28 @@ shaft whose top opens straight into a room can still go without a source (1 in 5
   or a natural list above -64), dealt out so rooms in the same 192-block square never repeat a kind;
   one to three supporting pieces near it. The old darts now dress passages only (1 deep, 2 abyss a
   chunk) and skip rooms.
+
+### 2026-11-19, test50: R6 story and life, R7 the spiral gallery
+
+- **R7, a gallery spiralling round a void** (core/Passages `SPIRAL` piece, `spiralSdf`; placed by
+  core/Deep `spiral`): an open shaft two deep levels tall (~90-115 blocks) with a ledge 5-7 wide
+  spiralling down its wall, each turn roofed by the turn above; radius and height wander with
+  noise and columns stand along the void's edge now and then, so it's a cave's spiral, not a
+  staircase. One deep cell in eight, one in three where the mood is awe or clever. Entered at the
+  top turn from a junction, left from the void's floor toward the lower level. Inside the drum only
+  the spiral carves (passages and noodles crossing it cut holes in the ledge; from outside they
+  now open into the gallery as side entrances); the bottom 6 blocks stay open for the way out.
+  Never placed where a water table over the drum reaches above its floor. Decoration skips it.
+  Checks: core probe 12/12 walkable top to bottom; DeepCheck walks the two nearest spirals in the
+  generated world (shape, core and world): both WALKABLE, ~7,000-8,400 standing spots each.
+- **R6, found places** (world/DeepDetail `story`): half the great halls and 15% of rooms over 22
+  wide hold one instead of a focal piece, by mood: a **colossus** (spine, rib arches, skull, tail,
+  half sunk; soul soil in the abyss), a **lost expedition** (cold campfire, bedrolls, barrels, a
+  crafting table, rails to nowhere, a loot chest: mineshaft above the deep, dungeon in the deep,
+  ancient city in the abyss; a skull and webs in fear), a **fungal grove** (mycelium, giant red and
+  brown mushrooms; crimson and warped under weeping vines in horror), a **root cathedral**
+  (mangrove-root columns roof to floor, rooted dirt and hanging roots, moss). No architecture.
+- New client check `deepLook` (client/DeepLook): screenshots the nearest spiral and found place
+  with night vision (run/screenshots/deep_*.png). Dev server watchdog off in run/server.properties
+  (the deep check's walks can take longer than 60 s on fresh ground).
+- Volume: every band still over the bar (deep 130%, abyss 125%). Core self-check passes.

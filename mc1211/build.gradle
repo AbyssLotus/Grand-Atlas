@@ -110,6 +110,13 @@ neoForge {
             programArgument 'join-test'
             systemProperty 'grandatlas.solutionCheck', 'true'
         }
+        // Screenshots the nearest spiral gallery (R7) and found place (R6) with night vision (client/DeepLook), then quits.
+        deepLook {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.deepLook', 'true'
+        }
         look {
             client()
             programArgument '--quickPlayMultiplayer'

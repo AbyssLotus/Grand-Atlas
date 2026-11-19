@@ -33,6 +33,8 @@ public final class DeepCheck {
     private static final int GIVE_UP = 24000;
 
     private static List<double[]> falls;
+    /** The spiral galleries (R7) checked: {x, top y, z, bottom y, radius}. */
+    private static List<double[]> spirals = new ArrayList<>();
     private static final List<long[]> forced = new ArrayList<>();
     /** Chunks still to force: one a tick, as forcing generates the chunk there and then (the watchdog stopped a whole batch). */
     private static final java.util.ArrayDeque<long[]> queue = new java.util.ArrayDeque<>();
@@ -48,7 +50,7 @@ public final class DeepCheck {
             onDone.run();
             return;
         }
-        String[] at = System.getProperty("grandatlas.deepAt", "36000,-66000").split(",");
+        String[] at = System.getProperty("grandatlas.deepAt", "-20000,140000").split(",");
         double cx = Double.parseDouble(at[0]), cz = Double.parseDouble(at[1]);
         List<double[]> all = new ArrayList<>();
         core.deep().falls(cx - 1500, cz - 1500, cx + 1500, cz + 1500, all);
@@ -72,7 +74,76 @@ public final class DeepCheck {
                 }
             }
         }
+        // R7: the two nearest spiral galleries, their whole drum loaded, walked top to bottom in the world.
+        List<double[]> sps = new ArrayList<>();
+        core.deep().spirals(cx - 3000, cz - 3000, cx + 3000, cz + 3000, sps);
+        sps.sort((a, b) -> Double.compare(Math.hypot(a[0] - cx, a[2] - cz), Math.hypot(b[0] - cx, b[2] - cz)));
+        spirals = new ArrayList<>(sps.subList(0, Math.min(2, sps.size())));
+        GrandAtlas.LOG.info("[deep check] {} spirals within 3000; checking {}", sps.size(), spirals.size());
+        for (double[] f : spirals) {
+            int fx = (int) Math.floor(f[0]) >> 4, fz = (int) Math.floor(f[2]) >> 4;
+            for (int dx = -3; dx <= 3; dx++) {
+                for (int dz = -3; dz <= 3; dz++) {
+                    queue.add(new long[] {fx + dx, fz + dz});
+                    forced.add(new long[] {fx + dx, fz + dz});
+                }
+            }
+        }
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> tick(e.getServer()));
+    }
+
+    /**
+     * Walks a spiral gallery in the world: from a standing spot on the ledge near the top, over floor
+     * with two blocks of headroom, stepping at most one block up or down. How far down it gets, and
+     * how many places along the way there are to stand.
+     */
+    private static String walkSpiral(ServerLevel level, double[] f) {
+        AtlasCore core = com.seaweed.grandatlas.world.CoreHandle.coreOf(level);
+        // the core's own carve (the spiral's shape, before anything is placed in it) ...
+        java.util.function.Predicate<BlockPos> coreOpen = q -> core.passages().carve(core.column(q.getX(), q.getZ()), q.getX(), q.getY(), q.getZ()) < 0;
+        // ... and the world (anything a player walks through counts as open: vines, carpets, plants)
+        java.util.function.Predicate<BlockPos> worldOpen = q -> !level.getBlockState(q).blocksMotion();
+        java.util.function.Predicate<BlockPos> shapeOpen = q -> core.deep().spiralOnly(q.getX(), q.getY(), q.getZ()) < 0;
+        return walk(f, shapeOpen, "shape") + "; " + walk(f, coreOpen, "core") + "; " + walk(f, worldOpen, "world");
+    }
+
+    private static String walk(double[] f, java.util.function.Predicate<BlockPos> open, String what) {
+        int cx = (int) Math.floor(f[0]), cz = (int) Math.floor(f[2]), top = (int) Math.floor(f[1]), bottom = (int) Math.floor(f[3]);
+        double rad = f[4];
+        java.util.function.Predicate<BlockPos> stand = q -> open.test(q) && open.test(q.above()) && !open.test(q.below());
+        // start from every standing spot on the ledge near the entrance (angle 0, the top turn)
+        java.util.HashSet<Long> seen = new java.util.HashSet<>();
+        java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+        BlockPos start = null;
+        for (int a = -25; a <= 25; a += 2) {
+            for (double rr = rad - 3; rr <= rad + 3; rr += 1) {
+                for (int y = top - 2; y <= top + 2; y++) {
+                    BlockPos c = new BlockPos((int) Math.floor(cx + Math.cos(Math.toRadians(a)) * rr), y, (int) Math.floor(cz + Math.sin(Math.toRadians(a)) * rr));
+                    if (stand.test(c) && seen.add(c.asLong())) {
+                        q.add(c);
+                        if (start == null) start = c;
+                    }
+                }
+            }
+        }
+        String head = String.format("spiral at %d %d (top %d, bottom %d, radius %.0f) %s: ", cx, cz, top, bottom, rad, what);
+        if (start == null) return head + "no standing spot at the top";
+        int lowest = start.getY(), starts = seen.size();
+        int lim = (int) Math.ceil(rad + 8);
+        while (!q.isEmpty() && seen.size() < 400000) {
+            BlockPos c = q.poll();
+            lowest = Math.min(lowest, c.getY());
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                for (int dy = 1; dy >= -1; dy--) {
+                    BlockPos n = c.relative(d).above(dy);
+                    if (Math.abs(n.getX() - cx) > lim || Math.abs(n.getZ() - cz) > lim || n.getY() < bottom - 4) continue;
+                    if (!stand.test(n)) continue;
+                    if (dy == 1 && !open.test(c.above(2))) continue;
+                    if (seen.add(n.asLong())) q.add(n);
+                }
+            }
+        }
+        return head + String.format("from y %d down to y %d, %d spots, %s", start.getY(), lowest, seen.size(), lowest <= bottom + 4 ? "WALKABLE" : "BROKEN at y " + lowest);
     }
 
     private static void tick(MinecraftServer server) {
@@ -113,6 +184,7 @@ public final class DeepCheck {
         AtlasCore core = com.seaweed.grandatlas.world.CoreHandle.coreOf(level);
         StringBuilder out = new StringBuilder("Deep check (cave rework R4/R5)\n");
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (double[] f : spirals) out.append(walkSpiral(level, f)).append('\n');
         for (double[] f : falls) {
             boolean lava = f[3] > 0.5;
             int cx = (int) Math.floor(f[0]), cz = (int) Math.floor(f[2]), top = (int) Math.floor(f[1]);
@@ -265,5 +337,6 @@ public final class DeepCheck {
             "sculk_shrieker", "sculk_catalyst", "sculk_vein", "infested_deepslate", "spawner", "obsidian", "crying_obsidian", "tinted_glass",
             "magma_block", "warped_nylium", "crimson_nylium", "warped_fungus", "crimson_fungus", "polished_basalt", "gilded_blackstone",
             "deepslate_copper_ore", "deepslate_iron_ore", "deepslate_gold_ore", "mossy_cobblestone", "weeping_vines", "weeping_vines_plant",
-            "clay", "cobbled_deepslate", "dripstone_block", "coarse_dirt");
+            "clay", "cobbled_deepslate", "dripstone_block", "coarse_dirt",
+            "chest", "rail", "mangrove_roots", "mycelium", "red_mushroom_block", "brown_mushroom_block", "crafting_table", "moss_block");
 }

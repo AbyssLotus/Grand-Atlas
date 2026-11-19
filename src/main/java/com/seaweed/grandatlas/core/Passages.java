@@ -51,7 +51,7 @@ public final class Passages {
     static final double BORE_CELL = 2800, RIFT_CELL = 1200;
 
     static final int LATTICE = 0, KARST = 1, SOLUTION = 2, DEEP = 3;
-    static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7, ROOM = 8;
+    static final int TUBE = 0, CANYON = 1, CRAWL = 2, SHAFT = 3, BORE = 4, CHAMBER = 5, RIFT = 6, GREAT_RIFT = 7, ROOM = 8, SPIRAL = 9;
 
     private final AtlasCore core;
     private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed, noodleSeed;
@@ -96,6 +96,33 @@ public final class Passages {
         long seed;
         /** {@link #ROOM}: the room from the library (core/Rooms). */
         Rooms.Room room;
+        /** {@link #SPIRAL}: {gallery radius, half width, height, pitch, turn direction (+1/-1), top y, bottom y}; centre in ax, az. */
+        double[] sp;
+
+        /**
+         * R7, the odd impossible passage: a gallery spiralling down round a void. Centre (x, z), the
+         * top turn's floor at top, the void's floor at bottom.
+         */
+        static Seg spiral(double x, double z, double top, double bottom, double radius, double halfW, double height, double pitch, int dir, long seed) {
+            Seg s = new Seg();
+            s.kind = SPIRAL;
+            s.sp = new double[] {radius, halfW, height, pitch, dir, top, bottom};
+            s.seed = seed;
+            s.ax = s.bx = x;
+            s.az = s.bz = z;
+            s.ay = top;
+            s.by = bottom;
+            double reach = radius + halfW + 5;
+            s.ra = s.rb = reach;
+            s.vr = 1;
+            s.minX = x - reach;
+            s.maxX = x + reach;
+            s.minZ = z - reach;
+            s.maxZ = z + reach;
+            s.minY = bottom - 3;
+            s.maxY = top + height + 8;
+            return s;
+        }
 
         /** A piece holding a library room. */
         static Seg of(Rooms.Room r) {
@@ -683,6 +710,7 @@ public final class Passages {
             case RIFT -> "rift";
             case GREAT_RIFT -> "great rift";
             case ROOM -> "room";
+            case SPIRAL -> "spiral gallery";
             default -> "none";
         };
     }
@@ -836,6 +864,7 @@ public final class Passages {
             }
         }
         if (cc.colCount == 0 || y < cc.colLo || y > cc.colHi) return best;
+        double claim = Double.NaN; // a spiral gallery's own value where it claims the block (NaN: none)
         double bx = x + 0.5, by = y + 0.5, bz = z + 0.5;
         boolean indexed = cc.colCount <= 64;
         long mask = indexed ? cc.ybins[Math.max(0, Math.min(cc.ybins.length - 1, (y - AtlasCore.MIN_Y) >> 4))] : 0;
@@ -851,6 +880,19 @@ public final class Passages {
             // wide passage cutting one poured it out over the air: DeepCheck's hanging water, test45-47).
             // Karst's own pieces are exempt: its rivers run on into dry passages by design.
             boolean guard = !Double.isNaN(cc.colWaterTop) && by <= cc.colWaterTop + 1 && Double.isNaN(s.water) && s.province != KARST;
+            if (s.kind == SPIRAL) {
+                double sv = 0.5 * spiralSdf(s, bx, by, bz);
+                if (spiralClaims(s, bx, by, bz)) {
+                    // Inside the drum only the spiral carves: passages and noodles crossing it cut holes
+                    // and dips in the ledge (DeepCheck's spiral walk, 2026-11-19); arriving from outside
+                    // they meet the gallery's outer wall and open into it as side entrances.
+                    claim = Double.isNaN(claim) ? sv : Math.min(claim, sv);
+                    continue;
+                }
+                if (sv < best && guard && poolShell(cc, bx, by, bz)) continue;
+                best = Math.min(best, sv);
+                continue;
+            }
             if (s.kind == ROOM) {
                 double rv = 0.5 * s.room.sdf(bx, by, bz); // (carve values are about half a block's distance)
                 if (rv < best && guard && poolShell(cc, bx, by, bz)) continue;
@@ -876,7 +918,7 @@ public final class Passages {
                 best = Math.min(best, (q - 1) * rmin * 0.5);
             }
         }
-        return best;
+        return Double.isNaN(claim) ? best : claim;
     }
 
     // ---- noodles (cave redesign: vanilla's thinnest caves, everywhere; the user, 2026-11-18)
@@ -917,6 +959,84 @@ public final class Passages {
         return false;
     }
 
+    /**
+     * The spiral gallery's signed distance (blocks, negative open): a void (an open shaft) with a
+     * ledge spiralling down its wall, each turn roofed by the turn above. The radius and the
+     * gallery's height wander with noise round the circle and down the shaft, and columns of rock
+     * stand along the ledge's inner edge every so often, so it is a cave's spiral, not a staircase.
+     */
+    static double spiralSdf(Seg s, double x, double y, double z) {
+        double[] p = s.sp;
+        double rc0 = p[0], w = p[1], h0 = p[2], pitch = p[3], dir = p[4], top = p[5], bottom = p[6];
+        if (y < bottom - 2 || y > top + h0 + 7) return 8;
+        double dx = x - s.ax, dz = z - s.az, r = Math.hypot(dx, dz);
+        if (r > rc0 + w + 5) return r - (rc0 + w + 5) + 3;
+        double ang = Math.atan2(dz, dx) * dir;
+        double cx = Math.cos(ang), cz = Math.sin(ang);
+        // radius and height wander (continuous round the circle: sampled on it, not on the angle)
+        double rc = rc0 + 2.6 * GradientNoise.noise3(s.seed, cx * 1.6, y / 34.0, cz * 1.6);
+        double hh = h0 + 1.2 * GradientNoise.noise3(s.seed ^ 0x5A1L, cx * 2.2, y / 25.0, cz * 2.2);
+        double rv = rc - w + 0.4; // the void's edge: the ledge opens onto it
+        double f = ang / (2 * Math.PI);
+        if (f < 0) f += 1;
+        // the turn whose floor is under this height, and the height above that floor
+        double sTurn = (top - y) / pitch - f;
+        int n = (int) Math.ceil(sTurn);
+        int last = (int) Math.floor((top - bottom) / pitch - f);
+        double gallery;
+        if (n < 0 || n > last) {
+            gallery = 8;
+        } else {
+            double hy = (n - sTurn) * pitch; // 0 on the floor .. pitch under the next floor up
+            double dr = Math.abs(r - rc) - w, dyv = Math.max(-hy, hy - hh);
+            double k = 1.2; // rounded corners
+            double ox = Math.max(dr + k, 0), oy = Math.max(dyv + k, 0);
+            gallery = Math.hypot(ox, oy) + Math.min(Math.max(dr + k, dyv + k), 0) - k;
+        }
+        double voidTop = top + h0 + 4;
+        double vd = Math.max(r - rv, Math.max(bottom - y, y - voidTop));
+        double d = Math.min(gallery, vd);
+        // columns along the ledge's inner edge, every ~8 blocks round, now and then
+        double circ = 2 * Math.PI * rv;
+        int slots = Math.max(6, (int) (circ / 8));
+        double slot = f * slots;
+        int si = (int) Math.floor(slot);
+        long ph = GradientNoise.hash(s.seed ^ 0xC01L, si, n, 0);
+        if ((ph & 0xFF) < 90) {
+            double across = (slot - si - 0.5) * circ / slots; // blocks from the slot's middle, along the edge
+            double colR = 1.0 + ((ph >>> 8) & 0xFF) / 255.0 * 0.6;
+            double pc = Math.hypot(across, r - (rv + 0.6)) - colR;
+            d = Math.max(d, -pc);
+        }
+        return d + 0.7 * GradientNoise.noise3(s.seed ^ 0x77L, x / 9.0, y / 7.0, z / 9.0);
+    }
+
+    /** Whether a point is inside a spiral gallery's drum (the void and the ledge, within the gallery's outer edge), where only it carves. */
+    static boolean spiralClaims(Seg s, double x, double y, double z) {
+        double[] p = s.sp;
+        if (y < p[6] + 6 || y > p[5] + p[2] + 6) return false; // (the bottom stays open: the way out, the lower level's passages)
+        double dx = x - s.ax, dz = z - s.az, r = Math.hypot(dx, dz);
+        if (r > p[0] + p[1] + 3) return false;
+        return r < spiralLedge(s, Math.atan2(dz, dx), y) + p[1] - 0.3;
+    }
+
+    /** Whether (x, y, z) is in a spiral gallery's drum (world/DeepDetail leaves them undressed). */
+    public boolean inSpiral(int x, int y, int z) {
+        Caches cc = caches.get();
+        if (x != cc.cx || z != cc.cz) column(cc, x, z);
+        for (int i = 0; i < cc.colCount; i++) {
+            Seg s = cc.col[i];
+            if (s.kind == SPIRAL && spiralClaims(s, x + 0.5, y + 0.5, z + 0.5)) return true;
+        }
+        return false;
+    }
+
+    /** The spiral's ledge radius (its middle) at an angle (radians, before the turn direction) and height. */
+    static double spiralLedge(Seg s, double ang, double y) {
+        double a = ang * s.sp[4];
+        return s.sp[0] + 2.6 * GradientNoise.noise3(s.seed, Math.cos(a) * 1.6, y / 34.0, Math.sin(a) * 1.6);
+    }
+
     /** Normalised distance from a segment's surface (1 on it, under 1 inside). */
     private static double shape(Seg s, double x, double y, double z) {
         double ex = s.bx - s.ax, ey = s.by - s.ay, ez = s.bz - s.az;
@@ -925,6 +1045,7 @@ public final class Passages {
         double ox = x - (s.ax + ex * t), oy = y - (s.ay + ey * t), oz = z - (s.az + ez * t);
         double r = s.ra + (s.rb - s.ra) * t;
         if (s.kind == ROOM) return 1 + s.room.sdf(x, y, z) / 4;
+        if (s.kind == SPIRAL) return 1 + spiralSdf(s, x, y, z) / 4;
         switch (s.kind) {
             case BORE -> {
                 // Round, with faint rings like a worm's segments.

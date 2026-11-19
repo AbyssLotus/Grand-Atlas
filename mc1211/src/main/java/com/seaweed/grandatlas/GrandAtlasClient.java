@@ -29,6 +29,10 @@ public class GrandAtlasClient {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
                     e -> com.seaweed.grandatlas.client.KarstCheck.tick());
         }
+        if (Boolean.getBoolean("grandatlas.deepLook")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+                    e -> com.seaweed.grandatlas.client.DeepLook.tick());
+        }
         if (Boolean.getBoolean("grandatlas.solutionCheck")) {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
                     e -> com.seaweed.grandatlas.client.SolutionCheck.tick());

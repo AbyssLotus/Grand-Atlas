@@ -37,6 +37,7 @@ Realism is the means, not the end. Real geology keeps the world believable (wate
 | Pandora Wilds | **Folded in**: terrain, plants, glow blocks, giant trees, vines and bridges. **Dropped**: the ikran and its nests (mobs), and the wasteland clearing, mining facility and open-pit mine (structures). The Pandora Wilds jar retires. |
 | Tectonic | Replaced. Declared `incompatible` in `neoforge.mods.toml`. |
 | Terralith | **Replaced** (along with Terralith ReStoned). The Terralith biomes you like get rebuilt as our own originals; see §13. Declared `incompatible`. |
+| Nether (2026-11-19) | **Plan A** ([NETHER_PLAN.md](NETHER_PLAN.md), research in [NETHER_RESEARCH.md](NETHER_RESEARCH.md)): vanilla's Nether shape and biomes kept, roof raised to 251–255 (terrain 0–256, dimension 0–319, logical height 256), vanilla lava sea kept (top at Y 31), and one perched lava lake per 512-block cell falling into a big lake below. Not started. |
 | BOP, BWG | Integrated through TerraBlender (§12). On 26.3 (checked 2026-10-29), **TerraBlender and BOP have builds; BWG doesn't yet** (its newest NeoForge build is 1.21.11). The integration is generic, so BWG works as soon as it ports. |
 
 ## 3. World frame
@@ -467,6 +468,7 @@ Openness falls steeply with bias. A bias of 0.1 roughly halves it, and 0.5 close
 | **M6** | **Fantasy.** Pandora fold-in (islands as terrain), elven wood, volcanic wastes with lava rivers, misty peaks, enchanted valley; the floating mini-continent macro. | The same. |
 | **M7** | **Underground, down to Y=-512** (the user's requirement, 2026-11-03; see MICRO_FEATURES.md §8). The floor moves from -128 to -512 and the underground becomes a second terrain domain: connected cave networks, mega-caverns, underground rivers, lakes and seas, karst linking sinkholes to caves, 3D cave biomes that vary with height. Plus glowworm and crystal caves. | The same. |
 | **M8** | **Integration.** TerraBlender harvest (BOP now, BWG when it ports), config, structure coverage, DH check, your Terralith-inspired picks. | A 26.3 test profile generates with BOP biomes on our landforms. |
+| **N** | **The Nether, plan A** ([NETHER_PLAN.md](NETHER_PLAN.md), 1.21.1). Phases: N0 preview of the three terrain variants → N1 raised roof, feature height audit, structure checks → N2 perched lava lakes and falls → N3 headless `NetherCheck` → N4 in-game look with the pack, DH and Lumina → N5 ship. Not started. | Most 512-block cells hold a perched lake whose fall reaches the sea; no stray lava; roof at 251–255; ores as common as vanilla. |
 | **M9** | **Performance and release.** Profiling, a pregen benchmark, README, release jar. | Meets the §14 target. |
 
 ## 17. Risks and open questions

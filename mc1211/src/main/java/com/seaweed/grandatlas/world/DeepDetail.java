@@ -67,6 +67,7 @@ public record DeepDetail() implements AtlasFeature {
             ColumnSample c = core.column(x, z);
             if (core.passages().carve(c, x, y, z) >= 0 || !level.getBlockState(pos.set(x, y, z)).isAir()) continue;
             if (inRoom(meet, x, y, z)) continue; // rooms have their plans
+            if (core.passages().inSpiral(x, y, z)) continue; // spiral galleries stay clear (their ledge is the path)
             // Down to the floor (and the roof over it), within a passage's height.
             int floor = y;
             while (floor > y - 24 && level.getBlockState(pos.set(x, floor - 1, z)).isAir()) floor--;
@@ -154,6 +155,13 @@ public record DeepDetail() implements AtlasFeature {
         int fx = (int) Math.floor(f[0]), fz = (int) Math.floor(f[2]);
         Moods.Mood mood = core.moods().at(fx, rm.floorY, fz);
         boolean ab = rm.floorY < AtlasCore.ABYSS_TOP;
+        // R6: half the great halls and some big rooms hold a found place instead (a colossus, a lost
+        // expedition, a fungal grove, a root cathedral).
+        double storyChance = rm.great() ? 0.5 : rm.w > 22 ? 0.15 : 0;
+        if (storyChance > 0 && r.nextDouble() < storyChance) {
+            BlockPos at0 = floorNear(level, fx, (int) Math.floor(f[1]), fz);
+            if (at0 != null && story(level, r, rm, mood, ab, at0, Math.floorDiv(fx, 16) * 16, Math.floorDiv(fz, 16) * 16)) return true;
+        }
         V[] focal = mood == null ? F_UPPER : (ab ? F_ABYSS : F_DEEP)[mood.ordinal()];
         V[] support = mood == null ? S_UPPER : (ab ? S_ABYSS : S_DEEP)[mood.ordinal()];
         // deal the kinds out round the rooms of the square, so neighbours differ
@@ -264,6 +272,316 @@ public record DeepDetail() implements AtlasFeature {
                             any = true;
                         }
                     }
+                }
+            }
+        }
+        return any;
+    }
+
+    // ---- R6: story and life (found places, in the rooms; the user's Rule of Cool answer 6:
+    // environmental storytelling, "huge fossils and remains are in"; answer 11: cave ecosystems).
+    // Nothing here is architecture (generated buildings are never designed: docs/M7_UNDERGROUND_PLAN.md):
+    // bones, a camp's leavings, fungi, roots.
+
+    /** Debug (client/DeepLook): which found place a room's plan holds, drawn exactly as {@link #dress} draws it, or null. */
+    public static String storyOf(AtlasCore core, Rooms.Room rm) {
+        RandomSource r = RandomSource.create(rm.seed());
+        double chance = rm.great() ? 1 : rm.w > 26 ? 0.6 : 0.3;
+        if (r.nextDouble() >= chance) return null;
+        double[] f = rm.focal();
+        Moods.Mood mood = core.moods().at((int) Math.floor(f[0]), rm.floorY, (int) Math.floor(f[2]));
+        double storyChance = rm.great() ? 0.5 : rm.w > 22 ? 0.15 : 0;
+        if (storyChance <= 0 || r.nextDouble() >= storyChance) return null;
+        int pick = r.nextInt(2);
+        if (mood == null) return switch (r.nextInt(3)) {
+            case 0 -> "expedition";
+            case 1 -> "fungal grove";
+            default -> "root cathedral";
+        };
+        return switch (mood) {
+            case AWE -> "colossus";
+            case FEAR -> "expedition";
+            case COZY -> pick == 0 ? "root cathedral" : "fungal grove";
+            case CLEVER -> pick == 0 ? "colossus" : "expedition";
+            case HORROR -> pick == 0 ? "colossus" : "fungal grove";
+        };
+    }
+
+    /** Sets a block if it's in the chunks a feature may write (this one and its neighbours) and the spot is air. */
+    private static boolean put(WorldGenLevel level, int x0, int z0, BlockPos p, BlockState st) {
+        if (p.getX() < x0 - 16 || p.getX() > x0 + 31 || p.getZ() < z0 - 16 || p.getZ() > z0 + 31) return false;
+        if (!level.getBlockState(p).isAir()) return false;
+        level.setBlock(p, st, 2);
+        return true;
+    }
+
+    /** As {@link #put}, replacing natural rock instead of air. */
+    private static boolean putRock(WorldGenLevel level, int x0, int z0, BlockPos p, BlockState st) {
+        if (p.getX() < x0 - 16 || p.getX() > x0 + 31 || p.getZ() < z0 - 16 || p.getZ() > z0 + 31) return false;
+        if (!stone(level, p)) return false;
+        level.setBlock(p, st, 2);
+        return true;
+    }
+
+    /** A found place in place of the room's focal piece, by mood (null: above the deep), or false if none fits. */
+    private static boolean story(WorldGenLevel level, RandomSource r, Rooms.Room rm, Moods.Mood mood, boolean ab, BlockPos at, int x0, int z0) {
+        int pick = r.nextInt(2);
+        if (mood == null) {
+            return switch (r.nextInt(3)) {
+                case 0 -> expedition(level, r, rm, at, x0, z0, 0);
+                case 1 -> fungalGrove(level, r, rm, at, x0, z0, false);
+                default -> rootCathedral(level, r, rm, at, x0, z0);
+            };
+        }
+        return switch (mood) {
+            case AWE -> colossus(level, r, rm, at, x0, z0, ab);
+            case FEAR -> expedition(level, r, rm, at, x0, z0, ab ? 2 : 1);
+            case COZY -> pick == 0 ? rootCathedral(level, r, rm, at, x0, z0) : fungalGrove(level, r, rm, at, x0, z0, false);
+            case CLEVER -> pick == 0 ? colossus(level, r, rm, at, x0, z0, ab) : expedition(level, r, rm, at, x0, z0, ab ? 2 : 1);
+            case HORROR -> pick == 0 ? colossus(level, r, rm, at, x0, z0, ab) : fungalGrove(level, r, rm, at, x0, z0, true);
+        };
+    }
+
+    /**
+     * A colossus: the bones of something enormous lying along the room, half sunk in the floor. A
+     * spine of bone, ribs arching over it (some broken), a skull at one end, a tapering tail.
+     */
+    private static boolean colossus(WorldGenLevel level, RandomSource r, Rooms.Room rm, BlockPos at, int x0, int z0, boolean ab) {
+        double yaw = rm.yaw() + (r.nextDouble() - 0.5) * 0.6, ux = Math.cos(yaw), uz = Math.sin(yaw), px = -uz, pz = ux;
+        double len = Math.min(28, rm.w * 0.75);
+        int fy = at.getY();
+        int roof = roofAt(level, at.getX(), fy, at.getZ());
+        double hr = Math.max(3, Math.min(roof == Integer.MIN_VALUE ? 8 : roof - fy - 2, 5 + len * 0.18));
+        BlockState spineX = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Math.abs(ux) > Math.abs(uz) ? Direction.Axis.X : Direction.Axis.Z);
+        BlockState bone = Blocks.BONE_BLOCK.defaultBlockState();
+        boolean any = false;
+        // the spine, a little raised in the middle, sunk at the ends; a knob each few blocks
+        for (double t = -len / 2; t <= len / 2; t += 0.5) {
+            double u = t / (len / 2);
+            int y = fy + (int) Math.round(1.2 * (1 - u * u)) - (Math.abs(u) > 0.8 ? 1 : 0);
+            BlockPos p = BlockPos.containing(at.getX() + 0.5 + ux * t, y, at.getZ() + 0.5 + uz * t);
+            any |= put(level, x0, z0, p, spineX);
+            if (((int) Math.floor(t)) % 3 == 0) any |= put(level, x0, z0, p.above(), bone);
+        }
+        // ribs: arches over the spine from floor to floor, a few missing or snapped short
+        for (double t = -len * 0.28; t <= len * 0.3; t += 3) {
+            if (r.nextInt(6) == 0) continue;
+            double u = t / (len / 2);
+            double span = (4 + len * 0.16) * Math.sqrt(Math.max(0.2, 1 - u * u));
+            double h = hr * Math.sqrt(Math.max(0.3, 1 - u * u));
+            double broken = r.nextInt(4) == 0 ? 0.35 + r.nextDouble() * 0.4 : 1; // how much of the arch is left
+            for (int side = -1; side <= 1; side += 2) {
+                double phiEnd = Math.PI / 2 * (side == 1 ? broken : 1);
+                for (double phi = 0; phi <= phiEnd; phi += 0.06) {
+                    double lat = span * Math.cos(phi) * side, ht = h * Math.sin(phi);
+                    BlockPos p = BlockPos.containing(at.getX() + 0.5 + ux * t + px * lat, fy + ht, at.getZ() + 0.5 + uz * t + pz * lat);
+                    any |= put(level, x0, z0, p, bone);
+                }
+            }
+        }
+        // the skull: a hollow lump of bone at the head end, two eye holes, the jaw a slab beneath
+        double hx = at.getX() + 0.5 + ux * (len / 2 + 3), hz = at.getZ() + 0.5 + uz * (len / 2 + 3);
+        double sr = 3 + len * 0.05;
+        for (int dx = -5; dx <= 5; dx++) {
+            for (int dy = 0; dy <= 6; dy++) {
+                for (int dz = -5; dz <= 5; dz++) {
+                    double a = (dx * ux + dz * uz) / (sr * 1.2), b = (dx * px + dz * pz) / sr, c = (dy - sr * 0.7) / (sr * 0.8);
+                    double q = a * a + b * b + c * c;
+                    if (q > 1 || q < 0.55) continue; // a shell
+                    BlockPos p = BlockPos.containing(hx + dx, fy + dy, hz + dz);
+                    // the eyes: two holes forward, either side
+                    double fwd = dx * ux + dz * uz, lat = dx * px + dz * pz;
+                    if (fwd > sr * 0.5 && Math.abs(Math.abs(lat) - sr * 0.45) < 1 && Math.abs(dy - sr * 0.8) < 1) continue;
+                    any |= put(level, x0, z0, p, bone);
+                }
+            }
+        }
+        // the tail, tapering off behind
+        for (double t = 0; t < 6 + len * 0.3; t += 0.5) {
+            double bend = Math.sin(t / 5) * 2;
+            BlockPos p = BlockPos.containing(at.getX() + 0.5 - ux * (len / 2 + t) + px * bend, fy, at.getZ() + 0.5 - uz * (len / 2 + t) + pz * bend);
+            if (r.nextInt(5) > 0) any |= put(level, x0, z0, p, bone);
+        }
+        if (ab) { // in the abyss its bed is soul soil
+            for (int k = 0; k < 40; k++) {
+                BlockPos p = BlockPos.containing(at.getX() + (r.nextDouble() - 0.5) * len, fy - 1, at.getZ() + (r.nextDouble() - 0.5) * len);
+                putRock(level, x0, z0, p, Blocks.SOUL_SOIL.defaultBlockState());
+            }
+        }
+        return any;
+    }
+
+    /**
+     * A lost expedition: a cold campfire, bedrolls, barrels and a chest whose loot is richer the deeper
+     * it lies (Terraria's rule: deeper is riskier and richer), a crafting table, rails that go nowhere.
+     * band 0 above the deep, 1 deep, 2 abyss. In fear, someone didn't leave.
+     */
+    private static boolean expedition(WorldGenLevel level, RandomSource r, Rooms.Room rm, BlockPos at, int x0, int z0, int band) {
+        if (!level.getBlockState(at).isAir()) return false;
+        double yaw = rm.yaw() + r.nextDouble(), ux = Math.cos(yaw), uz = Math.sin(yaw), px = -uz, pz = ux;
+        boolean any = put(level, x0, z0, at, Blocks.CAMPFIRE.defaultBlockState().setValue(net.minecraft.world.level.block.CampfireBlock.LIT, false));
+        BlockState[] carpets = {Blocks.BROWN_CARPET.defaultBlockState(), Blocks.GRAY_CARPET.defaultBlockState(), Blocks.LIGHT_GRAY_CARPET.defaultBlockState()};
+        java.util.function.BiFunction<Double, Double, BlockPos> spot = (f, l) -> {
+            BlockPos q = floorNear(level, (int) Math.floor(at.getX() + 0.5 + ux * f + px * l), at.getY(), (int) Math.floor(at.getZ() + 0.5 + uz * f + pz * l));
+            return q != null && Math.abs(q.getY() - at.getY()) <= 2 ? q : null;
+        };
+        // two bedrolls
+        for (int k = 0; k < 2; k++) {
+            BlockPos b = spot.apply(-1.0 + k * 2, 3.0);
+            if (b == null) continue;
+            BlockState c = carpets[r.nextInt(carpets.length)];
+            any |= put(level, x0, z0, b, c);
+            BlockPos b2 = spot.apply(-1.0 + k * 2, 4.0);
+            if (b2 != null) put(level, x0, z0, b2, c);
+            if (band >= 1 && k == 0 && r.nextBoolean()) { // someone who didn't get up
+                BlockPos sk = spot.apply(-1.0, 2.0);
+                if (sk != null) put(level, x0, z0, sk, Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, r.nextInt(16)));
+            }
+        }
+        // barrels and the chest
+        BlockPos br = spot.apply(2.5, -2.5);
+        if (br != null) {
+            any |= put(level, x0, z0, br, Blocks.BARREL.defaultBlockState());
+            if (r.nextBoolean()) put(level, x0, z0, br.above(), Blocks.BARREL.defaultBlockState());
+        }
+        BlockPos ch = spot.apply(1.0, -3.0);
+        if (ch != null && put(level, x0, z0, ch, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING,
+                Direction.Plane.HORIZONTAL.getRandomDirection(r)))) {
+            net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> loot = switch (band) {
+                case 0 -> net.minecraft.world.level.storage.loot.BuiltInLootTables.ABANDONED_MINESHAFT;
+                case 1 -> net.minecraft.world.level.storage.loot.BuiltInLootTables.SIMPLE_DUNGEON;
+                default -> net.minecraft.world.level.storage.loot.BuiltInLootTables.ANCIENT_CITY;
+            };
+            net.minecraft.world.RandomizableContainer.setBlockEntityLootTable(level, r, ch, loot);
+            any = true;
+        }
+        BlockPos ct = spot.apply(-2.5, -2.0);
+        if (ct != null) put(level, x0, z0, ct, Blocks.CRAFTING_TABLE.defaultBlockState());
+        // rails that go nowhere, a few missing
+        for (int k = 4; k < 12; k++) {
+            if (r.nextInt(5) == 0) continue;
+            BlockPos rl = spot.apply((double) k, 0.0);
+            if (rl != null && solid(level, rl.below())) put(level, x0, z0, rl, Blocks.RAIL.defaultBlockState());
+        }
+        if (band >= 1) {
+            for (int k = 0; k < 3; k++) {
+                BlockPos w = spot.apply((r.nextDouble() - 0.5) * 8, (r.nextDouble() - 0.5) * 8);
+                if (w != null) put(level, x0, z0, w.above(1 + r.nextInt(2)), Blocks.COBWEB.defaultBlockState());
+            }
+        }
+        return any;
+    }
+
+    /** A grove of giant mushrooms over mycelium; in horror, crimson and warped growth under weeping vines. */
+    private static boolean fungalGrove(WorldGenLevel level, RandomSource r, Rooms.Room rm, BlockPos at, int x0, int z0, boolean horror) {
+        double rad = Math.max(5, Math.min(11, rm.w * 0.35));
+        boolean any = false;
+        BlockState ground = horror ? (r.nextBoolean() ? Blocks.CRIMSON_NYLIUM : Blocks.WARPED_NYLIUM).defaultBlockState() : Blocks.MYCELIUM.defaultBlockState();
+        for (int dx = (int) -rad; dx <= rad; dx++) {
+            for (int dz = (int) -rad; dz <= rad; dz++) {
+                if (dx * dx + dz * dz > rad * rad || r.nextInt(10) < 2) continue;
+                BlockPos f = floorNear(level, at.getX() + dx, at.getY(), at.getZ() + dz);
+                if (f == null || Math.abs(f.getY() - at.getY()) > 3) continue;
+                if (!putRock(level, x0, z0, f.below(), ground)) continue;
+                any = true;
+                int roll = r.nextInt(100);
+                if (horror) {
+                    if (roll < 12) put(level, x0, z0, f, (ground.is(Blocks.CRIMSON_NYLIUM) ? Blocks.CRIMSON_FUNGUS : Blocks.WARPED_FUNGUS).defaultBlockState());
+                    else if (roll < 30) put(level, x0, z0, f, (ground.is(Blocks.CRIMSON_NYLIUM) ? Blocks.CRIMSON_ROOTS : Blocks.WARPED_ROOTS).defaultBlockState());
+                    if (r.nextInt(9) == 0) {
+                        int top = roofAt(level, f.getX(), f.getY(), f.getZ());
+                        if (top != Integer.MIN_VALUE && top - f.getY() > 4) {
+                            int len = 2 + r.nextInt(Math.min(8, top - f.getY() - 2));
+                            for (int i = 0; i < len; i++) put(level, x0, z0, new BlockPos(f.getX(), top - i, f.getZ()),
+                                    (i == len - 1 ? Blocks.WEEPING_VINES : Blocks.WEEPING_VINES_PLANT).defaultBlockState());
+                        }
+                    }
+                } else if (roll < 20) {
+                    put(level, x0, z0, f, (r.nextBoolean() ? Blocks.BROWN_MUSHROOM : Blocks.RED_MUSHROOM).defaultBlockState());
+                }
+            }
+        }
+        if (!horror) {
+            int n = 2 + r.nextInt(3);
+            for (int k = 0; k < n; k++) {
+                double a = r.nextDouble() * 2 * Math.PI, d = r.nextDouble() * rad * 0.8;
+                BlockPos f = floorNear(level, (int) Math.floor(at.getX() + Math.cos(a) * d), at.getY(), (int) Math.floor(at.getZ() + Math.sin(a) * d));
+                if (f != null) any |= giantMushroom(level, r, f, x0, z0, r.nextBoolean());
+            }
+        }
+        return any;
+    }
+
+    /** A giant mushroom from the floor (as vanilla's: red, a dome; brown, a broad flat cap), if there's room. */
+    private static boolean giantMushroom(WorldGenLevel level, RandomSource r, BlockPos f, int x0, int z0, boolean red) {
+        int top = roofAt(level, f.getX(), f.getY(), f.getZ());
+        int room = top == Integer.MIN_VALUE ? 30 : top - f.getY();
+        int stem = 3 + r.nextInt(4);
+        if (room < stem + 3) return false;
+        for (int i = 0; i < stem; i++) put(level, x0, z0, f.above(i), Blocks.MUSHROOM_STEM.defaultBlockState());
+        BlockState cap = (red ? Blocks.RED_MUSHROOM_BLOCK : Blocks.BROWN_MUSHROOM_BLOCK).defaultBlockState();
+        int cy = f.getY() + stem;
+        if (red) {
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) for (int dy = -2; dy <= 0; dy++) {
+                boolean edge = Math.abs(dx) == 2 || Math.abs(dz) == 2;
+                if (dy == 0 ? (Math.abs(dx) == 2 && Math.abs(dz) == 2) : !edge || Math.abs(dx) == 2 && Math.abs(dz) == 2) continue;
+                put(level, x0, z0, new BlockPos(f.getX() + dx, cy + dy, f.getZ() + dz), cap);
+            }
+        } else {
+            for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
+                if (Math.abs(dx) == 3 && Math.abs(dz) == 3) continue;
+                put(level, x0, z0, new BlockPos(f.getX() + dx, cy, f.getZ() + dz), cap);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * A root cathedral: roots of something far above come down through the roof as columns to the
+     * floor (mangrove roots, wandering a little, flared at the foot), rooted dirt and hanging roots
+     * overhead, moss underfoot.
+     */
+    private static boolean rootCathedral(WorldGenLevel level, RandomSource r, Rooms.Room rm, BlockPos at, int x0, int z0) {
+        double rad = Math.max(5, Math.min(11, rm.w * 0.35));
+        boolean any = false;
+        int n = 3 + r.nextInt(4);
+        for (int k = 0; k < n; k++) {
+            double a = r.nextDouble() * 2 * Math.PI, d = r.nextDouble() * rad;
+            BlockPos f = floorNear(level, (int) Math.floor(at.getX() + Math.cos(a) * d), at.getY(), (int) Math.floor(at.getZ() + Math.sin(a) * d));
+            if (f == null) continue;
+            int top = roofAt(level, f.getX(), f.getY(), f.getZ());
+            if (top == Integer.MIN_VALUE) continue;
+            int x = f.getX(), z = f.getZ();
+            if (top - f.getY() > 22) { // too tall to reach the floor: a hanging root curtain instead
+                for (int i = 0; i < 4 + r.nextInt(5); i++) any |= put(level, x0, z0, new BlockPos(x, top - i, z), Blocks.HANGING_ROOTS.defaultBlockState());
+                continue;
+            }
+            for (int y = top; y >= f.getY(); y--) {
+                if ((top - y) % 4 == 3 && r.nextInt(3) == 0) {
+                    int nx = x + r.nextInt(3) - 1, nz = z + r.nextInt(3) - 1;
+                    put(level, x0, z0, new BlockPos(nx, y, nz), Blocks.MANGROVE_ROOTS.defaultBlockState()); // a step sideways
+                    x = nx;
+                    z = nz;
+                }
+                any |= put(level, x0, z0, new BlockPos(x, y, z), Blocks.MANGROVE_ROOTS.defaultBlockState());
+            }
+            for (Direction dd : Direction.Plane.HORIZONTAL) {
+                if (r.nextBoolean()) put(level, x0, z0, new BlockPos(x, f.getY(), z).relative(dd), Blocks.MANGROVE_ROOTS.defaultBlockState()); // the flared foot
+            }
+            putRock(level, x0, z0, new BlockPos(x, top + 1, z), Blocks.ROOTED_DIRT.defaultBlockState());
+        }
+        // overhead and underfoot
+        for (int dx = (int) -rad; dx <= rad; dx++) {
+            for (int dz = (int) -rad; dz <= rad; dz++) {
+                if (dx * dx + dz * dz > rad * rad || r.nextInt(3) > 0) continue;
+                BlockPos f = floorNear(level, at.getX() + dx, at.getY(), at.getZ() + dz);
+                if (f == null) continue;
+                if (putRock(level, x0, z0, f.below(), Blocks.MOSS_BLOCK.defaultBlockState()) && r.nextInt(3) == 0) put(level, x0, z0, f, Blocks.MOSS_CARPET.defaultBlockState());
+                int top = roofAt(level, f.getX(), f.getY(), f.getZ());
+                if (top != Integer.MIN_VALUE && putRock(level, x0, z0, new BlockPos(f.getX(), top + 1, f.getZ()), Blocks.ROOTED_DIRT.defaultBlockState())
+                        && r.nextBoolean()) {
+                    put(level, x0, z0, new BlockPos(f.getX(), top, f.getZ()), Blocks.HANGING_ROOTS.defaultBlockState());
+                    any = true;
                 }
             }
         }
@@ -419,6 +737,7 @@ public record DeepDetail() implements AtlasFeature {
             int x = x0 + 4 + r.nextInt(8), z = z0 + 4 + r.nextInt(8);
             int y = AtlasCore.MIN_Y + 14 + r.nextInt(Moods.TOP - AtlasCore.MIN_Y - 14);
             if (!level.getBlockState(pos.set(x, y, z)).isAir() || core.passages().carve(core.column(x, z), x, y, z) >= 0) continue;
+            if (core.passages().inSpiral(x, y, z)) continue;
             int fy = y, cy = y;
             while (fy > y - 30 && level.getBlockState(pos.set(x, fy - 1, z)).isAir()) fy--;
             while (cy < y + 40 && level.getBlockState(pos.set(x, cy + 1, z)).isAir()) cy++;

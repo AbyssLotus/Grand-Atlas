@@ -424,6 +424,11 @@ public final class Rooms {
             return noise;
         }
 
+        /** The room's turn (radians): its template's local x runs along this heading. */
+        public double yaw() {
+            return Math.atan2(sin, cos);
+        }
+
         /** True for a great hall (wider than the normal 40-block cap). */
         public boolean great() {
             return w > 40.5;

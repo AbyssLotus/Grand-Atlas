@@ -49,6 +49,8 @@ public final class Deep {
         final HashMap<Long, List<Passages.Seg>> bins = new HashMap<>();
         /** Falls down tall shafts (R5): {x, y of the top junction, z, 1 lava / 0 water, shaft radius}. */
         final List<double[]> falls = new ArrayList<>();
+        /** Spiral galleries round a void (R7): {x, top y, z, bottom y, radius}. */
+        final List<double[]> spirals = new ArrayList<>();
         double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
     }
 
@@ -307,6 +309,11 @@ public final class Deep {
             cell.falls.add(new double[] {a.x, a.y, a.z, lava ? 1 : 0, r});
         }
 
+        // R7, the odd impossible passage: now and then a gallery spiralling down round a void, two levels
+        // tall, likelier where the region's mood is awe or clever. Entered at the top from a junction,
+        // left at the bottom toward the lower level's nearest junction.
+        spiral(cell, levels, rnd, x0, z0);
+
         // Into the nearest mega-cavern: a grand passage from the junction nearest it.
         double[] mc = core.megaCaverns().nearest(x0 + CELL / 2, z0 + CELL / 2);
         if (mc != null && Math.hypot(mc[0] - (x0 + CELL / 2), mc[1] - (z0 + CELL / 2)) < CELL * 0.5 + mc[2] * 0.5 + 200) {
@@ -327,6 +334,73 @@ public final class Deep {
             }
         }
         return finish(cell);
+    }
+
+    /** Dev: {@code -Dgrandatlas.spiralAlways=true} puts a spiral in every cell (to look at one). */
+    static final boolean SPIRAL_ALWAYS = Boolean.getBoolean("grandatlas.spiralAlways");
+
+    private void spiral(Cell cell, List<List<Node>> levels, Karst.Rng rnd, double x0, double z0) {
+        if (levels.size() < 3) return;
+        Moods.Mood m = core.moods().at(x0 + CELL / 2, LEVEL_Y[2], z0 + CELL / 2);
+        double chance = 0.12 + (m == Moods.Mood.AWE || m == Moods.Mood.CLEVER ? 0.25 : 0);
+        if (!SPIRAL_ALWAYS && rnd.next() >= chance) return;
+        int k0 = (int) (rnd.next() * (levels.size() - 2)), k1 = k0 + 2;
+        List<Node> topL = levels.get(k0), botL = levels.get(k1);
+        if (topL.isEmpty() || botL.isEmpty()) return;
+        Node a = topL.get((int) (rnd.next() * topL.size()));
+        if (a.gate) return;
+        double radius = 14 + 8 * rnd.next(), halfW = 2.6 + 1.0 * rnd.next(), height = 5 + 2 * rnd.next();
+        double pitch = height + 4 + 2 * rnd.next();
+        int dir = rnd.next() < 0.5 ? 1 : -1;
+        // the spiral beside the junction, so the top turn's start is a short walk from it
+        double ang = rnd.next() * 2 * Math.PI, off = radius + 8;
+        double cx = a.x + Math.cos(ang) * off, cz = a.z + Math.sin(ang) * off;
+        double top = a.y - 1, bottom = levelY(k1, cx, cz) - 2;
+        if (top - bottom < 40) return;
+        if (ground(cx, cz) - COVER < top + height + 8) return;
+        // Never a drowned spiral, nor one a water table's edge runs through (the edge's rock seal cut the
+        // ledge: DeepCheck's spiral walk, 2026-11-19): every table over the drum stays under its floor.
+        for (int k = 0; k < 9; k++) {
+            double tx = cx + (k == 0 ? 0 : Math.cos(k * Math.PI / 4) * (radius + 8)), tz = cz + (k == 0 ? 0 : Math.sin(k * Math.PI / 4) * (radius + 8));
+            double table = core.waters().table((int) tx, (int) tz);
+            if (!Double.isNaN(table) && table > bottom - 2) return;
+        }
+        Passages.Seg sp = Passages.Seg.spiral(cx, cz, top, bottom, radius, halfW, height, pitch, dir, rnd.nextLong());
+        cell.segs.add(sp);
+        // in at the top turn's start (angle 0, turned by dir: on the +x side either way), on the ledge's middle
+        double ex = cx + Passages.spiralLedge(sp, 0, top), ez = cz + 2 * dir;
+        Karst.walk(cell.segs, a.x, a.y, a.z, ex, top + 1.5, ez, rnd.nextLong(), Karst.Style.tube(2.6 + rnd.next(), 0.8, 0.5).varied().at(-1), null);
+        // out at the bottom, from the void's floor toward the lower level's nearest junction
+        Node b = nearest(botL, cx, cz, 160);
+        if (b != null) {
+            double bx = cx + (b.x - cx) / Math.max(1, Math.hypot(b.x - cx, b.z - cz)) * (radius - 4);
+            double bz = cz + (b.z - cz) / Math.max(1, Math.hypot(b.x - cx, b.z - cz)) * (radius - 4);
+            Karst.walk(cell.segs, bx, bottom + 2, bz, b.x, b.y, b.z, rnd.nextLong(), Karst.Style.tube(2.6 + rnd.next(), 0.8, 0.5).varied().at(-1), null);
+        }
+        cell.spirals.add(new double[] {cx, top, cz, bottom, radius});
+    }
+
+    /** Debug: the spiral galleries' own distance at a point (nothing else carved), or 8 if none is near. */
+    public double spiralOnly(double x, double y, double z) {
+        double best = 8;
+        for (int cj = cellOf(z - 60); cj <= cellOf(z + 60); cj++) {
+            for (int ci = cellOf(x - 60); ci <= cellOf(x + 60); ci++) {
+                for (Passages.Seg sg : cell(ci, cj).segs) if (sg.kind == Passages.SPIRAL) best = Math.min(best, Passages.spiralSdf(sg, x + 0.5, y + 0.5, z + 0.5));
+            }
+        }
+        return best;
+    }
+
+    /** The spirals (R7) whose centres lie in the box: {x, top y, z, bottom y, radius}. */
+    public void spirals(double x0, double z0, double x1, double z1, List<double[]> out) {
+        if (OFF) return;
+        for (int cj = cellOf(z0); cj <= cellOf(z1); cj++) {
+            for (int ci = cellOf(x0); ci <= cellOf(x1); ci++) {
+                for (double[] f : cell(ci, cj).spirals) {
+                    if (f[0] >= x0 && f[0] < x1 && f[2] >= z0 && f[2] < z1) out.add(f);
+                }
+            }
+        }
     }
 
     /** The nearest solution-cave junction of the lowest level to (x, z) within r, or null. */
