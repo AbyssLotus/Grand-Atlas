@@ -2,7 +2,7 @@
 
 Version 1.0, 13 November 2026
 
-Copyright (c) 2026 AbyssLotus
+Copyright (c) 2026 AbyssLotus (W.74 on Modrinth)
 
 ## The short version
 
@@ -23,7 +23,8 @@ This summary is here to help you read the terms below. It is not part of them.
 
 ### 1. Definitions
 
-- **"The licensor"** is AbyssLotus, the author of Grand Atlas.
+- **"The licensor"** is AbyssLotus, the author of Grand Atlas, who publishes as AbyssLotus on GitHub
+  and as W.74 on Modrinth.
 - **"Grand Atlas"** is the Grand Atlas mod: its source code, compiled files, data, textures, images and
   documentation, in every version released under this license, except Third-Party Content.
 - **"Third-Party Content"** is material made by other people and listed in
@@ -36,8 +37,8 @@ This summary is here to help you read the terms below. It is not part of them.
   value for, through or because of Grand Atlas or a derivative. This includes sales, paid downloads,
   subscriptions, donations, tips, ads, platform payouts or rewards (such as Modrinth's or CurseForge's),
   sponsorships, paid access and paid perks.
-- **"Official pages"** are the Grand Atlas pages the licensor runs, such as its Modrinth project and its
-  GitHub repository at https://github.com/AbyssLotus/Grand-Atlas.
+- **"Official pages"** are the Grand Atlas pages the licensor runs: its Modrinth project, published by
+  W.74, and its GitHub repository at https://github.com/AbyssLotus/Grand-Atlas.
 - **"You"** is the person or organization using Grand Atlas under this license.
 
 ### 2. What you may do
@@ -55,7 +56,7 @@ loaders; forking it; using its code in other mods; and sharing copies free of ch
 If you share Grand Atlas or a derivative, you must:
 
 1. **Keep the license.** Include this license, or a link to it, and the copyright notice above.
-2. **Give credit.** Credit "Grand Atlas by AbyssLotus", with a link to an official page, somewhere people
+2. **Give credit.** Credit "Grand Atlas by AbyssLotus" (or "by W.74"), with a link to an official page, somewhere people
    will see it, such as the download page or README. For a modpack, listing Grand Atlas in the pack's
    mod list is enough.
 3. **Leave the name to the original.** A derivative must say that it has been changed and is not the

@@ -165,6 +165,12 @@
         "maxCount": 6,
         "minCount": 4,
         "weight": 10
+      },
+      {
+        "type": "grandatlas:crystal_eel",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 3
       }
     ],
     "water_ambient": [

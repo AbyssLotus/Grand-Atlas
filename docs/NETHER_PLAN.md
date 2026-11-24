@@ -1,5 +1,8 @@
 # Nether, plan A: a taller vanilla Nether with perched lava falls (plan, 2026-11-19)
 
+> **Dropped (the user, 2026-11-23):** all Nether plans are off. Kept for reference only; nothing here is planned.
+
+
 This is a plan only; no code has changed. It is for 1.21.1 (`mc1211/` plus the shared core). The
 background is in `docs/NETHER_RESEARCH.md`.
 

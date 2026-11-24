@@ -225,7 +225,7 @@ public final class SelfCheck {
     }
 
     /**
-     * No seams across macro edges: walk spokes from macro centres out past their reach, block by
+     * No seams across macros: walk spokes from macro centres out past their reach, block by
      * block, and bisect every steep step as in {@link #noSeams}. Cliff walls are meant to be steep.
      */
     private static void macroEdges() {
@@ -242,7 +242,9 @@ public final class SelfCheck {
                 perKind.merge(site.kind().id(), 1, Integer::sum);
                 for (int k = 0; k < 8; k++) {
                     double a = k * Math.PI / 4 + 0.3, ux = Math.cos(a), uz = Math.sin(a);
-                    double r0 = site.radius() * 0.6, r1 = site.reachBlocks() + 400;
+                    // From the centre: the M2 expansion's kinds (2026-11-23) have their landmarks inside
+                    // (a horn, a pit, a monolith, canyons), not only at the edge.
+                    double r0 = 0, r1 = site.reachBlocks() + 400;
                     double prev = core.sampleBase(site.x() + ux * r0, site.z() + uz * r0).height();
                     spokes++;
                     for (double r = r0 + 1; r <= r1; r += 1) {
@@ -270,7 +272,9 @@ public final class SelfCheck {
 
     private static double residualJumpAlong(AtlasCore core, double x0, double z0, double x1, double z1) {
         double h0 = core.sampleBase(x0, z0).height(), h1 = core.sampleBase(x1, z1).height();
-        for (int i = 0; i < 8; i++) {
+        // 12 halvings (1/4096 block): walking from macro centres meets crag faces of ~230 blocks a block,
+        // which still left 2 blocks at 8 halvings; a true seam doesn't shrink however far it's halved.
+        for (int i = 0; i < 12; i++) {
             double mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, hm = core.sampleBase(mx, mz).height();
             if (Math.abs(hm - h0) > Math.abs(h1 - hm)) {
                 x1 = mx;

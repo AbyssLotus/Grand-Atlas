@@ -4,8 +4,11 @@
     text can be pasted into Modrinth as it is. Upload docs/logo.png as the project icon; putting the
     docs/images/*.webp shots in the project's Gallery too is optional.
   - Check the version numbers and the "Versions" section against the files you upload.
-  - Updated 2026-11-13 for 0.13.0 (1.21.1 is now the main version; wonders, fantasy, the guide book
-    and a roadmap added). Read it through and edit it before publishing.
+  - Updated 2026-11-24 for 1.0.0, the first release (new macro landforms, biome mods, structure and
+    climate changes, the two creatures, roadmap after 1.0.0). Domus Mortus is not in 1.0.0 and is not
+    mentioned here. Read it through and edit it before publishing.
+  - Modrinth settings: license "Custom" with the LICENSE.md link; client and server both required;
+    loader NeoForge, game version 1.21.1; mark the version Release.
 -->
 
 ![Grand Atlas](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/logo.png)
@@ -70,6 +73,8 @@ Rare, hand-designed places generated into the world:
   the aurora itself rippling through the water above.
 - **The Worldroot** — a world tree on the surface whose roots reach down to a great hall far below.
 - **The Hollow** — a cavern of floating islands over an underground lake.
+- **The Hanging Mountains** — a cavern deep in the abyss whose roof hangs a whole mountain range upside
+  down, its icy peaks reaching down over a still lake that mirrors them.
 - **Great Geodes** and **Titan's Graves**, among others.
 
 ![The rising fall of an Aurora Vault, seen across its crystal floor](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/images/aurora_vault_lake.webp)
@@ -96,6 +101,18 @@ Rare, hand-designed places generated into the world:
 - Smaller wonders scattered through the world: crystal gardens, standing stones, floating rocks, bone
   fields of fallen giants and petrified forests.
 
+### Landforms that tower over the rest
+Rare macro landforms that make a whole region: great craters with a peak at their heart, lone
+monoliths, tilted fault blocks, shattered plateaus split by canyons, great sinkholes with forests at the
+bottom and titan horns with knife-edge ridges. And four from high fantasy: rings of stone spires,
+mountains whose strata coil like a shell, lands torn apart by chasms, and sky pillars with gardens on
+top. Sometimes one stands on another, like a spire crown rising from a plateau.
+
+### Creatures
+- **Potted Monsters** pass for houseplants among the giant mushrooms of the fungal forests, until you
+  come too close.
+- **Crystal Eels** glide through the waters of the Aurora Vaults.
+
 ### The Grand Atlas
 A guide book to the world, in the spirit of a bestiary. Every landform, wonder, site and cave biome
 has a page that starts blank and fills in as you find it, with a turning 3D model of the place and
@@ -108,8 +125,11 @@ and a compass.
 - **Named places:** every set piece, landform and landmark has a name of its own, shown as you
   arrive.
 - **A chosen spawn:** new worlds start in green country by a river or lake, with high ground in view.
-- **Every forest biome**, in families: birch woods, dark forests with pale gardens inside them,
-  flower forests and cherry groves side by side, old growth taiga, bamboo in the jungle.
+- **Every forest biome**, in families: birch woods, dark forests with pale gardens inside them (with
+  Vanilla Backport), flower forests and cherry groves side by side, old growth taiga, bamboo in the
+  jungle.
+- **Living cliffs:** ferns, moss and vines on the ledges of bare rock faces, and stony shores dressed
+  with the rubble of the cliffs above.
 - **Villages by the water:** vanilla villages settle beside rivers and lakes.
 - Thousands of hand-built trees and rock formations from community asset packs (see Credits),
   re-skinned to match each biome.
@@ -127,10 +147,9 @@ and a compass.
 | Minecraft | Loader | Notes |
 |---|---|---|
 | **1.21.1** | NeoForge 21.1.197 or newer | The main version. Install **[Vanilla Backport](https://modrinth.com/mod/vanillabackport)** (optional) for the newer blocks and biomes Grand Atlas uses (Pale Garden, Sulfur Caves, leaf litter, dry grass and more); without it those are swapped for 1.21.1 stand-ins. |
-| **26.3** | NeoForge | Coming later: the same terrain, once it has caught up with the 1.21.1 version. |
 
-Grand Atlas is in **beta**: the world generates complete and is playable, but expect changes between
-versions, and back up your worlds.
+
+As with any terrain mod, back up your worlds before updating to a new version.
 
 **Grand Atlas needs a new world.** It cannot change terrain that has already been generated.
 
@@ -144,8 +163,8 @@ versions, and back up your worlds.
   trees to sit well beside Grand Atlas's.
 - **[Distant Horizons](https://modrinth.com/mod/distanthorizons)**, to see the mountain ranges from
   far away.
-- **1.21.1:** **[C2ME](https://modrinth.com/mod/c2me-neoforge)** generates chunks in parallel and makes a
-  large difference to Grand Atlas's generation speed.
+- **[C2ME](https://modrinth.com/mod/c2me-neoforge)** generates chunks in parallel and makes a large
+  difference to Grand Atlas's generation speed.
 
 ![The night sky over a violet crystal spire](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/images/night_sky.webp)
 
@@ -153,11 +172,20 @@ versions, and back up your worlds.
 
 - **Not compatible with other terrain mods** such as Tectonic or Terralith: Grand Atlas replaces the
   same parts of the game. The game will tell you if one is installed.
-- Structure mods work: villages, dungeons and other mods' structures generate in Grand Atlas's terrain,
-  and may break into its caves and set pieces. Only the parts of set pieces that would break when
-  built through are kept clear.
-- Biome mods that add Overworld biomes through the vanilla biome system will not appear: Grand Atlas
-  places all Overworld biomes itself.
+- **Not compatible with Pandora Wilds** as a separate mod: its biomes can't generate in a Grand Atlas
+  world. It's planned to join Grand Atlas itself (see Roadmap).
+- **Shader packs (Iris):** Grand Atlas's river water renders as water and the aurora shows through it.
+- **Vanilla Backport** (optional): when installed, Grand Atlas uses its newer blocks and biomes.
+- **Structure mods work:** villages, dungeons and other mods' structures generate in Grand Atlas's
+  terrain, and may break into its caves and set pieces. Surface structures skip steep slopes, rivers
+  and cliff faces, so they stand on ground that suits them.
+- **Biome mods using TerraBlender** (Biomes O' Plenty, Oh The Biomes We've Gone and others) work: their
+  biomes take patches of Grand Atlas's land where their authors meant them to go, with their own
+  ground and trees. Grand Atlas's own biomes and wonders keep theirs. Set how much land they get in
+  `config/grandatlas-common.toml` (`biomeMods.weight`: 0.6 by default, 0 for none, 1 for as much as a
+  plain TerraBlender world). Biome mods that inject biomes any other way will not appear.
+- **Big modpacks:** give the game about 10 GB of memory. With Distant Horizons, set its vertical quality
+  to Low: Grand Atlas's world is four times as tall as vanilla's, and full of caves.
 
 ## License
 
@@ -176,23 +204,21 @@ In short:
 This Mod was made with the help of Ai. All concepting, design, testing, as well as code review was
 performed by a human (Me!). I know how to Code in Java, but do not know the ins and outs of Minecraft
 modding and while I am learning most of the code in this project was generated with - Claude Code,
-Opus 5.5.
+Opus 5.5. The text of this page was also drafted with AI and edited by me. Every image on this page is a
+real in-game screenshot.
 
 ---
 
 ## Roadmap
 
-Grand Atlas stays in beta (0.x) until two things are done. Then it releases as **1.0.0**.
-
-### The road to 1.0.0
+### Next
 
 - **All art made by hand.** Every texture in the mod (blocks, items, the guide book and the aurora)
-  redrawn by human hands. Done so far: the glowcaps, and the aurora crystals, shards and
-  shattered crystal.
+  drawn by hand. Many already are; the rest are being replaced.
 - **A rebuilt water system.** Rivers, lakes and waterfalls ripped out and put back in, built so the
   odd stepping, staircased water and other strange water shapes can't happen at all.
 
-### Also planned, before or after 1.0.0
+### Also planned
 
 - **Polish the underground** — streams with step pools in the cave passages, thicker root caves, and
   more set pieces and cave biomes.
@@ -201,16 +227,18 @@ Grand Atlas stays in beta (0.x) until two things are done. Then it releases as *
 - **More fantasy** — a darker, corrupted country, giant flowers, lava rivers that flow, and floating
   islands woven into the land itself.
 - **Smoother borders** — softer meetings between neighbouring landforms (sand drifting up the rock,
-  scree running out onto the plain), and plants on bare cliff faces.
-- **Integration** — Biomes O' Plenty and other biome mods placed on Grand Atlas's landforms, and a
-  config file.
-- **Performance**, and then the **26.3** version.
+  scree running out onto the plain).
+- **The Pandora Wilds** — the glowing jungle, floating mountains and giant trees of the Pandora Wilds
+  mod, folded into Grand Atlas.
+- **Performance** — faster world generation.
 
 Plans change; feedback steers them.
 
 ---
 
 ## Credits
+
+**Grand Atlas** is made by **AbyssLotus** on GitHub, **W.74** on Modrinth.
 
 Grand Atlas places hand-built trees and rock formations made by other people, used with thanks under
 the terms each author published. If you are one of these authors and want something changed or removed,

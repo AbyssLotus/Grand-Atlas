@@ -166,7 +166,10 @@ public final class Megarange implements Landform {
                 double gradX = (profile(centreRidge[1], e) - profile(centreRidge[2], e)) / (2 * GRAD_STEP);
                 double gradZ = (profile(centreRidge[3], e) - profile(centreRidge[4], e)) / (2 * GRAD_STEP);
                 double slope = Math.hypot(gradX, gradZ);
-                if (slope * amp < 0.35) continue;
+                // Faded in, not switched: amp varies with the frame inside a macro (a massif's lift), so
+                // a hard cut at 0.35 popped a whole 120-block bowl in along a line (2026-11-23).
+                if (slope * amp < 0.3) continue;
+                double fade = smoothstep(0.3, 0.42, slope * amp);
 
                 // Stretch the bowl downhill so its floor runs out into a mouth below the headwall.
                 double downX = -gradX / slope, downZ = -gradZ / slope;
@@ -180,6 +183,7 @@ public final class Megarange implements Landform {
                 double t = d / radius;
                 double bowl = floor + (centre + 30 - floor) * Math.pow(smoothstep(0.35, 1.15, t), 1.4)
                         + Math.max(0, t - 0.9) * radius * 4;
+                bowl += (1 - fade) * 600;
                 relief = smoothMin(relief, bowl, 14);
                 if (t < 0.4 && bowl < base - 10) cirqueFloor = true;
             }

@@ -37,7 +37,8 @@ Realism is the means, not the end. Real geology keeps the world believable (wate
 | Pandora Wilds | **Folded in**: terrain, plants, glow blocks, giant trees, vines and bridges. **Dropped**: the ikran and its nests (mobs), and the wasteland clearing, mining facility and open-pit mine (structures). The Pandora Wilds jar retires. |
 | Tectonic | Replaced. Declared `incompatible` in `neoforge.mods.toml`. |
 | Terralith | **Replaced** (along with Terralith ReStoned). The Terralith biomes you like get rebuilt as our own originals; see §13. Declared `incompatible`. |
-| Nether (2026-11-19) | **Plan A** ([NETHER_PLAN.md](NETHER_PLAN.md), research in [NETHER_RESEARCH.md](NETHER_RESEARCH.md)): vanilla's Nether shape and biomes kept, roof raised to 251–255 (terrain 0–256, dimension 0–319, logical height 256), vanilla lava sea kept (top at Y 31), and one perched lava lake per 512-block cell falling into a big lake below. Not started. |
+| Nether (2026-11-19) | **Plan A** ([NETHER_PLAN.md](NETHER_PLAN.md), research in [NETHER_RESEARCH.md](NETHER_RESEARCH.md)): vanilla's Nether shape and biomes kept, roof raised to 251–255 (terrain 0–256, dimension 0–319, logical height 256), vanilla lava sea kept (top at Y 31), and one perched lava lake per 512-block cell falling into a big lake below. **Dropped 2026-11-23** (all Nether plans off). |
+| Domus Mortus dimension (2026-11-19) | **Built as a test dimension; ships in 1.2** (docs/ROADMAP.md) ([UNDERWORLD_DESIGN.md](UNDERWORLD_DESIGN.md)): a composed Greek-underworld realm (Styx ring, Asphodel, Lethe and Mnemosyne, Phlegethon, Tartarus below Y 32, Elysium) under a glimmering false starry sky nobody can leave through. Every death (any dimension, including other mods') goes to the ferryman: pay an obol (crafted from gold and iron nuggets, or found; a netherite-plated one is permanent) and enter with everything; can't pay and you respawn with items held in the Ferryman's Hoard. The way home is giving Persephone a Flower of Erebus from Tartarus' floor, on every trip. The coin is a second chance in hardcore (the netherite one too); no coin ritual; with keepInventory on, unpaid deaths keep items. All monsters spawn in Tartarus, no mob griefing, structures are the user's builds. Not started; all proposals approved; only music is still open (its section 11). |
 | BOP, BWG | Integrated through TerraBlender (§12). On 26.3 (checked 2026-10-29), **TerraBlender and BOP have builds; BWG doesn't yet** (its newest NeoForge build is 1.21.11). The integration is generic, so BWG works as soon as it ports. |
 
 ## 3. World frame
@@ -202,6 +203,16 @@ Outside the edge, terrain comes from the outer mosaic; inside, from the sub-mosa
 | **Tepui** | 0.8–2 km | Sheer 300–500 block cliffs, flat top | Misty forest, sinkholes, waterfalls off the edge (Angel Falls) | M5 |
 | **Caldera** | 2–5 km | Rim ring around a deep floor with a crater lake | A central island cone, hot springs, volcanic children | M5 |
 | **Rift valley** | 1–2 km wide, 8–20 km long | A linear trench with scarps on both sides | A chain of lakes, volcanoes, savanna | M5 |
+| **Great crater** | 2.6–4.6 km | Sunken floor, raised terraced rim, ejecta apron | Plain floor, a crater lake if rivers find it, a central peak | M2 expansion |
+| **Monolith** | 2–3 km | One sheer rock 220–380 high on a flattened plain | Open plain, savanna or scrub; a slot gorge through some | M2 expansion |
+| **Fault block** | 3–5 km | Tilted slab, escarpment on one side | Highlands and hills on the backslope | M2 expansion |
+| **Shattered plateau** | 2.8–4.8 km | Tableland broken by canyons down to the base | Island mesas with woods or scrub | M2 expansion |
+| **Great sinkhole** | 2.6–4 km | Karst dome with one giant pit | Wooded hills; a lost forest on the pit floor | M2 expansion |
+| **Titan horn** | 3–4.8 km | Raised foothills round one pyramidal peak | Foothills, snow, ice | M2 expansion |
+| **Spire Crown** | 2.4–3.8 km | A ring of colossal sheer spires | A glimmering vale inside | M2 fantasy |
+| **Coiled Peak** | 2.6–4.2 km | A lone peak with a spiral ledge to the top | Hills round its foot | M2 fantasy |
+| **Sundered Land** | 3.2–5 km | Tableland torn by jagged chasms, sides heaved apart | Hills and uplands | M2 fantasy |
+| **Sky Pillar** | 2–2.8 km | A sheer column to y 600–700, with lesser ones | Woods below, a hanging garden on top | M2 fantasy |
 
 **Rarity.**
 - Macros sit on a coarse grid of 6 km cells. Each cell hosts one with a probability of about 10 to 20% (weighted by type), jittered, with a minimum spacing between macros.
@@ -222,6 +233,28 @@ Outside the edge, terrain comes from the outer mosaic; inside, from the sub-mosa
   | Basin | 2.8–4.6 km | floor sunk 30–60 (never below sea + 4), rim 220–440 | 0.8 | Dry basins: playa, dunes, lowlands. Humid ones: a lowland and hill "lost world" |
   | Elevated mesa | 2–4.2 km | 200–330 | 0.7 | Canyonlands with uplands, dunes, playas |
 
+**M2 expansion (2026-11-23).** Six more kinds, each with its landmark inside (code in `core/macro`). Ten kinds now share the cells, so the four originals are about half as common as before. Measured in a 240 km square: 238 macros, 16–40 of each kind.
+
+  | Macro | Across | Shape | Relief scale | Family | Biome |
+  |---|---|---|---|---|---|
+  | Great crater | 2.6–4.6 km | Floor sunk 60–110; rim 110–200 over the country, slumped terraces inside, a concave ejecta apron outside; a central peak complex (90–170) on the biggest. Kept out of mountain belts | 0.35 | Lowlands and hills, or playa and rock desert when dry | Climate's own; the floor is a closed basin, so rivers may lake it or breach the rim |
+  | Monolith | 2–3 km plain | One rock 700–1300 long, 220–380 high: a lobed oval, 26-block wall, rounded dome top, fluted and pocked walls; 45% split by a wandering slot gorge 10–18 wide | 0.3 (the plain) | Lowlands, a little playa and dune | Banded badlands when warm and dry (Uluru), stony peaks otherwise (Half Dome); green top in the wet (Sugarloaf) |
+  | Fault block | 3–5 km | Tilted slab: an escarpment 280–430 high on one side in banded strata, sloping gently back to nothing on the far side | 0.7 | Highlands and hills, a little megarange | Climate's own |
+  | Shattered plateau | 2.8–4.8 km | Tableland +190–300 cut by a maze of canyons (warped Voronoi borders, 16–60 wide, banded walls) right down to the country outside; about a third end blind | 0.5 | Hills, lowlands, uplands; canyonlands when warm | Climate's own; canyon floors take the outside's |
+  | Great sinkhole | 2.6–4 km | Karst upland domed +120–200 with one pit 560–1000 across, sheer 28-block walls, dropping to the country's own level | 0.8 | Hills and highlands | Pit floor: jungle (warm), dark forest (mild), old-growth spruce (cold) |
+  | Titan horn | 3–4.8 km | Raised foothill country (+110) round one pyramidal peak 480–620 over its base, 3–4 concave faces meeting in bent aretes, summit near the cap | 0.8 | Highlands and hills (no megaranges: they were cut flat by the budget and rivalled the horn) | Snow and ice from altitude |
+
+**Fantasy kinds (2026-11-23, same day).** Four that break a rule on purpose. Sheer sides use a new `Landmarks.envelope`, which works like a landform's `Shape.envelope`: the 4-block grid keeps the full height round a tower's foot and the per-block cut trims it, so the walls come out vertical.
+
+  | Macro | Across | Shape | Biome |
+  |---|---|---|---|
+  | Spire Crown | 2.4–3.8 km | 14–21 stone spires, 45–105 thick and 220–450 tall, ringed at 0.36–0.44 of the radius round a vale sunk 15 | Spires stony peaks; the vale inside the ring Glimmer Vale (unless frozen) |
+  | Coiled Peak | 2.6–4.2 km | A lone peak 380–560 high wrapped by one ledge spiralling 4–6 turns to near the summit (strata whose phase turns with the angle), either way round | Climate's own |
+  | Sundered Land | 3.2–5 km | Tableland +140–220 torn by 1–3 jagged chasms 30–90 wide, edge to edge, down to the country outside; each side of a chasm heaved 30–90 apart | Climate's own; chasm floors the outside's |
+  | Sky Pillar | 2–2.8 km | One column 160–300 across, its top at y 600–700, with 1–3 lesser pillars (y 360–660) | Sky Garden on the great pillar's top (kept under y 700, where vanilla would snow on it); stony walls |
+
+New zones in the tag stack: `face` (a monolith's or sinkhole's wall), `pit` (a sinkhole's floor), `canyon` (a shattered plateau's canyons). A macro can now override the biome on its own ground (`Macro.biome`). The `macroEdges` self-check walks from each centre, not from 60% of the radius, so the landmarks inside are checked too. That turned up four older seams, all fixed: a Great Plateau lake bowl that stopped dead 120 blocks out, a megarange cirque switching on at a slope threshold where a massif's lift varies the range's amplitude, a Great Plateau summit's 20-block plinth, and granite needles losing their sheer envelope under a macro's foot.
+
 **Landmarks (0.0.3).** A macro can place features that belong to one site rather than to a landform (`Macro.landmarks`). They are applied to its own terrain before its edge combines it with the outside. In playtest round 2 a plateau's top was "nothing other than plains and forest", with no rivers flowing off it. So every Great Plateau now gets three landmarks, planned once per site and cached:
 - **A summit** (its Mount Hylia) at half the radius from the centre. It is 190–340 blocks over the tableland's datum, ridged, and rises *from the datum* rather than stacking on the terrain beneath; stacked on a range, the first one ran into the height cap.
 - **A lake** 100–280 blocks across on the far side of the centre, set just under the lowest ground around it.
@@ -232,6 +265,22 @@ The water itself is placed by `grandatlas:perched_water` (§8).
 **Plateau biomes.** The climate table reads absolute height, so a 300-block lift made most plateau tops alpine from edge to edge (snowy slopes and frozen peaks at t ≈ -0.4). A plateau now discounts 60% of its lift when picking biomes (`Macro.altitudeDiscount`). Its top grows its climate's lowland forests and fields, and only the summit reaches the snow.
 
 **Nesting depth.** A macro may host one smaller macro, such as a caldera on a massif or a tepui in a basin. That's at most two macro levels, then regional and local terrain as usual. Bounding the recursion keeps the cost per column predictable.
+
+**Composites, as built (2026-11-23, test59).** 35% of the hosts below carry one guest: a smaller macro of another kind, laid on the host's own terrain by its landmarks (`MacroField.guestLandmarks`), built on the host's datum. Guests stand off to one side of a tableland (on a Great Plateau, at right angles to its summit, clear of the lake) and in the middle of a crater, basin or Spire Crown, sized to at most 0.45 (0.6 central) of the host's radius. A guest's biome rules apply on its own landmark. In a 150 km square about 70 of 238 macros carry one, in 23 pairings; no seams. `/grandatlas locate composite` finds the nearest, `composite_<kind>` one with that guest.
+
+  | Host | Guests |
+  |---|---|
+  | Great Plateau | Sky Pillar, Spire Crown, Coiled Peak, Monolith |
+  | Elevated mesa | Monolith, Sky Pillar, Spire Crown |
+  | Massif | Horn, Coiled Peak, Spire Crown |
+  | Basin | Monolith, Sky Pillar, Coiled Peak, Spire Crown |
+  | Great crater | Coiled Peak, Sky Pillar, Monolith, Spire Crown |
+  | Fault block | Horn, Sky Pillar |
+  | Sundered Land | Sky Pillar, Spire Crown |
+  | Spire Crown | Sky Pillar, Horn |
+  | Shattered plateau | Sky Pillar |
+
+The great sinkhole is never a guest: its pit under a plateau's lake would leave the water hanging.
 
 ### 6.5 How it runs
 
@@ -423,7 +472,13 @@ Openness falls steeply with bias. A bias of 0.1 roughly halves it, and 0.5 close
 
 - **26.3 availability (2026-10-29):** TerraBlender, BOP, Distant Horizons, C2ME and Lithostitched have 26.3 NeoForge builds. BWG and Create don't.
 - **TerraBlender mods (BOP, BWG once it ports, and others).** At startup we read every TerraBlender overworld region and collect each modded biome with the climate point its author gave it. We sort them into our slot categories (lowland forest, mountain slope, peak, desert, wetland, beach, river, ocean and so on) by climate point plus `c:` conventional tags. Those biomes then fill **ordinary** provinces and the generic zones of wonder landforms. A config weight sets how often modded biomes win over ours; per-biome allow and deny lists live in config.
-- **Surface rules.** TerraBlender merges mod surface rules into whatever noise settings sit at the `minecraft:overworld` key. We override that same key on purpose, so BWG and BOP surfaces keep working. *(Verify in M8.)*
+- **Built (1.21.1, 2026-11-23):** world/ModdedBiomes, which differs from the plan above in a few ways:
+  - Each modded entry is placed by its *host*, the vanilla biome at that climate spot in vanilla's own table, not by our slot categories.
+  - Modded biomes take patches of vanilla hosts only.
+  - `biomeMods.weight` defaults to 0.6.
+  - There's a deny list.
+  - It's tested with BOP 21.1.0.14 and BWG 2.6.3 from the Shark pack. See ROADMAP.md.
+- **Surface rules.** TerraBlender wraps the noise settings' surface rule with each mod's rules for its own biomes, but only for multi-noise biome sources. ModdedBiomes.enableSurfaceRules does the same for ours, and BOP and BWG ground blocks generate (verified 2026-11-23).
 - **Lithostitched biome injectors** target multi-noise biome sources and won't fire on ours. Pandora's injector goes away with the fold-in, and nothing else in the pack is known to rely on one.
 - **Distant Horizons.** It generates LODs through our generator. M0 checks that it handles -128 to 1024 and measures speed.
 
@@ -460,7 +515,7 @@ Openness falls steeply with bias. A bias of 0.1 roughly halves it, and 0.5 close
 |---|---|---|
 | **M0 ✓** | **Foundation.** Scaffold, height override, `grandatlas:terrain` and `grandatlas:climate` density functions, `grandatlas:atlas` biome source (vanilla biomes), seeding, column cache, previewer, dev server. | A dev world generates at -128 to 1024 with a placeholder continent and mountain field, and `preview` renders it. |
 | **M1 ✓** | **Landform framework, built ready for nesting.** Continents, climate, province mosaic, blender with transition styles, adjacency, biome slots, landform registry. Landforms are relief over a datum, frames are passed down, and every column carries a tag stack. First landforms: megarange with cirques, canyon plateau, dune sea, playa. | Preview and in-game renders show the four meeting each other with no seams and clear identities. |
-| **M2 ✓** | **Macro landforms (§6).** Macro grid and query, frames, sub-mosaics, macro edges, `where` stack. First macros: Great Plateau, mountain massif, enclosed basin, elevated mesa. | A Great Plateau is recognisable from its foot and from on top, with several provinces and biomes on it and no seams at its cliff wall. |
+| **M2 ✓** | **Macro landforms (§6).** Macro grid and query, frames, sub-mosaics, macro edges, `where` stack. First macros: Great Plateau, mountain massif, enclosed basin, elevated mesa. **Expanded 2026-11-23:** great crater, monolith, fault block, shattered plateau, great sinkhole, titan horn, and the fantasy Spire Crown, Coiled Peak, Sundered Land and Sky Pillar (§6.4). | A Great Plateau is recognisable from its foot and from on top, with several provinces and biomes on it and no seams at its cliff wall. |
 | **M2b** | **Meso, micro and detail features** ([MICRO_FEATURES.md](MICRO_FEATURES.md)). A `MicroField` in the core (jittered cells, tiled), placement by context (tag stack, climate), shapes before rivers, carves per block, decorations at the features step; a first slice the user picks from the idea pool. **First slice built in 0.0.7:** five meso kinds (pond country, sinkhole field, hoodoo garden, cinder field, glade) and six micro kinds, with detail. | The first slice generates in a dev world with no seams at footprints, each feature is recognisable in a screenshot, `where` and `locate` know them, and `checkCore` covers determinism, density and forbidden contexts. |
 | **M3** | **Oceans, coasts and sea-level rivers.** Shelf, slope, abyss, trenches, fjords, Ha Long Bay, Stage A rivers (rivers to the sea built in 0.0.4 through the drainage network, §8; deltas and estuaries still to do). | Rivers reach the sea everywhere, and fjords and Ha Long render right. |
 | **M4** | **Hydrology Stage B.** Drainage graph, lakes, stepped rivers, waterfalls, fluid picker; Canadian Shield and Rockies. Macro water datums: plateau rivers pour off the rim (started in 0.0.3, one lake and river per Great Plateau), basins hold terminal lakes. The drainage graph, river lakes, closed-basin lakes, cascades and waterfalls are built (0.0.4, §8); the fluid picker, lake districts and the Shield and Rockies aren't. | Lakes above sea level and waterfalls generate seamlessly. |
@@ -468,7 +523,8 @@ Openness falls steeply with bias. A bias of 0.1 roughly halves it, and 0.5 close
 | **M6** | **Fantasy.** Pandora fold-in (islands as terrain), elven wood, volcanic wastes with lava rivers, misty peaks, enchanted valley; the floating mini-continent macro. | The same. |
 | **M7** | **Underground, down to Y=-512** (the user's requirement, 2026-11-03; see MICRO_FEATURES.md §8). The floor moves from -128 to -512 and the underground becomes a second terrain domain: connected cave networks, mega-caverns, underground rivers, lakes and seas, karst linking sinkholes to caves, 3D cave biomes that vary with height. Plus glowworm and crystal caves. | The same. |
 | **M8** | **Integration.** TerraBlender harvest (BOP now, BWG when it ports), config, structure coverage, DH check, your Terralith-inspired picks. | A 26.3 test profile generates with BOP biomes on our landforms. |
-| **N** | **The Nether, plan A** ([NETHER_PLAN.md](NETHER_PLAN.md), 1.21.1). Phases: N0 preview of the three terrain variants → N1 raised roof, feature height audit, structure checks → N2 perched lava lakes and falls → N3 headless `NetherCheck` → N4 in-game look with the pack, DH and Lumina → N5 ship. Not started. | Most 512-block cells hold a perched lake whose fall reaches the sea; no stray lava; roof at 251–255; ores as common as vanilla. |
+| **U** | **Domus Mortus** ([UNDERWORLD_DESIGN.md](UNDERWORLD_DESIGN.md), 1.21.1), before N. Phases U0 decisions → U1 vertical slice (death hook, obols, Hoard, boat ride, glimmering sky) → U2 realm map → U3 Tartarus, the flower, Persephone → U4 other places → U5 life → U6 user structures → U7 check and ship. Not started. | A full trip works: die, pay, arrive, descend Tartarus, give Persephone the flower, go home; unpaid deaths' items wait in the Hoard. |
+| **N** | **Dropped 2026-11-23.** ~~The Nether, plan A~~ ([NETHER_PLAN.md](NETHER_PLAN.md), 1.21.1). Phases: N0 preview of the three terrain variants → N1 raised roof, feature height audit, structure checks → N2 perched lava lakes and falls → N3 headless `NetherCheck` → N4 in-game look with the pack, DH and Lumina → N5 ship. Not started. | Most 512-block cells hold a perched lake whose fall reaches the sea; no stray lava; roof at 251–255; ores as common as vanilla. |
 | **M9** | **Performance and release.** Profiling, a pregen benchmark, README, release jar. | Meets the §14 target. |
 
 ## 17. Risks and open questions

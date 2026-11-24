@@ -1,5 +1,6 @@
 package com.seaweed.grandatlas.core.macro;
 
+import com.seaweed.grandatlas.core.BiomeKind;
 import com.seaweed.grandatlas.core.landform.Frame;
 import com.seaweed.grandatlas.core.landform.Landform;
 import com.seaweed.grandatlas.core.noise.GradientNoise;
@@ -50,6 +51,14 @@ public abstract class Macro {
         public double roughness;
         /** Overrides the macro zone when not null. */
         public MacroZone zone;
+        /**
+         * Something sheer stands here (a spire, a pillar): how far its full height, a few blocks in,
+         * stands over this column. The 4-block grid keeps that height round its foot and the exact
+         * height trims it, so its sides come out vertical (as {@code Shape.envelope}).
+         */
+        public double envelope;
+        /** A guest macro whose landmark stands here (its biome rules apply), or null. */
+        public Macro owner;
 
         public void reset(double height, double datum) {
             this.height = height;
@@ -57,6 +66,8 @@ public abstract class Macro {
             this.water = Double.NaN;
             this.roughness = 0;
             this.zone = null;
+            this.envelope = 0;
+            this.owner = null;
         }
     }
 
@@ -113,6 +124,14 @@ public abstract class Macro {
      * to this one site rather than to a landform (design §6.4). None by default.
      */
     public void landmarks(MacroField.Hit hit, double x, double z, Terrain terrain, Landmarks out) {}
+
+    /**
+     * The biome for a column on this macro's own terrain (dry land only), given the one the climate
+     * table chose; a monolith's walls are bare rock, a sinkhole's floor jungle. Unchanged by default.
+     */
+    public BiomeKind biome(MacroZone zone, double temperature, double humidity, BiomeKind biome) {
+        return biome;
+    }
 
     /** Combines the ordinary terrain outside ({@code outerH}) with the macro's own ({@code innerH}). */
     public abstract void combine(MacroField.Hit hit, double outerH, double innerH, double x, double z, Combined out);

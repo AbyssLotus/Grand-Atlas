@@ -606,6 +606,17 @@ def main():
         "step": "surface_structures",
     })
 
+    # ---- life on bare rock and stony shores (world/RockFaceLife.java), after the trees; 1.21.1 only.
+    if LEGACY:
+        write("data/grandatlas/worldgen/feature/rock_face_life.json", {"type": "grandatlas:rock_face_life"})
+        write("data/grandatlas/worldgen/placed_feature/rock_face_life.json", {"feature": "grandatlas:rock_face_life", "placement": []})
+        write("data/grandatlas/neoforge/biome_modifier/rock_face_life.json", {
+            "type": "neoforge:add_features",
+            "biomes": "#minecraft:is_overworld",
+            "features": "grandatlas:rock_face_life",
+            "step": "vegetal_decoration",
+        })
+
     # ---- hand-built assets (world/AtlasAssets.java): pack trees, god trees, rock formations (docs/CREDITS.md).
     # At the strongholds step: after country_detail (surface_structures), before trees and plants, so the
     # game's own trees fill in round the big ones.
@@ -641,6 +652,10 @@ def main():
     names["item.grandatlas.grand_atlas"] = "Grand Atlas"
     names["item.grandatlas.ripped_map"] = "Ripped Map"
     names.update({f"block.{NS}.{n}": v[3] for n, v in NEW_BLOCKS.items()})
+    # mobs (mc1211 entity/; 1.21.1 only)
+    for mob, cfg in MOBS.items():
+        names[f"entity.{NS}.{mob}"] = cfg["name"]
+        names[f"item.{NS}.{mob}_spawn_egg"] = cfg["name"] + " Spawn Egg"
     lang.write_text(json.dumps(names, indent=2) + "\n", encoding="utf-8")
     print("wrote", lang.relative_to(ROOT))
 
@@ -656,8 +671,11 @@ def main():
     fantasy_biomes(jar)
 
     respread(jar)
+
+    domus()
     new_blocks(jar)
     cave_biomes(jar)
+    mobs()
     if LEGACY:
         # The surface rules, inline: ours, then the game's own rule exactly as it ships.
         ns["surface_rule"] = legacy_rule("grandatlas:overworld", ns["surface_rule"])
@@ -1019,6 +1037,51 @@ SURFACE_ONLY = {"minecraft:trees_plains", "minecraft:flower_plains", "minecraft:
                 "minecraft:red_mushroom_normal", "minecraft:patch_pumpkin", "minecraft:patch_tall_grass_2"}
 
 
+# Grand Atlas's mobs (mc1211 entity/ModEntities.java; 1.21.1 only, so everything here is LEGACY-gated
+# except the lang names). Each: display name, cave biomes it spawns in, (category, weight, min, max)
+# and its loot pools. Spawn placement (on the ground, any light, never under open sky) is in ModEntities.
+MOBS = {
+    # The user's first Blockbench mob: a snapping plant in a terracotta pot, an ambusher of the fungal
+    # forests. Weight 100 of the biome's ~615 monster weight: about one monster spawn in seven.
+    "potted_monster": {
+        "name": "Potted Monster",
+        "biomes": {"fungal_forest"},
+        "spawn": ("monster", 100, 1, 2),
+        "loot": [
+            {"rolls": 1.0, "bonus_rolls": 0.0, "entries": [{"type": "minecraft:item", "name": "minecraft:flower_pot"}]},
+            {"rolls": 1.0, "bonus_rolls": 0.0, "entries": [
+                {"type": "minecraft:item", "name": name, "functions": [
+                    {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 0.0, "max": 2.0}, "add": False},
+                    {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting",
+                     "count": {"type": "minecraft:uniform", "min": 0.0, "max": 1.0}}]}
+                for name in ("minecraft:red_mushroom", "minecraft:brown_mushroom")]},
+        ],
+    },
+    # The user's second Blockbench mob: a shy blue eel, in the Aurora Vault only (the user, 2026-11-23).
+    # Weight 15 against the glow squid's 10, the category's only other.
+    "crystal_eel": {
+        "name": "Crystal Eel",
+        "biomes": {"aurora_vault"},
+        "spawn": ("underground_water_creature", 15, 1, 3),
+        "loot": [
+            {"rolls": 1.0, "bonus_rolls": 0.0, "entries": [{"type": "minecraft:item", "name": "minecraft:prismarine_crystals", "functions": [
+                {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 0.0, "max": 2.0}, "add": False},
+                {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting",
+                 "count": {"type": "minecraft:uniform", "min": 0.0, "max": 1.0}}]}]},
+        ],
+    },
+}
+
+
+def mobs():
+    if not LEGACY:
+        return
+    for mob, cfg in MOBS.items():
+        write(f"data/{NS}/loot_table/entities/{mob}.json", {"type": "minecraft:entity", "pools": cfg["loot"],
+                                                            "random_sequence": f"{NS}:entities/{mob}"})
+        assets(f"models/item/{mob}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+
+
 def cave_biomes(jar):
     write("data/grandatlas/worldgen/noise/cave_patch.json", {"base_amplitude": 1.0, "base_octave": -4, "octave_count": 2})
     for name, cfg in CAVE_CONFIGURED.items():
@@ -1067,6 +1130,11 @@ def cave_biomes(jar):
         elif name == "magma_chambers":
             spawns = attrs["minecraft:gameplay/natural_mob_spawns"]["argument"]["spawns_by_category"]
             spawns.setdefault("monster", []).append({"type": "minecraft:magma_cube", "count": {"type": "minecraft:uniform", "max_inclusive": 3, "min_inclusive": 1}, "weight": 60})
+        if LEGACY:
+            for mob, cfg in MOBS.items():
+                if name in cfg["biomes"]:
+                    category, weight, lo, hi = cfg["spawn"]
+                    b["spawners"].setdefault(category, []).append({"type": f"{NS}:{mob}", "weight": weight, "minCount": lo, "maxCount": hi})
         write(f"data/grandatlas/worldgen/biome/{name}.json", b)
     # Wrapped in grandatlas:cave_gate (world/CaveGate.java): the rules run only where the core says a
     # cave biome can be, so rock elsewhere never asks its biome (a quarter of chunk generation).
@@ -1227,6 +1295,144 @@ def respread(jar):
         "minecraft:calcite", "minecraft:dripstone_block", "minecraft:smooth_basalt", "minecraft:packed_mud", "minecraft:sculk",
         "minecraft:obsidian", "minecraft:soul_soil"]})
 
+
+
+# ---- Domus Mortus, the underworld dimension (docs/UNDERWORLD_DESIGN.md; 1.21.1 only). First pass:
+# the realm sectioned into the myth's places (mortus/MortusMap), one biome each, water and fire,
+# the barrier ceiling. The death and coin rules, creatures, the custom sky and the user's builds
+# come in later phases.
+DOMUS_JAR = pathlib.Path(__file__).resolve().parent.parent / "mc1211" / "build" / "moddev" / "artifacts" / "neoforge-21.1.265-client-extra-aka-minecraft-resources.jar"
+# region id -> (grass/foliage colour, fog colour, water colour, surface top, surface under, vegetation, particle)
+DOMUS_BIOMES = {
+    "styx":             ("#5a5f5a", "#1c1e2e", "#0e0f16", "minecraft:gravel", "minecraft:tuff", [], None),
+    "outer_sea":        ("#5a5f5a", "#14151f", "#0b0c12", "minecraft:gravel", "minecraft:tuff", [], None),
+    "landing_shore":    ("#8a8f88", "#2a2b3e", "#14151f", "minecraft:gravel", "minecraft:tuff", ["minecraft:patch_dead_bush"], "minecraft:white_ash"),
+    "the_gate":         ("#7d827b", "#26273a", "#14151f", "minecraft:tuff", "minecraft:tuff", [], None),
+    "asphodel_meadows": ("#a9ae9f", "#2c2d45", "#2a3346", "minecraft:grass_block", "minecraft:dirt",
+                         ["minecraft:patch_tall_grass", "minecraft:patch_grass_plain"], "minecraft:white_ash"),
+    "persephone_grove": ("#3c5238", "#232836", "#1d2a33", "minecraft:grass_block", "minecraft:dirt",
+                         ["minecraft:dark_forest_vegetation", "minecraft:patch_berry_common", "minecraft:patch_large_fern", "minecraft:patch_grass_taiga"], None),
+    "lethe_springs":    ("#b8beb2", "#33364c", "#c9dde4", "minecraft:grass_block", "minecraft:dirt", ["minecraft:patch_sugar_cane", "minecraft:patch_grass_plain"], None),
+    "cocytus":          ("#9fb0b8", "#2c3a4c", "#5d86a8", "minecraft:snow_block", "minecraft:packed_ice", ["minecraft:ice_spike", "minecraft:ice_patch"], "minecraft:white_ash"),
+    "phlegethon":       ("#6b5a4a", "#3a2418", "#3a2418", "minecraft:basalt", "minecraft:blackstone", [], "minecraft:ash"),
+    "tartarus":         ("#3a3a3a", "#08080c", "#08080c", "minecraft:blackstone", "minecraft:blackstone", [], None),
+    "black_plateau":    ("#4a4a4a", "#17171f", "#17171f", "minecraft:blackstone", "minecraft:basalt", [], None),
+    "elysium":          ("#d8c35c", "#5a4a32", "#5ba0b0", "minecraft:grass_block", "minecraft:dirt",
+                         ["minecraft:trees_meadow", "minecraft:flower_meadow", "minecraft:flower_cherry", "minecraft:patch_sunflower", "minecraft:patch_tall_grass"], "minecraft:spore_blossom_air"),
+    # the user's painted layout (mortus/MortusMap, data/grandatlas/domus/layout.bin)
+    "acheron_swamp":    ("#4e5a3c", "#20271f", "#2c3a2e", "minecraft:mud", "minecraft:mud",
+                         ["minecraft:trees_mangrove", "minecraft:patch_grass_normal", "minecraft:patch_waterlily", "minecraft:seagrass_swamp"], None),
+    "the_entrance":     ("#3a3a3a", "#100d10", "#0e0f16", "minecraft:basalt", "minecraft:blackstone", [], "minecraft:white_ash"),
+    "encircling_peaks": ("#6d736c", "#26273a", "#14151f", "minecraft:stone", "minecraft:tuff", ["minecraft:trees_grove", "minecraft:patch_grass_taiga"], None),
+}
+
+
+# Ground variety by region: (noise, min, max, block) patches over the default top, tried in order
+# (vanilla's surface noises, in about -1..1).
+DOMUS_PATCHES = {
+    "asphodel_meadows": [("minecraft:surface", 0.45, 9, "minecraft:coarse_dirt"), ("minecraft:gravel", 0.62, 9, "minecraft:gravel")],
+    "persephone_grove": [("minecraft:surface", 0.15, 9, "minecraft:podzol"), ("minecraft:surface", -9, -0.45, "minecraft:coarse_dirt")],
+    "elysium": [("minecraft:surface", 0.5, 9, "minecraft:moss_block")],
+    "lethe_springs": [("minecraft:surface", 0.4, 9, "minecraft:calcite")],
+    "landing_shore": [("minecraft:surface", 0.25, 9, "minecraft:tuff"), ("minecraft:surface", -9, -0.45, "minecraft:coarse_dirt")],
+    "cocytus": [("minecraft:surface", 0.7, 9, "minecraft:blue_ice"), ("minecraft:surface", 0.25, 9, "minecraft:packed_ice")],
+    "encircling_peaks": [("minecraft:surface", 0.5, 9, "minecraft:gravel"), ("minecraft:calcite", 0.35, 9, "minecraft:andesite"),
+                         ("minecraft:surface", -9, -0.4, "minecraft:tuff")],
+    "the_entrance": [("minecraft:surface", 0.75, 9, "minecraft:magma_block"), ("minecraft:surface", 0.2, 9, "minecraft:blackstone")],
+    "phlegethon": [("minecraft:surface", 0.5, 9, "minecraft:magma_block"), ("minecraft:surface", -9, -0.3, "minecraft:blackstone")],
+    "black_plateau": [("minecraft:surface", 0.55, 9, "minecraft:smooth_basalt")],
+    "acheron_swamp": [("minecraft:surface", 0.4, 9, "minecraft:moss_block"), ("minecraft:surface", -9, -0.5, "minecraft:muddy_mangrove_roots")],
+    "styx": [("minecraft:surface", 0.3, 9, "minecraft:soul_sand")],
+    "outer_sea": [("minecraft:surface", 0.3, 9, "minecraft:tuff")],
+}
+# Tartarus' walls: bronze (waxed copper, so it never changes) oxidising downward, black stone at the floor.
+DOMUS_TARTARUS_BANDS = [(20, "minecraft:waxed_copper_block", "minecraft:waxed_cut_copper"),
+                        (-80, "minecraft:waxed_exposed_copper", "minecraft:waxed_exposed_cut_copper"),
+                        (-170, "minecraft:waxed_weathered_copper", "minecraft:waxed_weathered_cut_copper"),
+                        (-250, "minecraft:waxed_oxidized_copper", "minecraft:waxed_oxidized_cut_copper")]
+
+
+def domus():
+    if not LEGACY:
+        return
+    hexi = lambda h: int(h[1:], 16)
+    dt = load(DOMUS_JAR, "data/minecraft/dimension_type/overworld.json")
+    dt.update({"min_y": -320, "height": 704, "logical_height": 704, "fixed_time": 18000, "ambient_light": 0.08,
+               "bed_works": False, "respawn_anchor_works": False, "has_raids": False, "natural": False})
+    write("data/grandatlas/dimension_type/domus_mortus.json", dt)
+    ns = load(DOMUS_JAR, "data/minecraft/worldgen/noise_settings/end.json")
+    zero = 0.0
+    ns["noise"] = {"min_y": -320, "height": 704, "size_horizontal": 1, "size_vertical": 2}
+    ns["noise_router"] = {k: zero for k in ns["noise_router"]}
+    ns["noise_router"]["final_density"] = {"type": "grandatlas:mortus_terrain"}
+    ns["noise_router"]["initial_density_without_jaggedness"] = {"type": "grandatlas:mortus_terrain"}
+    ns.update({"sea_level": -320, "aquifers_enabled": False, "ore_veins_enabled": False, "disable_mob_generation": False,
+               "default_block": {"Name": "minecraft:stone"}, "default_fluid": {"Name": "minecraft:water", "Properties": {"level": "0"}},
+               "spawn_target": []})
+    floor = lambda depth: {"type": "minecraft:stone_depth", "offset": depth, "add_surface_depth": depth > 0, "secondary_depth_range": 0, "surface_type": "floor"}
+    rules = [{"type": "minecraft:condition", "if_true": {"type": "minecraft:vertical_gradient", "random_name": "grandatlas:domus_bedrock",
+                                                         "true_at_and_below": {"above_bottom": 0}, "false_at_and_above": {"above_bottom": 5}},
+              "then_run": {"type": "minecraft:block", "result_state": {"Name": "minecraft:bedrock"}}},
+             ]
+    blk = lambda name: {"type": "minecraft:block", "result_state": {"Name": name}}
+    above = lambda y: {"type": "minecraft:y_above", "anchor": {"absolute": y}, "surface_depth_multiplier": 0, "add_stone_depth": False}
+    noise = lambda n, lo, hi: {"type": "minecraft:noise_threshold", "noise": n, "min_threshold": lo, "max_threshold": hi}
+    # Tartarus: every block of the pit's walls, banded by depth, the two copper forms mixed by noise
+    bands = []
+    for y, a, b in DOMUS_TARTARUS_BANDS:
+        bands.append({"type": "minecraft:condition", "if_true": above(y), "then_run": {"type": "minecraft:sequence", "sequence": [
+            {"type": "minecraft:condition", "if_true": noise("minecraft:surface", 0.2, 9), "then_run": blk(b)}, blk(a)]}})
+    bands.append(blk("minecraft:blackstone"))
+    rules.append({"type": "minecraft:condition", "if_true": {"type": "minecraft:biome", "biome_is": ["grandatlas:tartarus"]},
+                  "then_run": {"type": "minecraft:sequence", "sequence": bands}})
+    for bid, (grass, fog, water, top, under, veg, particle) in DOMUS_BIOMES.items():
+        tops = [{"type": "minecraft:condition", "if_true": noise(n, lo, hi), "then_run": blk(b)} for n, lo, hi, b in DOMUS_PATCHES.get(bid, [])]
+        tops.append(blk(top))
+        seq = []
+        if bid == "encircling_peaks":
+            # the mountains layered: snow on the heights, bare rock and scree between, grass and trees low down
+            seq.append({"type": "minecraft:condition", "if_true": floor(0),
+                        "then_run": {"type": "minecraft:sequence", "sequence": [
+                            {"type": "minecraft:condition", "if_true": above(165), "then_run": blk("minecraft:snow_block")},
+                            {"type": "minecraft:condition", "if_true": above(112), "then_run": {"type": "minecraft:sequence", "sequence": tops}},
+                            blk("minecraft:grass_block")]}})
+            seq.append({"type": "minecraft:condition", "if_true": floor(3), "then_run": {"type": "minecraft:sequence", "sequence": [
+                {"type": "minecraft:condition", "if_true": above(112), "then_run": blk(under)}, blk("minecraft:dirt")]}})
+        else:
+            seq.append({"type": "minecraft:condition", "if_true": floor(0), "then_run": {"type": "minecraft:sequence", "sequence": tops}})
+            seq.append({"type": "minecraft:condition", "if_true": floor(3), "then_run": blk(under)})
+        rules.append({"type": "minecraft:condition", "if_true": {"type": "minecraft:biome", "biome_is": [f"grandatlas:{bid}"]},
+                      "then_run": {"type": "minecraft:sequence", "sequence": seq}})
+    ns["surface_rule"] = {"type": "minecraft:sequence", "sequence": rules}
+    write("data/grandatlas/worldgen/noise_settings/domus_mortus.json", ns)
+    write("data/grandatlas/dimension/domus_mortus.json", {"type": "grandatlas:domus_mortus", "generator": {
+        "type": "minecraft:noise", "settings": "grandatlas:domus_mortus", "biome_source": {"type": "grandatlas:mortus"}}})
+    for f in ("mortus_fluids", "mortus_detail", "mortus_ceiling"):
+        write(f"data/grandatlas/worldgen/configured_feature/{f}.json", {"type": f"grandatlas:{f}", "config": {}})
+        write(f"data/grandatlas/worldgen/placed_feature/{f}.json", {"feature": f"grandatlas:{f}", "placement": []})
+    tmpl = load(DOMUS_JAR, "data/minecraft/worldgen/biome/plains.json")
+    hostile = [{"type": f"minecraft:{m}", "weight": w, "minCount": a, "maxCount": b}
+               for m, w, a, b in (("zombie", 95, 4, 4), ("skeleton", 100, 4, 4), ("spider", 100, 4, 4), ("creeper", 100, 4, 4), ("enderman", 10, 1, 4))]
+    for bid, (grass, fog, water, top, under, veg, particle) in DOMUS_BIOMES.items():
+        b = dict(tmpl)
+        b["temperature"], b["downfall"], b["has_precipitation"] = (0.0 if bid == "cocytus" else 0.6), 0.0, False
+        eff = {"fog_color": hexi(fog), "sky_color": hexi("#0b0b1a"), "water_color": hexi(water), "water_fog_color": hexi(water),
+               "grass_color": hexi(grass), "foliage_color": hexi(grass),
+               "mood_sound": {"block_search_extent": 8, "offset": 2.0, "sound": "minecraft:ambient.cave", "tick_delay": 6000}}
+        if particle:
+            eff["particle"] = {"options": {"type": particle}, "probability": 0.004}
+        b["effects"] = eff
+        feats = [[] for _ in range(11)]
+        feats[1] = ["grandatlas:mortus_fluids"]  # water and fire, once a chunk
+        feats[9] = list(veg) + ["grandatlas:mortus_detail"]  # vanilla's plants, then the realm's own detail
+        feats[10] = ["grandatlas:mortus_ceiling"]  # the barrier sky, after everything (it would read as the ground)
+        b["features"] = feats
+        b["carvers"] = {}
+        b["spawners"] = {k: [] for k in tmpl["spawners"]}
+        b["spawn_costs"] = {}
+        if bid == "tartarus":  # all monsters may spawn in Tartarus (decided); custom creatures elsewhere later
+            b["spawners"]["monster"] = hostile
+        write(f"data/grandatlas/worldgen/biome/{bid}.json", b)
 
 def salt_flat_surface():
     """A white salt crust (calcite) with darker polygon-like ridges, over white terracotta."""

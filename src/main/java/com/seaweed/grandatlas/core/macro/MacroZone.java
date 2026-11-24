@@ -23,7 +23,13 @@ public enum MacroZone {
     /** A perched lake on a macro's own terrain. */
     LAKE,
     /** A river on a macro's own terrain, running to its edge. */
-    RIVER;
+    RIVER,
+    /** A sheer rock face: a monolith's wall, a great sinkhole's wall. */
+    FACE,
+    /** The floor of a great sinkhole. */
+    PIT,
+    /** A canyon cut through a shattered plateau. */
+    CANYON;
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);

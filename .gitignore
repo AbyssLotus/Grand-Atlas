@@ -21,3 +21,7 @@ assets-src/
 # redistributing it); fetched locally, never committed
 backport-deps/
 preview/rivers/
+
+# M8 audit runs: copies of pack mods, never committed
+run-structures/
+run-biomes/

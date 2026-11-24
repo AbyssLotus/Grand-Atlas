@@ -14,6 +14,9 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 logoFile = "grandatlas_logo.png"
 authors = "${mod_authors}"
+credits = "Hand-built trees and rock formations by H2CO3 (1k - Treepack), Plutouthere (The God Tree-Pack) and Dannypan (Landscaping Mega Schematic Pack, with trees by paleozoey), used under their published terms. See GRAND_ATLAS_CREDITS.md."
+displayURL = "https://github.com/AbyssLotus/Grand-Atlas"
+issueTrackerURL = "https://github.com/AbyssLotus/Grand-Atlas/issues"
 description = '''${mod_description}'''
 
 [[dependencies.${mod_id}]]
@@ -51,7 +54,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "pandorawilds"
 type = "incompatible"
-reason = "Pandora Wilds is folded into Grand Atlas. Remove the separate Pandora Wilds jar."
+reason = "Pandora Wilds' biomes can't generate in a Grand Atlas world. Remove it; it's planned to join Grand Atlas in a later version."
 versionRange = "[0,)"
 ordering = "NONE"
 side = "BOTH"

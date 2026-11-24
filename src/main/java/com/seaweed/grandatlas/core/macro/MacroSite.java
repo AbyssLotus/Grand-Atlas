@@ -5,10 +5,16 @@ import com.seaweed.grandatlas.core.world.WorldField;
 
 /**
  * One placed macro landform: its kind, centre, footprint radius, the context at its centre,
- * and a seed for its own parameters (a plateau's lift, where its ramps are).
+ * and a seed for its own parameters (a plateau's lift, where its ramps are). A host may carry a
+ * {@code guest}: a smaller macro of another kind standing on its ground (a Sky Pillar on a Great
+ * Plateau), whose landmarks are laid on the host's own terrain ({@link MacroField#guestLandmarks}).
  */
 public record MacroSite(Macro kind, int cellX, int cellZ, double x, double z, double radius,
-                        WorldField.Point centre, long seed) {
+                        WorldField.Point centre, long seed, MacroSite guest) {
+
+    public MacroSite(Macro kind, int cellX, int cellZ, double x, double z, double radius, WorldField.Point centre, long seed) {
+        this(kind, cellX, cellZ, x, z, radius, centre, seed, null);
+    }
 
     /** A stable per-site parameter in [0, 1); {@code k} picks which one. */
     public double param(int k) {

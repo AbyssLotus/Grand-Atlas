@@ -101,6 +101,36 @@ public final class AtlasEntries {
                         + "the climate inside is its own.");
         add(G, "elevated_mesa", "Elevated Mesas", "minecraft:terracotta",
                 "A mesa raised high over the land on cliffs of banded rock, its top a flat world of its own.");
+        add(G, "crater", "Great Craters", "minecraft:gravel",
+                "An ancient impact scar kilometres wide: a sunken floor inside a ring wall that steps down in slumped "
+                        + "terraces, a long apron of rubble outside, and in the biggest a cluster of peaks at the centre.");
+        add(G, "monolith", "Monoliths", "minecraft:red_sandstone",
+                "One colossal rock rising sheer out of an open plain, hundreds of blocks high, its walls fluted and "
+                        + "pocked, its top a rounded dome. Some are split end to end by a slot gorge.");
+        add(G, "fault_block", "Fault Blocks", "minecraft:deepslate",
+                "A slab of country tilted up along a fault: on one side a banded escarpment hundreds of blocks high, "
+                        + "on the other a long slope falling gently back to the land behind.");
+        add(G, "shattered_plateau", "Shattered Plateaus", "minecraft:smooth_sandstone",
+                "A tableland broken by a maze of sheer canyons that cut right down to the land outside, leaving a "
+                        + "scatter of island mesas, each a small world on top.");
+        add(G, "great_sinkhole", "Great Sinkholes", "minecraft:moss_block",
+                "A wooded upland with one colossal pit sunk into it, hundreds of blocks across and as deep, its walls "
+                        + "sheer. Rivers pour over the rim, and on the floor a lost forest grows out of the wind.");
+        add(G, "horn", "Titan Horns", "minecraft:packed_ice",
+                "One colossal pyramid of a peak, its faces meeting in knife-edge ridges, its summit near the top of the "
+                        + "world, rising out of mountain country of its own.");
+        add(G, "spire_crown", "Spire Crowns", "minecraft:calcite",
+                "A ring of colossal stone spires, sheer-sided and hundreds of blocks tall, standing round a sheltered, "
+                        + "glimmering vale like the points of a crown.");
+        add(G, "coiled_peak", "Coiled Peaks", "minecraft:mossy_stone_bricks",
+                "A lone mountain wrapped by one great ledge that spirals round it from the foot to near the summit, "
+                        + "a road to the top that no one built.");
+        add(G, "sundered_land", "Sundered Lands", "minecraft:blackstone",
+                "A raised country torn apart by chasms jagged as lightning, as deep as the land is high, the ground on "
+                        + "one side of each heaved up above the other.");
+        add(G, "sky_pillar", "Sky Pillars", "minecraft:flowering_azalea",
+                "A sheer column of rock rising from the woods to far above the clouds, a hanging garden on its top, "
+                        + "lesser pillars standing beside it.");
         add(G, "sky_isles", "The Sky Isles", "minecraft:grass_block",
                 "A great island hanging hundreds of blocks over the land, ringed by a flock of smaller isles at other "
                         + "heights. Gardens and woods on top, a root of rock tapering to jagged points beneath, glow berries "

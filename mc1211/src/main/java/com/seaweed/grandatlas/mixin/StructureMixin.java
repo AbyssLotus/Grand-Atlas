@@ -82,6 +82,24 @@ public abstract class StructureMixin {
                         new net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer(kept)));
     }
 
+    /**
+     * Surface structures only on ground that suits them (M8, {@link com.seaweed.grandatlas.world.StructureGround}):
+     * not on a steep slope, in a river or lake, or against a cliff. Here, where both building a
+     * structure and checking for one (locate, maps) find its start, so they agree.
+     */
+    @Inject(method = "findValidGenerationPoint", at = @At("RETURN"), cancellable = true, require = 1)
+    private void grandatlas$onGoodGround(Structure.GenerationContext context,
+                                         CallbackInfoReturnable<java.util.Optional<Structure.GenerationStub>> cir) {
+        java.util.Optional<Structure.GenerationStub> stub = cir.getReturnValue();
+        if (stub == null || stub.isEmpty()) return;
+        Structure self = (Structure) (Object) this;
+        if (!com.seaweed.grandatlas.world.StructureGround.judged(self, context.registryAccess())) return;
+        AtlasCore core = CoreHandle.coreFrom(context.randomState());
+        if (core == null) return;
+        net.minecraft.core.BlockPos p = stub.get().position();
+        if (com.seaweed.grandatlas.world.StructureGround.fault(core, self, p.getX(), p.getZ()) != null) cir.setReturnValue(java.util.Optional.empty());
+    }
+
     private static boolean grandatlas$byWater(AtlasCore core, int x, int z) {
         if (grandatlas$water(core.column(x, z))) return false; // not in it
         for (int r = 14; r <= 84; r += 14) {

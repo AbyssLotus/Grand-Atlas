@@ -57,5 +57,9 @@
   "block.grandatlas.shattered_aurora_crystal_violet": "Shattered Violet Aurora Crystal",
   "block.grandatlas.aurora_crystal_rose": "Rose Aurora Crystal",
   "block.grandatlas.aurora_shard_rose": "Rose Aurora Shard",
-  "block.grandatlas.shattered_aurora_crystal_rose": "Shattered Rose Aurora Crystal"
+  "block.grandatlas.shattered_aurora_crystal_rose": "Shattered Rose Aurora Crystal",
+  "entity.grandatlas.potted_monster": "Potted Monster",
+  "item.grandatlas.potted_monster_spawn_egg": "Potted Monster Spawn Egg",
+  "entity.grandatlas.crystal_eel": "Crystal Eel",
+  "item.grandatlas.crystal_eel_spawn_egg": "Crystal Eel Spawn Egg"
 }

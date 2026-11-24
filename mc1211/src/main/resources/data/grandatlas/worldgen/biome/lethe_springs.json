@@ -1,0 +1,52 @@
+{
+  "carvers": {},
+  "downfall": 0.0,
+  "effects": {
+    "fog_color": 3356236,
+    "sky_color": 723738,
+    "water_color": 13229540,
+    "water_fog_color": 13229540,
+    "grass_color": 12107442,
+    "foliage_color": 12107442,
+    "mood_sound": {
+      "block_search_extent": 8,
+      "offset": 2.0,
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000
+    }
+  },
+  "features": [
+    [],
+    [
+      "grandatlas:mortus_fluids"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:patch_sugar_cane",
+      "minecraft:patch_grass_plain",
+      "grandatlas:mortus_detail"
+    ],
+    [
+      "grandatlas:mortus_ceiling"
+    ]
+  ],
+  "has_precipitation": false,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 0.6
+}

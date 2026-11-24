@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "grandatlas:misty_peaks",
+    "grandatlas:volcano",
+    "grandatlas:tepui_summit",
+    "grandatlas:rainbow_mountains"
+  ]
+}

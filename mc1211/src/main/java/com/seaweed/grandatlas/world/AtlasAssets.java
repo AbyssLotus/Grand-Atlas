@@ -97,6 +97,9 @@ public record AtlasAssets() implements AtlasFeature {
                     int px = at[0], pz = at[1];
                     ColumnSample c = core.column(px, pz);
                     if (!clear(core, c, px, pz)) continue;
+                    // A modded biome (BOP, BWG) brings its own trees: the pack's stand back there. Its rocks and god trees stay.
+                    if (layer == Layer.TREES && chunkGenerator.getBiomeSource() instanceof AtlasBiomeSource s
+                            && s.modded().pick(c.biome(), px, pz) != null) continue;
                     Asset a = choose(layer, core, c, px, pz, h);
                     if (a == null) continue;
                     int turn = layer == Layer.FIN ? 0 : (int) ((h >>> 20) & 3); // fins lean one way: the wind's
@@ -498,11 +501,59 @@ public record AtlasAssets() implements AtlasFeature {
         return g;
     }
 
+    /**
+     * True when the ground under a rock formation's footprint varies by more than it can stand on:
+     * one side would hang in the air while the other was buried (the user, 2026-11-23: rocks "float
+     * when placed wrong"). Judged from the core alone, so every chunk the asset touches agrees.
+     */
+    private static boolean tooSteep(AtlasCore core, Asset a, int px, int pz) {
+        int r = a.reach();
+        if (r < 6) return false;
+        int lo = Integer.MAX_VALUE, hi = Integer.MIN_VALUE;
+        for (int k = 0; k < 8; k++) {
+            double ang = k * Math.PI / 4;
+            for (double f = 0.4; f <= 0.81; f += 0.4) {
+                int y = core.column(px + (int) (Math.cos(ang) * r * f), pz + (int) (Math.sin(ang) * r * f)).surfaceY();
+                lo = Math.min(lo, y);
+                hi = Math.max(hi, y);
+            }
+        }
+        return hi - lo > Math.max(12, 0.6 * (a.sy - a.baseY));
+    }
+
+    private static final java.util.Map<Asset, BlockState> ROCK_OF = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** The block a formation is mostly made of (its stone, terracotta, sandstone...), for filling under it. */
+    private static BlockState rockOf(Asset a) {
+        return ROCK_OF.computeIfAbsent(a, k -> {
+            java.util.Map<BlockState, Integer> counts = new java.util.HashMap<>();
+            for (int ax = 0; ax < k.sx; ax++) {
+                for (int az = 0; az < k.sz; az++) {
+                    for (int i = k.firstRun(ax, az), e = k.endRun(ax, az); i < e; i++) {
+                        BlockState b = k.runState(i, 0);
+                        if (b.isAir() || turf(b) || b.is(BlockTags.LEAVES) || b.is(BlockTags.LOGS) || !b.isSolid()
+                                || b.is(Blocks.SNOW_BLOCK) || b.is(Blocks.POWDER_SNOW)) continue;
+                        counts.merge(b, k.runLength(i), Integer::sum);
+                    }
+                }
+            }
+            return counts.entrySet().stream().max(java.util.Map.Entry.comparingByValue())
+                    .map(java.util.Map.Entry::getKey).orElse(Blocks.STONE.defaultBlockState());
+        });
+    }
+
+    /** Ground cover that only belongs on top: a stack of it shows a grass edge on every block. */
+    private static boolean turf(BlockState b) {
+        return b.is(Blocks.GRASS_BLOCK) || b.is(Blocks.PODZOL) || b.is(Blocks.MYCELIUM) || b.is(Blocks.MOSS_BLOCK)
+                || b.is(Blocks.DIRT_PATH) || b.is(Blocks.SAND) || b.is(Blocks.RED_SAND);
+    }
+
     /** Writes the part of the asset that lies in this chunk. */
     private static boolean build(WorldGenLevel level, AtlasCore core, Asset a, int px, int pz, int turn, Layer layer, int x0, int z0) {
+        boolean rock = layer != Layer.TREES && layer != Layer.GOD && layer != Layer.SILVER;
+        if (rock && tooSteep(core, a, px, pz)) return false;
         int gy = ground(core, a, px, pz, layer);
         int cx = a.sx / 2, cz = a.sz / 2;
-        boolean rock = layer != Layer.TREES && layer != Layer.GOD && layer != Layer.SILVER;
         // A rock formation wears the country it stands in (its own trees and turf are re-skinned).
         Country land = country(core.column(px, pz).biome());
         Country skin = rock || layer == Layer.TREES || land == Country.SILVER ? land : Country.NONE;
@@ -539,12 +590,18 @@ public record AtlasAssets() implements AtlasFeature {
                 if (low <= a.baseY + (rock ? 6 : 1)) {
                     BlockState foot = skin == Country.NONE ? a.runState(first, turn) : reskin(a.runState(first, turn), skin);
                     if (foot.isAir() || foot.is(BlockTags.LEAVES) || !foot.isSolid()) continue;
-                    BlockState fill = foot; // the same block: stone under stone, trunk under trunk
+                    // The same block (trunk under trunk, stone under stone), except under turf: grass
+                    // carried down stood up as a wall of grass edges, one per block (the user, 2026-11-23).
+                    // There it's two blocks of soil, then the formation's own rock.
+                    boolean soil = rock && (turf(foot) || foot.is(BlockTags.DIRT));
+                    BlockState under = soil ? rockOf(a) : foot;
                     int top = gy + a.runY(first) - a.baseY;
-                    for (int wy = top, k = 0; k < (rock ? 28 : 10) && wy > minY; wy--, k++) {
+                    // Down until it meets ground: a cap of 28 left flat-bottomed overhangs hanging over slopes.
+                    for (int wy = top, k = 0; k < (rock ? 128 : 10) && wy > minY; wy--, k++) {
                         BlockState here = level.getBlockState(pos.set(wx, wy, wz));
                         if (!here.isAir() && !here.canBeReplaced() && !here.is(BlockTags.LEAVES)) break;
                         if (!here.getFluidState().isEmpty()) break;
+                        BlockState fill = !soil ? foot : k < 2 ? (foot.is(Blocks.SAND) || foot.is(Blocks.RED_SAND) ? foot : Blocks.DIRT.defaultBlockState()) : under;
                         level.setBlock(pos, fill, 2);
                         placed = true;
                     }

@@ -116,7 +116,9 @@ public final class GreatPlateau extends Macro {
             if (s < 1) {
                 double cone = Math.pow(1 - s, 1.5);
                 double ridges = Fractal.erodedRidges(summitRidges, x / 240.0, z / 240.0, 4);
-                h = Math.max(h, out.datum + 20 + p.summitH * cone * (0.6 + 0.4 * ridges));
+                // The 20-block plinth fades with the cone: as a constant it stood up as a step round the
+                // summit's foot wherever the tableland lay lower (2026-11-23).
+                h = Math.max(h, out.datum + (20 + p.summitH * (0.6 + 0.4 * ridges)) * cone);
                 out.roughness = 0.4 * smoothstep(0.05, 0.3, cone);
                 if (cone > 0.12) out.zone = MacroZone.SUMMIT;
             }
@@ -126,7 +128,9 @@ public final class GreatPlateau extends Macro {
         // a circle"). Distances are measured against the outline toward each direction.
         double dl = Math.hypot(x - p.lakeX, z - p.lakeZ) / lakeShape(site, Math.atan2(z - p.lakeZ, x - p.lakeX));
         if (dl < p.lakeR + 120) {
-            h = channel(h, dl, p.lakeR, p.lakeLevel, 4 + 0.08 * p.lakeR, 0.5);
+            // Faded out over the last 40 blocks: a hill higher than the bowl's slope met a cliff where the cut
+            // stopped (2026-11-23).
+            h = lerp(smoothstep(p.lakeR + 80, p.lakeR + 120, dl), channel(h, dl, p.lakeR, p.lakeLevel, 4 + 0.08 * p.lakeR, 0.5), h);
             if (dl < p.lakeR) {
                 out.water = p.lakeLevel;
                 out.zone = MacroZone.LAKE;

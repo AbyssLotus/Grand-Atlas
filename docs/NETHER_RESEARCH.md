@@ -1,5 +1,8 @@
 # The Nether: what others have done, and what Grand Atlas could do (research, 2026-11-19)
 
+> **Dropped (the user, 2026-11-23):** all Nether plans are off. Kept for reference only; nothing here is planned.
+
+
 Research only. Nothing in the code or data changed. Everything is for Minecraft 1.21.1 NeoForge
 (`mc1211/`). Every claim links its source. Where a point is my own reading rather than a source's,
 it says so ("my read").

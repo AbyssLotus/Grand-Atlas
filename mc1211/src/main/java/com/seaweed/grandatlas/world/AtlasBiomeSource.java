@@ -70,9 +70,35 @@ public final class AtlasBiomeSource extends BiomeSource {
         return CODEC;
     }
 
+    /** Other mods' biomes on our land (TerraBlender regions), filled in as the server starts. */
+    private volatile ModdedBiomes modded = ModdedBiomes.NONE;
+    private volatile java.util.Set<Holder<Biome>> possible;
+
+    /** Reads the biome mods' TerraBlender regions (GrandAtlas, as the server starts, before any chunk). */
+    public void harvestModded(net.minecraft.core.Registry<Biome> registry, long seed) {
+        modded = ModdedBiomes.harvest(registry, seed);
+        possible = null;
+    }
+
+    public ModdedBiomes modded() {
+        return modded;
+    }
+
     @Override
     protected Stream<Holder<Biome>> collectPossibleBiomes() {
-        return byKind.values().stream().distinct();
+        return Stream.concat(byKind.values().stream(), modded.all().stream()).distinct();
+    }
+
+    /** Rebuilt once the modded biomes are in (the game's own copy is worked out once, maybe earlier). */
+    @Override
+    public java.util.Set<Holder<Biome>> possibleBiomes() {
+        java.util.Set<Holder<Biome>> p = possible;
+        if (p == null) {
+            java.util.Set<Holder<Biome>> s = new java.util.LinkedHashSet<>();
+            collectPossibleBiomes().forEach(s::add);
+            possible = p = java.util.Collections.unmodifiableSet(s);
+        }
+        return p;
     }
 
     /** The core behind the last sampler asked with: one world's sampler asks millions of times. */
@@ -90,6 +116,12 @@ public final class AtlasBiomeSource extends BiomeSource {
             lastSampler = sampler;
         }
         int x = QuartPos.toBlock(quartX), y = QuartPos.toBlock(quartY), z = QuartPos.toBlock(quartZ);
-        return byKind.get(core.biomeAt(core.column(x, z), x, y, z));
+        BiomeKind kind = core.biomeAt(core.column(x, z), x, y, z);
+        ModdedBiomes m = modded;
+        if (m != ModdedBiomes.NONE) {
+            Holder<Biome> other = m.pick(kind, x, z);
+            if (other != null) return other;
+        }
+        return byKind.get(kind);
     }
 }

@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:ruined_portal_mountain",
+    {"id": "iceandfire:ice_dragon_roost", "required": false},
+    {"id": "iceandfire:fire_dragon_roost", "required": false},
+    {"id": "iceandfire:lightning_dragon_roost", "required": false},
+    {"id": "iceandfire:ice_dragon_cave", "required": false},
+    {"id": "iceandfire:fire_dragon_cave", "required": false},
+    {"id": "iceandfire:lightning_dragon_cave", "required": false},
+    {"id": "iceandfire:cyclops_cave", "required": false},
+    {"id": "idas:iceandfire/dread_citadel", "required": false},
+    {"id": "idas:animal_den/polar_bear_den", "required": false}
+  ]
+}

@@ -36,6 +36,16 @@ import com.seaweed.grandatlas.core.macro.MacroSite;
 import com.seaweed.grandatlas.core.macro.MacroZone;
 import com.seaweed.grandatlas.core.macro.Wall;
 import com.seaweed.grandatlas.core.macro.Massif;
+import com.seaweed.grandatlas.core.macro.Crater;
+import com.seaweed.grandatlas.core.macro.FaultBlock;
+import com.seaweed.grandatlas.core.macro.GreatSinkhole;
+import com.seaweed.grandatlas.core.macro.Horn;
+import com.seaweed.grandatlas.core.macro.Monolith;
+import com.seaweed.grandatlas.core.macro.ShatteredPlateau;
+import com.seaweed.grandatlas.core.macro.CoiledPeak;
+import com.seaweed.grandatlas.core.macro.SkyPillar;
+import com.seaweed.grandatlas.core.macro.SpireCrown;
+import com.seaweed.grandatlas.core.macro.SunderedLand;
 import com.seaweed.grandatlas.core.noise.Fractal;
 import com.seaweed.grandatlas.core.noise.GradientNoise;
 import com.seaweed.grandatlas.core.province.Province;
@@ -125,7 +135,12 @@ public final class AtlasCore {
             if (l instanceof RiftValley r) r.bind(mosaic);
         } // the tepuis and rifts are laid out in the mosaic's warped space
         macros = new MacroField(GradientNoise.fork(seed, 60), world,
-                List.of(new GreatPlateau(seed), new Massif(seed), new Basin(seed), new ElevatedMesa(seed)));
+                List.of(new GreatPlateau(seed), new Massif(seed), new Basin(seed), new ElevatedMesa(seed),
+                        // the M2 expansion (2026-11-23)
+                        new Crater(seed), new Monolith(seed), new FaultBlock(seed), new ShatteredPlateau(seed),
+                        new GreatSinkhole(seed), new Horn(seed),
+                        // ... and its fantasy kinds
+                        new SpireCrown(seed), new CoiledPeak(seed), new SunderedLand(seed), new SkyPillar(seed)));
         for (Macro kind : macros.kinds()) {
             subMosaics.put(kind, subMosaic(kind));
             innerTerrains.put(kind, (px, pz, out) -> innerTerrain(kind, px, pz, out));
@@ -441,7 +456,7 @@ public final class AtlasCore {
         Transition transition = s.transition;
         int cellX = s.cellX, cellZ = s.cellZ;
         double t = wp.temperature(), w = wp.humidity();
-        Macro macro = null;
+        Macro macro = null, guestOwner = null;
         MacroZone macroZone = MacroZone.NONE;
         double inside = 0, water = Double.NaN;
         Wall wall = null;
@@ -456,13 +471,25 @@ public final class AtlasCore {
             Macro.Landmarks marks = s.landmarks;
             marks.reset(inner.datum() + s.relief, inner.datum());
             kind.landmarks(hit, x, z, innerTerrains.get(kind), marks);
+            macros.guestLandmarks(hit.site, x, z, innerTerrains.get(kind), marks); // a guest macro on its ground
             double innerH = marks.height;
             Macro.Combined combined = s.combined;
             combined.wall = null;
             kind.combine(hit, covered ? innerH : height, innerH, x, z, combined);
             wall = combined.wall;
             inside = combined.inside;
+            if (!covered && !Double.isNaN(coastEnvelope)) {
+                // Something sheer outside (a granite needle) stays sheer where the macro's foot lifts
+                // the ground under it: its envelope moves with the ground, fading as the macro takes
+                // over. Left behind, it sat under the lifted ground and the needle lost its per-block
+                // cut (2026-11-23).
+                coastEnvelope = combined.height + Math.max(0, coastEnvelope - height) * (1 - inside);
+            }
             height = combined.height;
+            if (marks.envelope > 0.5 && inside >= 0.5) {
+                double top = height + marks.envelope;
+                coastEnvelope = Double.isNaN(coastEnvelope) ? top : Math.max(coastEnvelope, top);
+            }
             rough = Math.min(2, lerp(inside, rough, s.roughness) + combined.roughness + inside * marks.roughness);
             if (inside > 0.97 && (!(kind instanceof GreatPlateau) || !rivers || plateauLakeClear(hit.site))) {
                 water = marks.water; // up to the top of the edge, where a river pours off
@@ -473,6 +500,7 @@ public final class AtlasCore {
             macroZone = combined.zone;
             if (marks.zone != null && inside >= 0.5) {
                 macroZone = marks.zone;
+                guestOwner = marks.owner;
             }
             rock = lerp(inside, rock, s.rock);
             if (inside >= 0.5) {
@@ -635,6 +663,7 @@ public final class AtlasCore {
                     : rock > 6 ? BiomeKind.BADLANDS // standing rock is banded sandstone whatever province it's in
                     : Biomes.variety(landform.biome(zone, tb, wb, altitude, v), tb, wb, altitude,
                             1.7 * (cn(60, x, z, 700) + 0.35 * cn(61, x, z, 190)), 1.7 * (cn(62, x, z, 520) + 0.35 * cn(63, x, z, 150)), wp.interior());
+            if (macro != null && Double.isNaN(water) && rock <= 6) biome = (guestOwner != null ? guestOwner : macro).biome(macroZone, tb, wb, biome);
             double fromSite = site == null ? Double.MAX_VALUE : Math.hypot(x - site.x(), z - site.z());
             if (site != null && site.kind() == MesoKind.GLADE && Double.isNaN(water) && fromSite < 0.62 * site.radius()) {
                 biome = BiomeKind.MEADOW; // the glade's clearing: open meadow, no trees
@@ -1126,6 +1155,11 @@ public final class AtlasCore {
     /** The nearest macro of a kind, for {@code /grandatlas locate}. */
     public MacroSite findMacro(Macro kind, double x, double z) {
         return macros.find(kind, x, z, 18);
+    }
+
+    /** The nearest macro carrying a guest (of that kind, or any when null), for {@code /grandatlas locate}. */
+    public MacroSite findComposite(Macro guest, double x, double z) {
+        return macros.findComposite(guest, x, z, 18);
     }
 
     /**

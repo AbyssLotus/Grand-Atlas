@@ -55,6 +55,16 @@ public final class Passages {
 
     private final AtlasCore core;
     private final long nodeSeed, maskSeed, potSeed, styleSeed, roughSeed, boreSeed, riftSeed, noodleSeed, rockSeed;
+    // The cells (junctions, links, bores, rifts) are shared by every thread. Per-thread copies, in a
+    // modpack with C2ME and Distant Horizons, meant dozens of threads each holding the same pieces
+    // (3.6 million of them, 800 MB, in the Shark pack, measured 2026-11-23). A cell's lists are
+    // filled before they are published and never changed after, so sharing them is safe.
+    private final java.util.concurrent.ConcurrentHashMap<Long, NodeCell> sharedNodes = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<Long, List<Seg>> sharedEdges = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<Long, List<Seg>> sharedBores = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<Long, List<Seg>> sharedRifts = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Pieces held in the shared edges, bores and rifts. */
+    private final java.util.concurrent.atomic.AtomicInteger sharedSegs = new java.util.concurrent.atomic.AtomicInteger();
     private final ThreadLocal<Caches> caches = ThreadLocal.withInitial(Caches::new);
 
     Passages(AtlasCore core, long seed) {
@@ -180,11 +190,15 @@ public final class Passages {
         final long[] hash = new long[LEVELS];
     }
 
-    private static final class Caches {
-        final HashMap<Long, NodeCell> nodes = new HashMap<>();
-        final HashMap<Long, List<Seg>> edges = new HashMap<>();
-        final HashMap<Long, List<Seg>> bores = new HashMap<>();
-        final HashMap<Long, List<Seg>> rifts = new HashMap<>();
+    /** Most cave pieces kept cached, for all threads together (about 45 MB), and most junction cells. */
+    private static final int SEG_CAP = 200_000, NODE_CAP = 60_000;
+
+    /** A thread's working state; the cell maps in it are the shared ones. */
+    private final class Caches {
+        final java.util.Map<Long, NodeCell> nodes = sharedNodes;
+        final java.util.Map<Long, List<Seg>> edges = sharedEdges;
+        final java.util.Map<Long, List<Seg>> bores = sharedBores;
+        final java.util.Map<Long, List<Seg>> rifts = sharedRifts;
         // the last chunk's candidate segments
         long chunkKey = Long.MIN_VALUE;
         final ArrayList<Seg> chunk = new ArrayList<>();
@@ -207,10 +221,13 @@ public final class Passages {
         final long[] ybins = new long[(1024 - AtlasCore.MIN_Y) / 16 + 1];
 
         void trim() {
-            if (nodes.size() > 6000) nodes.clear();
-            if (edges.size() > 160) edges.clear(); // several hundred pieces a cell: a few MB a thread
-            if (bores.size() > 64) bores.clear();
-            if (rifts.size() > 128) rifts.clear();
+            if (sharedSegs.get() > SEG_CAP) {
+                edges.clear();
+                bores.clear();
+                rifts.clear();
+                sharedSegs.set(0);
+            }
+            if (nodes.size() > NODE_CAP) nodes.clear();
         }
     }
 
@@ -346,6 +363,7 @@ public final class Passages {
             }
         }
         cc.edges.put(key, list);
+        sharedSegs.addAndGet(list.size());
         return list;
     }
 
@@ -523,6 +541,7 @@ public final class Passages {
         if (list != null) return list;
         list = new ArrayList<>();
         cc.bores.put(key, list);
+        sharedSegs.addAndGet(list.size());
         long h = GradientNoise.hash(boreSeed, i, j);
         if (unit(h, 0) > 0.4) return list;
         double x0 = (i + 0.2 + 0.6 * unit(h, 1)) * BORE_CELL, z0 = (j + 0.2 + 0.6 * unit(h, 2)) * BORE_CELL;
@@ -601,6 +620,7 @@ public final class Passages {
         if (list != null) return list;
         list = new ArrayList<>();
         cc.rifts.put(key, list);
+        sharedSegs.addAndGet(list.size());
         long h = GradientNoise.hash(riftSeed, i, j);
         if (unit(h, 0) > 0.3) return list;
         SplittableRandomish rnd = new SplittableRandomish(h);

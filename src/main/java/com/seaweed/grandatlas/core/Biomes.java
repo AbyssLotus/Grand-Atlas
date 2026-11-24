@@ -36,8 +36,18 @@ public final class Biomes {
         return t > 0.3 && v > 0.3 ? BiomeKind.CHERRY_GROVE : BiomeKind.MEADOW;
     }
 
+    /**
+     * Where hot country starts (desert, badlands, savanna, jungle). 0.55 until 2026-11-23, when the
+     * structure audit found desert, badlands, swamp and snowy plains each near 1% of the land, so the
+     * pack's desert temples, snowy villages and swamp huts almost never generated (the user: "re
+     * balance the climate"). Then the hot band moved down to 0.4, desert took humidity under 0 (was
+     * -0.25) with savanna and sparse jungle pushed wetter, swamps reach 106 to 112 blocks up (were 82 to 86), snowy plains take up to humidity 0.15 and give
+     * way to snowy taiga less often, and the plains band widened. Forest is still the common cover.
+     */
+    static final double HOT = 0.4;
+
     public static BiomeKind lowland(double t, double w, double h, double v) {
-        if (t < -0.5) return w < 0 ? BiomeKind.SNOWY_PLAINS : BiomeKind.SNOWY_TAIGA;
+        if (t < -0.5) return w < 0.15 ? BiomeKind.SNOWY_PLAINS : BiomeKind.SNOWY_TAIGA;
         if (t < -0.15) return w > 0.4 ? BiomeKind.OLD_GROWTH_SPRUCE_TAIGA : BiomeKind.TAIGA;
         // Forest is the common cover of temperate and warm country, plains the dry exception (the
         // user, 2026-11-10: "make forests more likely to occur than plains"). Plains were everything
@@ -45,24 +55,24 @@ public final class Biomes {
         // broken by clearings.
         if (t < 0.25) {
             // (the climate runs dry: a tenth of the land sits at the driest humidity, so the open band is kept narrow)
-            if (w < -0.72) return v > 0.4 ? BiomeKind.SUNFLOWER_PLAINS : BiomeKind.PLAINS;
+            if (w < -0.58) return v > 0.4 ? BiomeKind.SUNFLOWER_PLAINS : BiomeKind.PLAINS;
             if (w < -0.2) return v > 0.35 ? BiomeKind.FLOWER_FOREST : v > -0.3 ? BiomeKind.FOREST : BiomeKind.PLAINS;
             if (w < 0.3) return v > 0.1 ? BiomeKind.BIRCH_FOREST : BiomeKind.FOREST;
-            return h < 86 ? BiomeKind.SWAMP : BiomeKind.DARK_FOREST;
+            return h < 112 ? BiomeKind.SWAMP : BiomeKind.DARK_FOREST;
         }
-        if (t < 0.55) {
+        if (t < HOT) {
             if (w < -0.4) return h > 150 ? BiomeKind.SAVANNA_PLATEAU : BiomeKind.SAVANNA;
             if (w < -0.1) return v > 0.35 ? BiomeKind.FLOWER_FOREST : v > -0.25 ? BiomeKind.FOREST : BiomeKind.PLAINS;
             if (w < 0.45) return BiomeKind.FOREST;
             return BiomeKind.SPARSE_JUNGLE;
         }
-        if (w < -0.25) {
+        if (w < 0.0) {
             if (h > 170) return v > 0 ? BiomeKind.WOODED_BADLANDS : BiomeKind.BADLANDS;
             return BiomeKind.DESERT;
         }
-        if (w < 0.05) return h > 150 ? BiomeKind.SAVANNA_PLATEAU : BiomeKind.SAVANNA;
-        if (w < 0.3) return BiomeKind.SPARSE_JUNGLE;
-        return h < 84 ? BiomeKind.MANGROVE_SWAMP : BiomeKind.JUNGLE;
+        if (w < 0.22) return h > 150 ? BiomeKind.SAVANNA_PLATEAU : BiomeKind.SAVANNA;
+        if (w < 0.38) return BiomeKind.SPARSE_JUNGLE;
+        return h < 96 ? BiomeKind.MANGROVE_SWAMP : BiomeKind.JUNGLE;
     }
 
     /**
@@ -81,7 +91,7 @@ public final class Biomes {
         switch (b) {
             case FOREST -> {
                 if (h > 250 && p2 < -0.1) return BiomeKind.WINDSWEPT_FOREST;
-                if (h < 82 && w > 0.05 && p2 < -0.3) return BiomeKind.SWAMP;
+                if (h < 106 && w > 0.05 && p2 < -0.3) return BiomeKind.SWAMP;
                 if (t > -0.05 && p2 < -0.62) return BiomeKind.CHERRY_GROVE;
                 if (p1 > 0.72) return BiomeKind.OLD_GROWTH_BIRCH_FOREST;
                 if (p1 > 0.4) return BiomeKind.BIRCH_FOREST;
@@ -93,7 +103,7 @@ public final class Biomes {
                 return p1 > 0.55 ? BiomeKind.OLD_GROWTH_BIRCH_FOREST : p2 < -0.62 && t > -0.05 ? BiomeKind.CHERRY_GROVE : b;
             }
             case DARK_FOREST -> {
-                return p2 > 0.58 ? BiomeKind.PALE_GARDEN : h < 82 && p2 < -0.35 ? BiomeKind.SWAMP : b;
+                return p2 > 0.58 ? BiomeKind.PALE_GARDEN : h < 106 && p2 < -0.35 ? BiomeKind.SWAMP : b;
             }
             case TAIGA -> {
                 return p1 > 0.55 ? BiomeKind.OLD_GROWTH_PINE_TAIGA : p1 < -0.55 ? BiomeKind.OLD_GROWTH_SPRUCE_TAIGA : h > 240 && p2 > 0.1 ? BiomeKind.GROVE : b;
@@ -102,7 +112,7 @@ public final class Biomes {
                 return p1 > 0.0 && w > -0.5 ? BiomeKind.GROVE : b;
             }
             case SNOWY_PLAINS -> {
-                return p2 > 0.42 ? BiomeKind.ICE_SPIKES : p1 > 0.15 && w > -0.6 ? BiomeKind.SNOWY_TAIGA : b;
+                return p2 > 0.42 ? BiomeKind.ICE_SPIKES : p1 > 0.45 && w > -0.6 ? BiomeKind.SNOWY_TAIGA : b;
             }
             case PLAINS -> {
                 if (interior < 0.12 && p2 > 0.5 && Math.abs(t) < 0.45) return BiomeKind.MUSHROOM_FIELDS;

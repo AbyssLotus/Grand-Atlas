@@ -44,6 +44,7 @@ public final class AtlasCommands {
                                 .executes(ctx -> show(ctx.getSource(), StringArgumentType.getString(ctx, "layer")))))
                 .then(Commands.literal("survey").then(Commands.literal("caves").executes(ctx -> survey(ctx.getSource()))))
                 .then(Commands.literal("seed").executes(ctx -> seed(ctx.getSource())))
+                .then(Commands.literal("domus").executes(ctx -> domus(ctx.getSource())))
                 .then(Commands.literal("watertest").executes(ctx -> WaterTest.build(ctx.getSource())))
                 .then(Commands.literal("locate")
                         .then(Commands.argument("landform", StringArgumentType.word())
@@ -53,6 +54,8 @@ public final class AtlasCommands {
                                             : SharedSuggestionProvider.suggest(java.util.stream.Stream.of(
                                                     core.landforms().stream().map(Landform::id),
                                                     core.macros().kinds().stream().map(Macro::id),
+                                                    java.util.stream.Stream.of("composite"),
+                                                    core.macros().kinds().stream().map(m -> "composite_" + m.id()),
                                                     java.util.Arrays.stream(MesoKind.values()).map(MesoKind::id),
                                                     com.seaweed.grandatlas.core.world.WorldField.ISLAND_SEAS.stream(),
                                                     java.util.stream.Stream.of("karst", "swallet", "worm_bore", "mega_cavern", "underground_sea", "rift", "great_rift", "the_hollow", "great_geode", "titans_grave", "aurora_vault", "aurora_well", "worldroot", "titan_skull", "sky_isles"),
@@ -60,6 +63,34 @@ public final class AtlasCommands {
                                                     com.seaweed.grandatlas.debug.CaveLocate.IDS.stream().sorted()).flatMap(s -> s), builder);
                                 })
                                 .executes(ctx -> locate(ctx.getSource(), StringArgumentType.getString(ctx, "landform"))))));
+    }
+
+    /** Domus Mortus's level key (mortus/; docs/UNDERWORLD_DESIGN.md). */
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> DOMUS = net.minecraft.resources.ResourceKey.create(
+            net.minecraft.core.registries.Registries.DIMENSION, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(GrandAtlas.MOD_ID, "domus_mortus"));
+
+    /** {@code /grandatlas domus}: an op's way into Domus Mortus (on the landing, by the Gate) and back to the Overworld's spawn. */
+    private static int domus(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        net.minecraft.server.level.ServerPlayer player = source.getPlayerOrException();
+        net.minecraft.server.MinecraftServer server = source.getServer();
+        if (player.level().dimension() == DOMUS) {
+            net.minecraft.server.level.ServerLevel ow = server.overworld();
+            BlockPos sp = ow.getSharedSpawnPos();
+            player.teleportTo(ow, sp.getX() + 0.5, ow.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, sp.getX(), sp.getZ()) + 1, sp.getZ() + 0.5, 0, 0);
+            source.sendSuccess(() -> Component.literal("Back among the living."), false);
+            return 1;
+        }
+        net.minecraft.server.level.ServerLevel domus = server.getLevel(DOMUS);
+        if (domus == null) {
+            source.sendFailure(Component.literal("Domus Mortus isn't in this build (it comes in 1.2)."));
+            return 0;
+        }
+        // inside the Gate, facing inland across Asphodel toward the Black Plateau
+        // where the dead wake: on the ledge in the entrance cave's chamber, facing the passage out
+        player.teleportTo(domus, com.seaweed.grandatlas.mortus.MortusMap.SPAWN_X + 0.5, com.seaweed.grandatlas.mortus.MortusMap.SPAWN_Y,
+                com.seaweed.grandatlas.mortus.MortusMap.SPAWN_Z + 0.5, -90, 5);
+        source.sendSuccess(() -> Component.literal("Domus Mortus. You wake in the entrance cave; follow the river east out through the Acheron swamp to the Styx. Hades' platform at -324 150 -476; Tartarus at 500 -150; Elysium at 250 -560; Lethe and Mnemosyne at -140 120; Cocytus runs across the south."), false);
+        return 1;
     }
 
     private static @Nullable AtlasCore core(CommandSourceStack source) {
@@ -253,6 +284,25 @@ public final class AtlasCommands {
             int distance = (int) Math.hypot(sea[0] - pos.getX(), sea[1] - pos.getZ());
             located(source, String.format("Nearest %s: centre %d %d (%d blocks), about %.0f km across",
                     id, (int) sea[0], (int) sea[1], distance, sea[2] * 2 / 1000));
+            return distance;
+        }
+        if (id.equals("composite") || id.startsWith("composite_")) {
+            // A macro carrying a guest macro on its ground (a Sky Pillar on a Great Plateau); "composite_<kind>" asks for that guest.
+            Macro guest = id.equals("composite") ? null : core.macro(id.substring("composite_".length()));
+            if (!id.equals("composite") && guest == null) {
+                source.sendFailure(Component.literal("No macro kind " + id.substring("composite_".length()) + "."));
+                return 0;
+            }
+            MacroSite host = core.findComposite(guest, pos.getX(), pos.getZ());
+            if (host == null) {
+                source.sendFailure(Component.literal("No " + id + " within ~100 km."));
+                return 0;
+            }
+            MacroSite g = host.guest();
+            int distance = (int) Math.hypot(g.x() - pos.getX(), g.z() - pos.getZ());
+            located(source, String.format("Nearest %s: a %s on a %s, the %s at %d %d (%d blocks); the %s's centre %d %d",
+                    id, g.kind().id(), host.kind().id(), g.kind().id(), (int) g.x(), (int) g.z(), distance,
+                    host.kind().id(), (int) host.x(), (int) host.z()));
             return distance;
         }
         Macro macro = core.macro(id);

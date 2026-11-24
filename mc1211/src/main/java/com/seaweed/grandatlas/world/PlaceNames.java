@@ -181,6 +181,16 @@ public final class PlaceNames {
                     case "massif" -> "The " + n + " Massif";
                     case "basin" -> "The " + n + " Basin";
                     case "elevated_mesa" -> n + " Mesa";
+                    case "crater" -> "The " + n + " Crater";
+                    case "monolith" -> n + " Rock";
+                    case "fault_block" -> "The " + n + " Escarpment";
+                    case "shattered_plateau" -> "The " + n + " Breaks";
+                    case "great_sinkhole" -> "The " + n + " Abyss";
+                    case "horn" -> "The " + n + " Horn";
+                    case "spire_crown" -> "The Crown of " + n;
+                    case "coiled_peak" -> "The " + n + " Coil";
+                    case "sundered_land" -> "The Sundering of " + n;
+                    case "sky_pillar" -> n + "'s Pillar";
                     default -> n;
                 };
                 return new Place(m.seed() | 2, title, c.macro().id().replace('_', ' '), true);

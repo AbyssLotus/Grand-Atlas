@@ -69,6 +69,30 @@ neoForge {
             programArgument '--nogui'
             systemProperty 'grandatlas.caveShape', 'true'
         }
+        // What stands at each of Domus Mortus's places, then stops (debug/DomusCheck).
+        domusCheck {
+            server()
+            programArgument '--nogui'
+            systemProperty 'grandatlas.domusCheck', 'true'
+        }
+        // M8: every registered structure against our biomes and ground, then stops (debug/StructureAudit). Its own
+        // game folder, run-structures/, holds the pack's structure mods so the dev run's own stay as they are.
+        structureAudit {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run-structures')
+            systemProperty 'grandatlas.structureAudit', 'true'
+            // (Create: Central Kitchen is left out of run-structures/mods: in a dev run NeoForge loads every mod's game
+            // tests, and one of its names Hearth & Harvest, which the pack doesn't have, crashing the server.)
+        }
+        // M8: TerraBlender biome mods (BOP, BWG, from the Shark pack) on our land, then stops (debug/BiomeModsCheck).
+        // Its own game folder, run-biomes/, holds those mods.
+        biomeModsCheck {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run-biomes')
+            systemProperty 'grandatlas.biomeModsCheck', 'true'
+        }
         // Generates falls of the deep network on fresh ground, lets fluids run, reports, stops (debug/DeepCheck).
         deepCheck {
             server()
@@ -94,6 +118,13 @@ neoForge {
             programArgument 'join-test'
             systemProperty 'grandatlas.debugCheck', 'true'
         }
+        // Screenshots of Grand Atlas's mobs on a stage in the air (client/MobLook), then quits.
+        mobLook {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.mobLook', 'true'
+        }
         // Screenshots the nearest karst system with a sinking stream (client/KarstCheck), then quits.
         // Forces a sinking stream in every karst system (dev only), so there is one to look at.
         karstCheck {
@@ -116,6 +147,26 @@ neoForge {
             programArgument '--quickPlaySingleplayer'
             programArgument 'join-test'
             systemProperty 'grandatlas.deepLook', 'true'
+        }
+        // Screenshots Domus Mortus's places from fixed viewpoints with night vision (client/DomusLook), then quits.
+        domusLook {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'join-test'
+            systemProperty 'grandatlas.domusLook', 'true'
+        }
+        surfaceLook {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'surface-test'
+            systemProperty 'grandatlas.surfaceLook', 'true'
+        }
+        // Screenshots the nearest site of each M2-expansion macro kind (client/MacroLook), then quits.
+        macroLook {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'surface-test'
+            systemProperty 'grandatlas.macroLook', 'true'
         }
         look {
             client()
@@ -167,6 +218,20 @@ tasks.named('processResources', ProcessResources).configure {
     from('..') {
         include 'LICENSE.md'
         rename 'LICENSE.md', 'GRAND_ATLAS_LICENSE.md'
+    }
+    // Release builds (-Prelease) leave Domus Mortus out: it ships in 1.2 (docs/ROADMAP.md). Without
+    // its dimension, biomes, noise settings and features the realm doesn't exist in the world; the
+    // code stays (registered codecs nothing uses) and /grandatlas domus says it isn't in this build.
+    if (project.hasProperty('release')) {
+        exclude 'data/grandatlas/dimension/domus_mortus.json'
+        exclude 'data/grandatlas/dimension_type/domus_mortus.json'
+        exclude 'data/grandatlas/worldgen/noise_settings/domus_mortus.json'
+        exclude 'data/grandatlas/worldgen/configured_feature/mortus_*.json'
+        exclude 'data/grandatlas/worldgen/placed_feature/mortus_*.json'
+        exclude 'data/grandatlas/domus/**'
+        ['styx', 'outer_sea', 'landing_shore', 'the_gate', 'asphodel_meadows', 'persephone_grove', 'lethe_springs',
+         'cocytus', 'phlegethon', 'tartarus', 'black_plateau', 'elysium', 'acheron_swamp', 'the_entrance',
+         'encircling_peaks'].each { exclude "data/grandatlas/worldgen/biome/${it}.json" }
     }
 }
 

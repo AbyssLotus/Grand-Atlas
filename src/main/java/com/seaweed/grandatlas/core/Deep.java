@@ -84,13 +84,22 @@ public final class Deep {
         return GradientNoise.floor(v / CELL);
     }
 
+    /** Most pieces kept cached across all cells (about 33 MB): a cell count alone let them grow to
+     * hundreds of MB once Distant Horizons generated far afield (the Shark pack, 2026-11-23). */
+    private static final int PIECE_CAP = 150_000;
+    private final java.util.concurrent.atomic.AtomicInteger pieces = new java.util.concurrent.atomic.AtomicInteger();
+
     Cell cell(int i, int j) {
         long k = key(i, j);
         Cell c = cells.get(k);
         if (c != null) return c;
-        if (cells.size() > 256) cells.clear();
+        if (cells.size() > 256 || pieces.get() > PIECE_CAP) {
+            cells.clear();
+            pieces.set(0);
+        }
         c = build(i, j);
         Cell prev = cells.putIfAbsent(k, c);
+        if (prev == null) pieces.addAndGet(c.segs.size());
         return prev != null ? prev : c;
     }
 

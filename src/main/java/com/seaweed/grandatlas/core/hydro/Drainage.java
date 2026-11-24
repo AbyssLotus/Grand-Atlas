@@ -5,6 +5,7 @@ import static com.seaweed.grandatlas.core.Maths.smoothstep;
 
 import com.seaweed.grandatlas.core.AtlasCore;
 import com.seaweed.grandatlas.core.ColumnSample;
+import com.seaweed.grandatlas.core.noise.Fractal;
 import com.seaweed.grandatlas.core.noise.GradientNoise;
 import com.seaweed.grandatlas.core.world.WorldField;
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public final class Drainage {
     static final int BREACH = 15;
     /** Rain (in nodes of average rainfall) a stream needs upstream to start. */
     public static final double SOURCE = 4;
+    /** Depth of the routing troughs that gather streams on flat ground, in blocks. */
+    static final double TROUGH = 9;
     /** Routing pull toward the sea, in blocks of height per block of distance to it. */
     static final double PULL = 0.08;
     static final double SEA = AtlasCore.SEA_LEVEL - 0.1;
@@ -178,7 +181,7 @@ public final class Drainage {
         }
     }
 
-    private final long seed;
+    private final long seed, troughs;
     private final Terrain terrain;
     private final CoastDistance coast;
     private final TileCache<Nodes> nodeTiles = new TileCache<>(1024);
@@ -187,6 +190,7 @@ public final class Drainage {
 
     public Drainage(long seed, WorldField world, Terrain terrain) {
         this.seed = GradientNoise.fork(seed, 1);
+        this.troughs = GradientNoise.fork(seed, 2);
         this.terrain = terrain;
         this.coast = new CoastDistance(world);
     }
@@ -252,7 +256,13 @@ public final class Drainage {
                     n.seed[k] = (float) best.water();
                     n.rain[k] += (float) (SOURCE + 1); // a lake feeds the stream out of it
                 }
-                n.q[k] = (float) (best.height() + PULL * coast.at(bx, bz));
+                // Routing height: the ground, a pull toward the sea, and faint troughs. On flat ground (a
+                // crater floor, a plain) steepest descent ran every stream parallel, 128 blocks apart, and
+                // they never met (the user, 2026-11-23: "rivers should merge the 1st or 2nd time they
+                // cross"). The troughs, lines a few blocks deep winding over kilometres, gather them; on
+                // real slopes they're too shallow to matter. Routing only: the ground itself is unchanged.
+                double trough = TROUGH * Math.min(1, Math.abs(Fractal.fbm(troughs, bx / 900.0, bz / 900.0, 2)) * 3);
+                n.q[k] = (float) (best.height() + PULL * coast.at(bx, bz) + trough);
             }
         }
         return n;
@@ -320,6 +330,28 @@ public final class Drainage {
                 if (best < 0) sinks.add(at);
             }
         }
+        // No crossings: where two diagonal flows cross in one square of four nodes, the higher source
+        // drains instead to the other's target (a step along the square's side), so the streams join
+        // there rather than crossing (2026-11-23: rivers crossed again and again without merging).
+        // Each diagonal lies in one square only and the new step is never diagonal, so the squares
+        // decide independently, the same in every tile; and it only ever steps down, so no loops.
+        for (int b = m - BREACH; b < m + TILE + BREACH - 1; b++) {
+            for (int a = m - BREACH; a < m + TILE + BREACH - 1; a++) {
+                int p00 = a + b * w, p10 = p00 + 1, p01 = p00 + w, p11 = p01 + 1;
+                int e1 = diagonalEdge(down, p00, p11, w), e2 = diagonalEdge(down, p10, p01, w);
+                if (e1 < 0 || e2 < 0) continue;
+                // e1, e2: the source of each crossing diagonal; their targets are the opposite corners.
+                int t1 = e1 == p00 ? p11 : p00, t2 = e2 == p10 ? p01 : p10;
+                int hi = q[e1] >= q[e2] ? e1 : e2, lo = hi == e1 ? e2 : e1;
+                int target = hi == e1 ? t2 : t1;
+                if (q[target] < q[hi]) {
+                    down[hi] = direction(target % w - hi % w, target / w - hi / w);
+                } else {
+                    int other = lo == e1 ? t2 : t1;
+                    if (q[other] < q[lo]) down[lo] = direction(other % w - lo % w, other / w - lo / w);
+                }
+            }
+        }
         // Breach pits from the lowest up; the first route through a node wins.
         sinks.sort((u, v) -> {
             int c = Float.compare(q[u], q[v]);
@@ -372,6 +404,18 @@ public final class Drainage {
             }
         }
         return r;
+    }
+
+    /** The source of a flow along the diagonal between u and v (either way), or -1 if neither drains to the other. */
+    private static int diagonalEdge(byte[] down, int u, int v, int w) {
+        if (flowsTo(down, u, v, w)) return u;
+        if (flowsTo(down, v, u, w)) return v;
+        return -1;
+    }
+
+    private static boolean flowsTo(byte[] down, int from, int to, int w) {
+        byte d = down[from];
+        return d >= 0 && d < 8 && from + DX[d] + DZ[d] * w == to;
     }
 
     private static byte direction(int da, int db) {
@@ -699,7 +743,7 @@ public final class Drainage {
         if (r.paths.get(k) instanceof Course c) return c;
         byte d = downOf(i, j);
         java.util.List<double[]> oxbows = new java.util.ArrayList<>();
-        double[][] p = meander(i, j, resample(smooth(finePath(position(i, j), position(i + DX[d], j + DZ[d]))), 6), oxbows);
+        double[][] p = meander(i, j, throughNodes(i, j, resample(smooth(finePath(position(i, j), position(i + DX[d], j + DZ[d]))), 6)), oxbows);
         double off = halfWidth(catchment(memo(i, j))) + 3, low = Double.MAX_VALUE;
         for (int s = 0; s < p.length; s++) {
             int a = Math.max(0, s - 1), b = Math.min(p.length - 1, s + 1);
@@ -711,6 +755,61 @@ public final class Drainage {
         Course c = new Course(p, low, oxbows.toArray(new double[0][]));
         r.paths.set(k, c);
         return c;
+    }
+
+    /**
+     * Bends a reach so the river runs smoothly through its nodes instead of turning a corner at each
+     * (the user, 2026-11-23: streams "zig zag too much"). Each node gets one heading, from the main
+     * stream into it (the biggest that drains there) to the node below it, and a reach is eased onto
+     * the headings at both its ends: the offset of a Hermite curve from the straight chord, added to
+     * the routed path. Both reaches at a node use the same heading, so the main stem is smooth through
+     * it; a tributary still meets it at its own angle. Fjords keep their course.
+     */
+    private double[][] throughNodes(int i, int j, double[][] p) {
+        int n = p.length;
+        byte d = downOf(i, j);
+        if (n < 3 || d < 0 || fjord(i, j)) return p;
+        int di = i + DX[d], dj = j + DZ[d];
+        double[] p0 = position(i, j), p1 = position(di, dj);
+        double cx = p1[0] - p0[0], cz = p1[1] - p0[1];
+        double[] up = mainUpstream(i, j);
+        byte d2 = downOf(di, dj);
+        double[] below = d2 >= 0 ? position(di + DX[d2], dj + DZ[d2]) : null;
+        // Heading at each end (Catmull-Rom), eased a little so a bend never overshoots.
+        double t0x = up != null ? (p1[0] - up[0]) * 0.5 : cx, t0z = up != null ? (p1[1] - up[1]) * 0.5 : cz;
+        double t1x = below != null ? (below[0] - p0[0]) * 0.5 : cx, t1z = below != null ? (below[1] - p0[1]) * 0.5 : cz;
+        double ease = 0.8;
+        double total = 0;
+        double[] arc = new double[n];
+        for (int s = 1; s < n; s++) arc[s] = total += Math.hypot(p[s][0] - p[s - 1][0], p[s][1] - p[s - 1][1]);
+        double[][] q = new double[n][];
+        for (int s = 0; s < n; s++) {
+            double t = arc[s] / Math.max(1e-6, total), t2 = t * t, t3 = t2 * t;
+            double h10 = t3 - 2 * t2 + t, h11 = t3 - t2;
+            // Hermite minus the chord: the end points cancel, leaving the tangents' terms against the
+            // chord's own (a chord is the Hermite curve whose tangents are the chord itself).
+            double ox = ease * (h10 * (t0x - cx) + h11 * (t1x - cx));
+            double oz = ease * (h10 * (t0z - cz) + h11 * (t1z - cz));
+            q[s] = new double[] {p[s][0] + ox, p[s][1] + oz};
+        }
+        return q;
+    }
+
+    /** The position of the node with the largest catchment draining into (i, j), or null if none does. */
+    private double[] mainUpstream(int i, int j) {
+        double best = -1;
+        int bi = 0, bj = 0;
+        for (int e = 0; e < 8; e++) {
+            int ui = i + DX[e], uj = j + DZ[e];
+            if (!drainsTo(ui, uj, i, j)) continue;
+            double c = catchment(memo(ui, uj));
+            if (c > best) {
+                best = c;
+                bi = ui;
+                bj = uj;
+            }
+        }
+        return best < 0 ? null : position(bi, bj);
     }
 
     /**
@@ -731,12 +830,16 @@ public final class Drainage {
         double half = halfWidth(catchment(memo(i, j)));
         // Every river short of a mountain torrent wanders a little (routed on an 8-block grid it ran
         // in ruler-straight diagonals); on flat ground it meanders in full.
-        double wiggle = (3 + 1.2 * half) * (1 - smoothstep(0.08, 0.16, grade));
+        // (Gentler and longer for small streams: at 3 + 1.2 x half over a 36-block wave every creek drew
+        // the same tight sawtooth, which the user called unnatural, 2026-11-23.)
+        boolean small = half < 4;
+        double wiggle = (small ? 1.5 + 0.8 * half : 3 + 1.2 * half) * (1 - smoothstep(0.08, 0.16, grade));
         if (flat <= 0 && wiggle <= 0) return p;
         // Real meanders repeat every 10-14 channel widths and wander across a belt 5-10 widths wide;
         // the wavelength keeps to 36+ so the 6-block course still draws it smooth.
-        double wave = Math.max(36, 11 * 2 * half), amp = Math.max(wiggle, flat * Math.min(0.3 * wave, 5 * half + 5));
-        if (flat <= 0) wave = Math.max(30, 8 * 2 * half);
+        double wave = Math.max(small ? 90 : 36, 11 * 2 * half);
+        double amp = Math.max(wiggle, flat * Math.min(0.3 * wave, small ? 4 * half + 4 : 5 * half + 5));
+        if (flat <= 0) wave = Math.max(small ? 70 : 30, 8 * 2 * half);
         long h = GradientNoise.hash(seed ^ 0x3E4DL, i, j);
         double phase = (h & 0xFFFF) / 65536.0 * Math.PI * 2;
         double[][] q = new double[n][];
@@ -744,11 +847,17 @@ public final class Drainage {
         for (int s = 0; s < n; s++) {
             int a = Math.max(0, s - 1), b = Math.min(n - 1, s + 1);
             double tx = p[b][0] - p[a][0], tz = p[b][1] - p[a][1], tl = Math.max(1e-6, Math.hypot(tx, tz));
-            double ends = smoothstep(0, 0.22, arc[s] / Math.max(1, total)) * smoothstep(0, 0.22, 1 - arc[s] / Math.max(1, total));
-            double swing = amp * ends * Math.sin(arc[s] / wave * Math.PI * 2 + phase
-                    + 1.2 * GradientNoise.noise2(seed ^ 0x3E4EL, p[s][0] / (2 * wave), p[s][1] / (2 * wave)));
-            swings[s] = swing;
-            q[s] = new double[] {p[s][0] - tz / tl * swing, p[s][1] + tx / tl * swing};
+            // A smooth displacement of the land under the river, irregular (no two bends alike), eased
+            // to nothing at the nodes: the rest of the network expects each reach to end on its node,
+            // and unpinned, reaches stopped short beside each other. (The old wave, a sine pinned at
+            // every node 128 blocks apart, drew one bump per reach, all in step: the zigzag the user
+            // saw, 2026-11-23.) throughNodes already carries the river smoothly through each node.
+            double t = arc[s] / Math.max(1, total);
+            double ends = smoothstep(0, 0.3, t) * smoothstep(0, 0.3, 1 - t);
+            double wx = 1.3 * amp * ends * GradientNoise.noise2(seed ^ 0x3E4EL, p[s][0] / wave, p[s][1] / wave);
+            double wz = 1.3 * amp * ends * GradientNoise.noise2(seed ^ 0x3E4FL, p[s][0] / wave, p[s][1] / wave);
+            swings[s] = (-tz * wx + tx * wz) / tl; // its sideways part, for the oxbows below
+            q[s] = new double[] {p[s][0] + wx, p[s][1] + wz};
         }
         // Oxbow lakes (docs/M3_M4_PLAN.md, phase 4): beside some of a lowland river's full bends, the
         // crescent of a loop it has since cut off, a little way out from the bend.

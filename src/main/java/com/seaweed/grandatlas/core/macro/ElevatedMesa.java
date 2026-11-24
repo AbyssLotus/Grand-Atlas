@@ -1,5 +1,6 @@
 package com.seaweed.grandatlas.core.macro;
 
+import com.seaweed.grandatlas.core.BiomeKind;
 import com.seaweed.grandatlas.core.Maths;
 import com.seaweed.grandatlas.core.landform.CanyonPlateau;
 import com.seaweed.grandatlas.core.landform.Frame;
@@ -26,10 +27,13 @@ public final class ElevatedMesa extends Macro {
     @Override public String id() { return "elevated_mesa"; }
     @Override public int color() { return 0xFF7040; }
     @Override public double subCell() { return 650; }
+    // Its lift mustn't cool it: a 300-block mesa read as alpine and grew taiga on top (the user, 2026-11-23).
+    @Override public double altitudeDiscount() { return 0.8; }
 
     @Override
     public double weight(WorldField.Point c) {
-        return c.humidity() > 0.05 || c.interior() < 0.3 ? 0 : 1.2;
+        // Warm and dry only: in cold dry country its canyonlands (warm-only) fell back to highlands, then taiga.
+        return c.humidity() > 0.05 || c.temperature() < 0.15 || c.interior() < 0.3 ? 0 : 2.2;
     }
 
     @Override
@@ -78,5 +82,16 @@ public final class ElevatedMesa extends Macro {
         out.inside = c;
         out.roughness = 0.25 * bell;
         out.zone = c >= 0.5 ? (e > EDGE / 2 + 60 ? MacroZone.INTERIOR : MacroZone.RIM) : MacroZone.FOOT;
+    }
+
+    /** A mesa is dry country on top: anything the climate table grows there that isn't arid becomes badlands or savanna. */
+    @Override
+    public BiomeKind biome(MacroZone zone, double t, double w, BiomeKind biome) {
+        if (zone != MacroZone.INTERIOR && zone != MacroZone.RIM) return biome;
+        return switch (biome) {
+            case BADLANDS, ERODED_BADLANDS, WOODED_BADLANDS, SAVANNA, SAVANNA_PLATEAU, WINDSWEPT_SAVANNA, DESERT, RED_DESERT -> biome;
+            default -> w > -0.05 ? BiomeKind.WOODED_BADLANDS : t > 0.5 && w < -0.4 ? BiomeKind.DESERT
+                    : w > -0.25 ? BiomeKind.SAVANNA_PLATEAU : BiomeKind.BADLANDS;
+        };
     }
 }

@@ -1,0 +1,10 @@
+{
+  "type": "grandatlas:domus_mortus",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "grandatlas:domus_mortus",
+    "biome_source": {
+      "type": "grandatlas:mortus"
+    }
+  }
+}

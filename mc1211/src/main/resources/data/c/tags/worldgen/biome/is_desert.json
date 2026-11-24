@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "grandatlas:salt_flat",
+    "grandatlas:red_desert"
+  ]
+}

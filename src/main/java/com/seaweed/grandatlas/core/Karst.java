@@ -61,6 +61,11 @@ public final class Karst {
     private final long seed;
     private final ConcurrentHashMap<Long, Object> systems = new ConcurrentHashMap<>();
     private static final Object NONE = new Object();
+    /** Most pieces kept cached across all systems (about 33 MB): a cell count alone let them grow to
+     * hundreds of MB once Distant Horizons generated far afield (the Shark pack, 2026-11-23). */
+    private static final int PIECE_CAP = 150_000;
+    private final java.util.concurrent.atomic.AtomicInteger pieces = new java.util.concurrent.atomic.AtomicInteger();
+    private static final int SYSTEM_CAP = 2048;
 
     Karst(AtlasCore core, long seed) {
         this.core = core;
@@ -95,9 +100,15 @@ public final class Karst {
         long key = ((long) ci << 32) ^ (cj & 0xFFFFFFFFL);
         Object o = systems.get(key);
         if (o == null) {
+            // Bounded: systems were kept forever, so memory grew with every one ever generated.
+            if (systems.size() > SYSTEM_CAP || pieces.get() > PIECE_CAP) {
+                systems.clear();
+                pieces.set(0);
+            }
             MesoSite site = core.features().site(ci, cj);
             Object built = site != null && site.kind() == MesoKind.SINKHOLE_FIELD ? build(site) : NONE;
             Object prev = systems.putIfAbsent(key, built);
+            if (prev == null && built instanceof KarstSystem k) pieces.addAndGet(k.segs.size());
             o = prev != null ? prev : built;
         }
         return o == NONE ? null : (KarstSystem) o;

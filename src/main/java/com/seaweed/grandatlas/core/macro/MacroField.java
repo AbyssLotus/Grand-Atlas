@@ -100,6 +100,7 @@ public final class MacroField {
                 }
             }
             site = fit(site, allowed);
+            if (site != null) site = withGuest(site);
         }
         c.keys[slot] = key;
         c.values[slot] = site == null ? NONE : site;
@@ -115,6 +116,95 @@ public final class MacroField {
             s = new MacroSite(s.kind(), s.cellX(), s.cellZ(), s.x(), s.z(), radius, s.centre(), s.seed());
         }
         return s.reachBlocks() <= allowed ? s : null;
+    }
+
+    /**
+     * Which kinds may stand on a host's ground as its guest (M2 composites, 2026-11-23): towers and
+     * peaks on tablelands, a coil or pillar in a crater or basin, a horn in a crown. Kinds whose
+     * landmark digs down (the sinkhole's pit) are left out: under a plateau's lake it would hang water.
+     */
+    private static final java.util.Map<String, String[]> GUESTS = java.util.Map.of(
+            "great_plateau", new String[] {"sky_pillar", "spire_crown", "coiled_peak", "monolith"},
+            "elevated_mesa", new String[] {"monolith", "sky_pillar", "spire_crown"},
+            "massif", new String[] {"horn", "coiled_peak", "spire_crown"},
+            "basin", new String[] {"monolith", "sky_pillar", "coiled_peak", "spire_crown"},
+            "crater", new String[] {"coiled_peak", "sky_pillar", "monolith", "spire_crown"},
+            "fault_block", new String[] {"horn", "sky_pillar"},
+            "sundered_land", new String[] {"sky_pillar", "spire_crown"},
+            "spire_crown", new String[] {"sky_pillar", "horn"},
+            "shattered_plateau", new String[] {"sky_pillar"});
+    /** Chance a host that can take a guest has one. */
+    private static final double GUEST_CHANCE = 0.35;
+
+    /** The site with a guest added when it rolls one. Guests stand within the host's interior, sized to fit it. */
+    private MacroSite withGuest(MacroSite host) {
+        String[] options = GUESTS.get(host.kind().id());
+        if (options == null || host.param(900) >= GUEST_CHANCE) return host;
+        String id = options[(int) (host.param(901) * options.length)];
+        Macro kind = kinds.stream().filter(k -> k.id().equals(id)).findFirst().orElse(null);
+        if (kind == null) return host;
+        // Ringed or bowl-shaped hosts put it in the middle; tablelands off to one side, clear of a
+        // plateau's summit (at param 20's angle) and its lake (the far side).
+        boolean central = switch (host.kind().id()) {
+            case "crater", "spire_crown", "basin" -> true;
+            default -> false;
+        };
+        double angle = host.kind().id().equals("great_plateau")
+                ? host.param(20) * Math.PI * 2 + Math.PI / 2 * (host.param(902) < 0.5 ? 1 : -1)
+                : host.param(903) * Math.PI * 2;
+        double off = central ? 0 : (0.25 + 0.1 * host.param(904)) * host.radius();
+        double gx = host.x() + Math.cos(angle) * off, gz = host.z() + Math.sin(angle) * off;
+        long seed = GradientNoise.mix(host.seed() ^ 0x6E57L);
+        MacroSite draft = new MacroSite(kind, host.cellX(), host.cellZ(), gx, gz, 0, host.centre(), seed);
+        double radius = Math.min(kind.radius(draft), (central ? 0.6 : 0.45) * host.radius());
+        MacroSite guest = new MacroSite(kind, host.cellX(), host.cellZ(), gx, gz, radius, host.centre(), seed);
+        return new MacroSite(host.kind(), host.cellX(), host.cellZ(), host.x(), host.z(), host.radius(), host.centre(), host.seed(), guest);
+    }
+
+    private final ThreadLocal<Hit> guestHit = ThreadLocal.withInitial(Hit::new);
+
+    /**
+     * Lays a host's guest landmark over the host's own terrain (after the host's own landmarks):
+     * the guest measures itself from its own centre and builds on the host's datum.
+     */
+    public void guestLandmarks(MacroSite host, double x, double z, Macro.Terrain terrain, Macro.Landmarks marks) {
+        MacroSite g = host.guest();
+        if (g == null) return;
+        double dx = x - g.x(), dz = z - g.z(), d = Math.hypot(dx, dz);
+        if (d > g.radius() * 1.3) return;
+        Hit h = guestHit.get();
+        h.site = g;
+        h.s = d / g.radius();
+        h.inside = g.radius() - d;
+        h.dirX = d > 1e-6 ? dx / d : 1;
+        h.dirZ = d > 1e-6 ? dz / d : 0;
+        MacroZone before = marks.zone;
+        double heightBefore = marks.height;
+        g.kind().landmarks(h, x, z, terrain, marks);
+        if (marks.zone != before || marks.height != heightBefore) marks.owner = g.kind();
+    }
+
+    /** The nearest host carrying a guest (of {@code guest}'s kind, or any when null), for /grandatlas locate. */
+    public MacroSite findComposite(Macro guest, double x, double z, int maxRings) {
+        int cx = GradientNoise.floor(x / CELL), cz = GradientNoise.floor(z / CELL);
+        for (int r = 0; r <= maxRings; r++) {
+            MacroSite best = null;
+            double bestD = Double.MAX_VALUE;
+            for (int dz = -r; dz <= r; dz++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                    MacroSite s = site(cx + dx, cz + dz);
+                    if (s == null || s.guest() == null || guest != null && s.guest().kind() != guest) continue;
+                    double d = Math.hypot(s.x() - x, s.z() - z);
+                    if (d < bestD) {
+                        bestD = d;
+                        best = s;
+                    }
+                }
+            }
+            if (best != null) return best;
+        }
+        return null;
     }
 
     /** Searches outward ring by ring for the nearest macro of a kind. */

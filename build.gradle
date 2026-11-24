@@ -150,6 +150,17 @@ tasks.register('finProbe', JavaExec) {
     args = (project.findProperty('args') ?: '').toString().tokenize()
 }
 
+tasks.register('biomeStats', JavaExec) {
+    group = 'grandatlas'
+    description = 'Surface biome shares of the land, and the climate spread, over a large square.'
+    dependsOn 'classes'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.seaweed.grandatlas.core.preview.BiomeStats'
+    workingDir = projectDir
+    maxHeapSize = '6g'
+    args = (project.findProperty('args') ?: '').toString().tokenize()
+}
+
 tasks.register('checkCore', JavaExec) {
     group = 'grandatlas'
     description = 'Determinism, continuity and bounds checks on the terrain core.'

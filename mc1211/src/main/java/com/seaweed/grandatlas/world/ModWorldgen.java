@@ -23,6 +23,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *   <li>{@code grandatlas:floater_cleanup}: clears rock the crags' undercuts cut loose</li>
  *   <li>{@code grandatlas:steep_rock}: bare rock instead of grass and dirt on steep ground</li>
  *   <li>{@code grandatlas:atlas_assets}: hand-built trees, god trees and rock formations from the approved packs (docs/CREDITS.md)</li>
+ *   <li>{@code grandatlas:rock_face_life}: plants on bare rock ledges and faces, boulders and driftwood on stony shores</li>
  *   <li>{@code grandatlas:country_detail}: boulders, logs and ground cover on ordinary ground between the meso sites</li>
  *   <li>{@code grandatlas:cave_dressing}: roots, icicles and crystal beams for the cave biomes (M7e)</li>
  *   <li>{@code grandatlas:deep_water}: the underground's lakes, seas and flooded caves (M7d)</li>
@@ -61,11 +62,18 @@ public final class ModWorldgen {
         FEATURE_TYPES.register("floater_cleanup", () -> AtlasFeature.adapt(new FloaterCleanup()));
         FEATURE_TYPES.register("steep_rock", () -> AtlasFeature.adapt(new SteepRock()));
         FEATURE_TYPES.register("country_detail", () -> AtlasFeature.adapt(new CountryDetail()));
+        FEATURE_TYPES.register("rock_face_life", () -> AtlasFeature.adapt(new RockFaceLife()));
         FEATURE_TYPES.register("atlas_assets", () -> AtlasFeature.adapt(new AtlasAssets()));
         FEATURE_TYPES.register("deep_water", () -> AtlasFeature.adapt(new DeepWater()));
         FEATURE_TYPES.register("cave_dressing", () -> AtlasFeature.adapt(new CaveDressing()));
         FEATURE_TYPES.register("set_piece_dressing", () -> AtlasFeature.adapt(new SetPieceDressing()));
         FEATURE_TYPES.register("fantasy_detail", () -> AtlasFeature.adapt(new FantasyDetail()));
+        // Domus Mortus, the underworld dimension (mortus/; docs/UNDERWORLD_DESIGN.md)
+        DENSITY_FUNCTION_TYPES.register("mortus_terrain", () -> com.seaweed.grandatlas.mortus.MortusTerrain.MAP_CODEC);
+        BIOME_SOURCES.register("mortus", () -> com.seaweed.grandatlas.mortus.MortusBiomeSource.CODEC);
+        FEATURE_TYPES.register("mortus_fluids", () -> AtlasFeature.adapt(new com.seaweed.grandatlas.mortus.MortusFluids()));
+        FEATURE_TYPES.register("mortus_detail", () -> AtlasFeature.adapt(new com.seaweed.grandatlas.mortus.MortusDetail()));
+        FEATURE_TYPES.register("mortus_ceiling", () -> AtlasFeature.adapt(new com.seaweed.grandatlas.mortus.MortusCeiling()));
         MATERIAL_RULE_TYPES.register("strata", () -> Strata.MAP_CODEC);
         MATERIAL_RULE_TYPES.register("rainbow", () -> RainbowBands.MAP_CODEC);
         MATERIAL_RULE_TYPES.register("cave_gate", () -> CaveGate.MAP_CODEC);
