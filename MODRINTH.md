@@ -174,39 +174,36 @@ In short:
 ## Made with AI
 
 This Mod was made with the help of Ai. All concepting, design, testing, as well as code review was
-performed by a human (Me!). I know how to Code in Java, but do not know the ins and outs of Minecraft
-modding and while I am learning most of the code in this project was generated with - Claude Code,
-Opus 5.5.
+performed by a human (Me!), with some additional help from friends for texturing and hopefully in the future music and sound as well. I know how to Code in Java, but do not know the ins and outs of Minecraft modding and while I am learning most of the code in this project was generated with - Claude Code, Opus 5.5.
+
+---
+
+## Tools Used
+
+- **Claude Code** = for Coding
+- **Wikipedia** = Researching types of land formations.
+- **Obsidian** = Writing and Formatting in markdown (I love obsidian <3)
 
 ---
 
 ## Roadmap
 
-Grand Atlas stays in beta (0.x) until two things are done. Then it releases as **1.0.0**.
+### The road to 1.1.0
 
-### The road to 1.0.0
-
-- **All art made by hand.** Every texture in the mod (blocks, items, the guide book and the aurora)
-  redrawn by human hands. Done so far: the glowcaps, and the aurora crystals, shards and
-  shattered crystal.
 - **A rebuilt water system.** Rivers, lakes and waterfalls ripped out and put back in, built so the
   odd stepping, staircased water and other strange water shapes can't happen at all.
 
-### Also planned, before or after 1.0.0
+### Also planned, before or after 1.1.0
 
 - **Polish the underground** — streams with step pools in the cave passages, thicker root caves, and
   more set pieces and cave biomes.
 - **More water features** on the new system — kettle lakes, valley lakes behind natural dams,
   terraced turquoise cascades, and a wooded marsh biome.
-- **More fantasy** — a darker, corrupted country, giant flowers, lava rivers that flow, and floating
-  islands woven into the land itself.
-- **Smoother borders** — softer meetings between neighbouring landforms (sand drifting up the rock,
-  scree running out onto the plain), and plants on bare cliff faces.
-- **Integration** — Biomes O' Plenty and other biome mods placed on Grand Atlas's landforms, and a
-  config file.
-- **Performance**, and then the **26.3** version.
+- **More fantasy** — corrupted country, giant flowers, lava rivers, etc.
+- **Smoother borders** — softer meetings between neighboring landforms, and plants on bare cliff faces.
+- **Performance** ...
 
-Plans change; feedback steers them.
+Plans change; your feedback steers them :P.
 
 ---
 
