@@ -1,11 +1,3 @@
-<!--
-  Modrinth project description for Grand Atlas 1.0.0. Paste everything below this comment.
-  The full write-up (every feature, roadmap) is the README on GitHub; keep this page short.
-  Images load from the public GitHub repo's main branch, so push main before publishing.
-  Modrinth settings: license Custom (link LICENSE.md); client and server required; NeoForge 1.21.1;
-  version 1.0.0 Release; dependency Vanilla Backport (optional); tick "Contains AI-generated content".
--->
-
 ![Grand Atlas](https://raw.githubusercontent.com/AbyssLotus/Grand-Atlas/main/docs/logo.png)
 
 **A new Overworld: mountains past y 700, rivers that run to the sea, and a world that goes 512 blocks
