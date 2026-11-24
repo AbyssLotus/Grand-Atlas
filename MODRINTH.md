@@ -127,7 +127,7 @@ and a compass.
 | Minecraft | Loader | Notes |
 |---|---|---|
 | **1.21.1** | NeoForge 21.1.197 or newer | The main version. Install **[Vanilla Backport](https://modrinth.com/mod/vanillabackport)** (optional) for the newer blocks and biomes Grand Atlas uses (Pale Garden, Sulfur Caves, leaf litter, dry grass and more); without it those are swapped for 1.21.1 stand-ins. |
-| **26.3** | NeoForge | Coming later: the same terrain, once it has caught up with the 1.21.1 version. |
+| **26.3** | NeoForge | MaYBE :) |
 
 Grand Atlas is in **beta**: the world generates complete and is playable, but expect changes between
 versions, and back up your worlds.
