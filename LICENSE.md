@@ -1,6 +1,7 @@
 # Grand Atlas License
 
-Version 1.0, 13 November 2026
+Version 1.1, 24 November 2026 (1.0, 13 November 2026, plus section 1.1: using this license for other
+works)
 
 Copyright (c) 2026 AbyssLotus (W.74 on Modrinth)
 
@@ -18,6 +19,8 @@ This summary is here to help you read the terms below. It is not part of them.
   selling worlds made with it.
 - **Not covered:** the third-party trees and rock formations listed in `docs/CREDITS.md`, and Minecraft
   itself.
+- **Other works:** the licensor can use this same license for other projects, such as a modpack. For
+  those, read "Grand Atlas" as that project.
 
 ## The terms
 
@@ -40,6 +43,23 @@ This summary is here to help you read the terms below. It is not part of them.
 - **"Official pages"** are the Grand Atlas pages the licensor runs: its Modrinth project, published by
   W.74, and its GitHub repository at https://github.com/AbyssLotus/Grand-Atlas.
 - **"You"** is the person or organization using Grand Atlas under this license.
+
+### 1.1 Using this license for other works
+
+The licensor may release other works under this license, such as another mod, a modpack, a resource pack
+or a datapack, by saying so where the work is published (for example, by naming "Grand Atlas License 1.1"
+as its license). For such a work, and only for it:
+
+1. Every mention of **"Grand Atlas"** in these terms means that work: the licensor's own files in it, in
+   every version released under this license.
+2. **"Third-Party Content"** means material in that work made by other people, such as other people's
+   mods in a modpack. It stays under its owners' terms and is not licensed to you here.
+3. **"Official pages"** means the pages the licensor runs for that work.
+4. The name and logo of that work are protected by section 3.3 in the same way as Grand Atlas's. The
+   name and logo of Grand Atlas itself stay protected whatever work this license is used for.
+
+A work released under this license does not change the terms for Grand Atlas, and Grand Atlas's terms
+do not change because of it.
 
 ### 2. What you may do
 

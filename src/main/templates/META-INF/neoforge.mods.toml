@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
-license = "Grand Atlas License 1.0 (noncommercial) - https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md"
+license = "Grand Atlas License 1.1 (noncommercial) - https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md"
 
 [[mixins]]
 config = "${mod_id}.mixins.json"

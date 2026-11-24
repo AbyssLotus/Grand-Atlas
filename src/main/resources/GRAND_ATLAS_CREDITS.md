@@ -1,7 +1,7 @@
 # Credits
 
 **Grand Atlas** is made by **AbyssLotus** (W.74 on Modrinth), under the
-[Grand Atlas License 1.0](https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md). Code, data,
+[Grand Atlas License 1.1](https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md). Code, data,
 textures, the logo, the guide book and both mobs (the Potted Monster and the Crystal Eel) are Grand
 Atlas's own. Textures are hand-drawn (by the author, with help from friends) or painted by Grand Atlas's own tools (`tools/textures.py`).
 
