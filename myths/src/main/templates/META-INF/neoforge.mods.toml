@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# neoforge.mods.toml — the add-on's ID card.
+#
+# WHAT THIS FILE IS
+#   When Minecraft starts, NeoForge looks inside every jar in the mods folder for
+#   META-INF/neoforge.mods.toml. Without it, a jar isn't a mod. This file tells
+#   NeoForge the mod's id, name and version, and what it needs to run. NeoForge
+#   reads it BEFORE loading any of our Java code. That's how it can say "you're
+#   missing Grand Atlas" instead of crashing.
+#
+#   This copy is a TEMPLATE: the dollar-brace placeholders (like the mod id
+#   below) are filled in from myths/gradle.properties and myths/build.gradle when
+#   the mod is built. (Comments can't contain a dollar-brace pair themselves: the
+#   filler would try to read it as a placeholder and fail the build.)
+#
+#   The format is TOML: `key = value` lines, and [[double brackets]] start a new
+#   entry in a list.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Which language loader starts the mod. "javafml" means "a normal Java mod with a
+# class marked @Mod". Almost every mod uses it.
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "Grand Atlas License 1.1 (noncommercial) - https://github.com/AbyssLotus/Grand-Atlas/blob/main/LICENSE.md"
+
+# One jar can hold several mods, so mods are a list. Ours has one entry.
+[[mods]]
+# Must match the id in the @Mod annotation on our main class (GrandAtlasMyths.java).
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+displayURL = "https://github.com/AbyssLotus/Grand-Atlas"
+issueTrackerURL = "https://github.com/AbyssLotus/Grand-Atlas/issues"
+description = '''${mod_description}'''
+
+# ── Dependencies ─────────────────────────────────────────────────────────────
+# Each entry names another mod and how we relate to it:
+#   type      "required" (refuse to start without it), "optional", or "incompatible"
+#   versionRange  which of its versions are OK. "[a,b)" = from a, up to but not including b
+#   ordering  whether our code should load BEFORE or AFTER it, or NONE if it doesn't matter
+#   side      CLIENT, SERVER or BOTH: where the dependency applies
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neo_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# The add-on sits on top of Grand Atlas, so it needs Grand Atlas present.
+# ordering = "AFTER" means Grand Atlas finishes setting up first, so anything we
+# read from it later is already there.
+[[dependencies.${mod_id}]]
+modId = "grandatlas"
+type = "required"
+versionRange = "${grandatlas_version_range}"
+ordering = "AFTER"
+side = "BOTH"

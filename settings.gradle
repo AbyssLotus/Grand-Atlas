@@ -13,3 +13,6 @@ plugins {
 rootProject.name = 'grand-atlas'
 
 include 'mc1211'
+
+// Grand Atlas: Myths & Legends, the add-on (docs/MYTHS_AND_LEGENDS.md). Its own jar, built from myths/.
+include 'myths'

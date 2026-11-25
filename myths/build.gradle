@@ -1,0 +1,154 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Grand Atlas: Myths & Legends — the build script.
+//
+// WHAT GRADLE IS
+//   Gradle is the build tool. You never compile Java or start Minecraft by hand;
+//   you ask Gradle to run a "task" and it does every step needed:
+//
+//     ./gradlew :myths:build       compile the add-on and pack it into a .jar
+//     ./gradlew :myths:runClient   start a Minecraft dev client with the add-on loaded
+//     ./gradlew :myths:runServer   start a dev server instead
+//
+//   The ":myths:" part picks this project. The repo has three Gradle projects:
+//   the root (Grand Atlas for 26.3), `mc1211` (Grand Atlas for 1.21.1) and this
+//   one. settings.gradle at the root lists them.
+//
+// WHAT THIS FILE DOES
+//   1. Says this is a Java project and a NeoForge mod (the `plugins` block).
+//   2. Picks the Minecraft and NeoForge versions.
+//   3. Sets up "runs": ready-made ways to launch the game for testing.
+//   4. Fills in neoforge.mods.toml from gradle.properties.
+//   5. Packs the finished .jar.
+// ─────────────────────────────────────────────────────────────────────────────
+
+plugins {
+    // Plain Java: compile .java files into .class files and pack them in a jar.
+    id 'java'
+    // ModDevGradle ("MDG") is NeoForge's Gradle plugin. It downloads Minecraft and
+    // NeoForge, puts them on the compile classpath so `import net.minecraft...`
+    // works, and creates the runClient/runServer tasks. Its version is pinned once,
+    // in the root build.gradle, so all three projects use the same one.
+    id 'net.neoforged.moddev'
+}
+
+// The same Minecraft and NeoForge versions Grand Atlas's 1.21.1 build uses
+// (mc1211/build.gradle). An add-on must match the mod it sits on.
+ext {
+    mc_version = '1.21.1'
+    mc_version_range = '[1.21.1]'
+    // The NeoForge build we develop against...
+    neo_version_1211 = '21.1.265'
+    // ...and the oldest one players may run it on.
+    neo_version_min = '21.1.197'
+    // Which Grand Atlas versions this add-on works with: 1.0.1 or newer, below 2.
+    // "[" means "including", ")" means "excluding".
+    grandatlas_version_range = '[1.0.1,2)'
+}
+
+// The jar's name ends up as grandatlas_myths-0.1.0+mc1.21.1.jar.
+version = mod_version + '+mc1.21.1'
+group = mod_group_id
+base {
+    archivesName = mod_id
+}
+
+// Minecraft 1.21.1 runs on Java 21, so we compile for Java 21. Gradle fetches that
+// JDK by itself if your computer doesn't have it (the "toolchain").
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+neoForge {
+    version = project.neo_version_1211
+
+    // RUNS: each entry becomes a Gradle task (client -> runClient, server -> runServer).
+    // They start the game straight from your compiled code, with no jar or launcher.
+    // The game folder for these runs is myths/run/ (worlds, logs, configs, mods).
+    // It's ignored by git, so nothing you do in a test world gets committed.
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            // The server's own window isn't needed; its console is in the terminal.
+            programArgument '--nogui'
+        }
+    }
+
+    // Tells NeoForge which compiled code belongs to which mod. Ours is all in
+    // the `main` source set (myths/src/main/...).
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// ── Grand Atlas in the dev runs ──────────────────────────────────────────────
+// The add-on REQUIRES Grand Atlas (see neoforge.mods.toml), so the dev game must
+// load it too, or NeoForge refuses to start. The simplest honest way: build Grand
+// Atlas's 1.21.1 jar and drop it into myths/run/mods/, exactly as a player would
+// put it in their mods folder.
+//
+// It's copied under a fixed name, so rebuilding replaces the old copy instead of
+// piling up one jar per version. Any other mods you put in run/mods are left alone.
+def copyGrandAtlas = tasks.register('copyGrandAtlas', Copy) {
+    group = 'myths'
+    description = "Builds Grand Atlas (1.21.1) and puts it in myths/run/mods for the dev runs."
+    from project(':mc1211').tasks.named('jar')
+    into layout.projectDirectory.dir('run/mods')
+    rename { 'grandatlas-dev.jar' }
+}
+// Run tasks are created by MDG, so we hook them as they appear.
+tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+    dependsOn copyGrandAtlas
+}
+
+// ── neoforge.mods.toml, filled in from gradle.properties ─────────────────────
+// The file in src/main/templates/ has placeholders like ${mod_id}. This task copies
+// it into build/ with each placeholder replaced by its real value. The result is
+// what goes into the jar. One source of truth: change a value in gradle.properties
+// and the mod's metadata follows.
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version_range : mc_version_range,
+            neo_version             : neo_version_min,
+            grandatlas_version_range: grandatlas_version_range,
+            mod_id                  : mod_id,
+            mod_name                : mod_name,
+            mod_version             : project.version.toString(),
+            mod_authors             : mod_authors,   // from the root gradle.properties
+            mod_description         : mod_description,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+// ── The jar ──────────────────────────────────────────────────────────────────
+tasks.named('jar', Jar).configure {
+    // The license travels with every copy, as it does in Grand Atlas's jar.
+    from(rootDir) {
+        include 'LICENSE.md'
+        rename 'LICENSE.md', 'GRAND_ATLAS_MYTHS_LICENSE.md'
+    }
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_id,
+                'Specification-Vendor'  : mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : mod_name,
+                'Implementation-Version': project.version.toString(),
+                'Implementation-Vendor' : mod_authors,
+        ])
+    }
+}
