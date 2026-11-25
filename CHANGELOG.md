@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1 — lower memory on servers and many-core machines
+
+- **Performance:** the set pieces' site cache (Hollows, Geodes, Titan's Graves, Aurora Vaults, the
+  Worldroot, the Hanging Mountains) is now shared by every worldgen thread and capped, instead of a copy
+  of up to 20,000 sites per thread. With C2ME and Distant Horizons generating on many threads, that copy
+  held about 120 MB in Create Atlas; memory use no longer grows with the core count. The world generates
+  exactly as before: same seed, same set pieces.
+
 ## 1.0.0 — first public release (Minecraft 1.21.1, NeoForge)
 
 The first release on Modrinth. Grand Atlas replaces the Overworld's terrain and biome placement.

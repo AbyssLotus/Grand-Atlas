@@ -5,7 +5,6 @@ import static com.seaweed.grandatlas.core.Maths.smoothstep;
 import com.seaweed.grandatlas.core.noise.Fractal;
 import com.seaweed.grandatlas.core.noise.GradientNoise;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -59,7 +58,13 @@ public final class SetPieces {
 
     private final AtlasCore core;
     private final long seed;
-    private final ThreadLocal<HashMap<Long, Site>> sites = ThreadLocal.withInitial(HashMap::new);
+    // The sites are shared by every thread. A cache per thread, in a modpack with C2ME and Distant
+    // Horizons, meant dozens of threads each holding up to 20,000 sites (950,000 bone and tree
+    // capsules, 123 MB, in Create Atlas on a 16-core machine, measured 2026-11-24). A site is
+    // finished before it is published and never changed after, so sharing it is safe.
+    private final java.util.concurrent.ConcurrentHashMap<Long, Site> sites = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Most sites kept, for all threads together: a few working sets' worth. */
+    private static final int SITE_CAP = 30_000;
     // A small table of columns per thread, keyed on the low bits of x and z. 26.3 hands density
     // functions whole columns, so one remembered column was enough there; 1.21.1 samples a 4x4 cell
     // block by block, cycling through sixteen columns, and with one slot every sample rebuilt the
@@ -172,18 +177,26 @@ public final class SetPieces {
     // ---- sites
 
     private Site site(int kind, int i, int j) {
-        HashMap<Long, Site> cache = sites.get();
         // (mixed: the plain packed key's hash put many sites in the same buckets, which the table then
         // had to search as trees)
         long key = GradientNoise.mix(((long) kind << 58) ^ ((long) i << 29) ^ (j & 0x1FFFFFFFL));
-        Site s = cache.get(key);
+        Site s = sites.get(key);
         if (s != null) return s;
         // Each kind checks every earlier kind round it for overlaps (and those theirs), so the working set
         // is a few thousand sites; a small cache thrashes and rebuilds them without end.
-        if (cache.size() > 20000) cache.clear();
-        s = new Site();
+        if (sites.size() > SITE_CAP) sites.clear();
+        // Built whole before it is published: the overlap check only asks about earlier kinds, so
+        // building never needs this site from the map. Two threads may build the same site at once;
+        // both get the same answer (a site is a pure function of the seed and its cell), and the
+        // first one in is kept.
+        s = makeSite(kind, i, j);
+        Site had = sites.putIfAbsent(key, s);
+        return had != null ? had : s;
+    }
+
+    private Site makeSite(int kind, int i, int j) {
+        Site s = new Site();
         s.kind = kind;
-        cache.put(key, s);
         long h = GradientNoise.hash(GradientNoise.fork(seed, kind), i, j);
         s.h = h;
         if (unit(h, 0) > 0.5) return s;
