@@ -13,6 +13,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
@@ -224,14 +225,23 @@ public final class LabyrinthChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Runs once per chunk with a real (if limited) world view, after its blocks exist: places
-     * the lab parts (chest, lecterns, automata, the Minotaur) that fall inside this chunk.
+     * The decoration step (where vanilla places trees and ores): the last step that may place
+     * blocks. Puts in the lab blocks that need block entities: the loot chest and the lecterns.
      */
+    @Override
+    public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structures) {
+        super.applyBiomeDecoration(level, chunk, structures);
+        ChunkPos cp = chunk.getPos();
+        LabyrinthMaze m = maze(level.getLevel().getChunkSource().randomState());
+        for (int[] r : regionsTouching(cp)) LabyrinthLab.placeBlocks(level, m, r[0], r[1], cp, level.getRandom());
+    }
+
+    /** The spawn step: entities only. The lab's automata and Minotaur. */
     @Override
     public void spawnOriginalMobs(WorldGenRegion region) {
         ChunkPos cp = region.getCenter();
         LabyrinthMaze m = maze(region.getLevel().getChunkSource().randomState());
-        for (int[] r : regionsTouching(cp)) LabyrinthLab.placeContents(region, m, r[0], r[1], cp, region.getRandom());
+        for (int[] r : regionsTouching(cp)) LabyrinthLab.placeEntities(region, m, r[0], r[1], cp, region.getRandom());
     }
 
     @Override

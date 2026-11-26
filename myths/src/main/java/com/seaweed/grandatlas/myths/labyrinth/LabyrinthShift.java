@@ -168,6 +168,16 @@ public final class LabyrinthShift {
         }
     }
 
+    /** Dev only (dev/LabCheck): shift region (rx, rz) now, whoever is near, and queue its loaded chunks. */
+    public static void forceShift(ServerLevel level, int rx, int rz) {
+        EPOCHS.merge(key(rx, rz), 1, Integer::sum);
+        int size = LabyrinthMaze.REGION * LabyrinthMaze.CELL;
+        int x0 = rx * size, z0 = rz * size;
+        for (int cx = x0 >> 4; cx <= (x0 + size - 1) >> 4; cx++)
+            for (int cz = z0 >> 4; cz <= (z0 + size - 1) >> 4; cz++)
+                if (level.getChunkSource().getChunkNow(cx, cz) != null) queue(new ChunkPos(cx, cz));
+    }
+
     /** Is any player in region (rx, rz) or within MARGIN blocks of it? */
     private static boolean occupied(ServerLevel level, int rx, int rz) {
         int size = LabyrinthMaze.REGION * LabyrinthMaze.CELL;
@@ -219,7 +229,10 @@ public final class LabyrinthShift {
         }, true);
 
         // The new labs' chest, lecterns, figures and Minotaur, for the regions that changed.
-        for (int[] r : changed) LabyrinthLab.placeContents(level, m, r[0], r[1], cp, level.getRandom());
+        for (int[] r : changed) {
+            LabyrinthLab.placeBlocks(level, m, r[0], r[1], cp, level.getRandom());
+            LabyrinthLab.placeEntities(level, m, r[0], r[1], cp, level.getRandom());
+        }
 
         // Anyone caught where a wall now stands is moved to the middle of their cell (always open).
         for (ServerPlayer p : level.players()) {

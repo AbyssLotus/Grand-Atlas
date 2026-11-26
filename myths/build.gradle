@@ -76,6 +76,13 @@ neoForge {
         }
         // Dev checks (dev/LabyrinthGameTests): a headless server makes a fresh world, runs the
         // add-on's game tests, prints the results and stops. gradlew :myths:runGameTestServer
+        // Dev check in a real world (dev/LabCheck): opens run/saves/myths-check, generates and shifts a lab, quits.
+        labCheck {
+            client()
+            programArgument '--quickPlaySingleplayer'
+            programArgument 'myths-check'
+            systemProperty 'grandatlas_myths.labCheck', 'true'
+        }
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
@@ -107,7 +114,7 @@ def copyGrandAtlas = tasks.register('copyGrandAtlas', Copy) {
     rename { 'grandatlas-dev.jar' }
 }
 // Run tasks are created by MDG, so we hook them as they appear.
-tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer'] }.configureEach {
+tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer', 'runLabCheck'] }.configureEach {
     dependsOn copyGrandAtlas
 }
 

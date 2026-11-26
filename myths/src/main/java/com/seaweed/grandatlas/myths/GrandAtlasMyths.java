@@ -126,6 +126,9 @@ public class GrandAtlasMyths {
         NeoForge.EVENT_BUS.addListener(LabyrinthEntry::onBlockBreak);
         // ...and the end-of-tick hook that does the queued trips in and out.
         NeoForge.EVENT_BUS.addListener(Labyrinth::onServerTick);
+
+        // Dev only: gradlew :myths:runLabCheck (dev/LabCheck).
+        if (Boolean.getBoolean("grandatlas_myths.labCheck")) com.seaweed.grandatlas.myths.dev.LabCheck.install();
     }
 
     /**

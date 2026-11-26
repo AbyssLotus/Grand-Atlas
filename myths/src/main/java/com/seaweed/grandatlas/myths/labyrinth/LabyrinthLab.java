@@ -78,8 +78,8 @@ import java.util.List;
  * <h2>How it's placed</h2>
  * {@link #build} lists every block of the hall through a {@link Sink}; the chunk generator's
  * sink keeps the ones inside the chunk it's making, so each chunk builds its share. Things
- * that need a block entity or are entities (the chest, the lectern books, the automata, the
- * Minotaur) are placed by {@link #placeContents}, one chunk at a time, once the chunk exists.
+ * that need a block entity (the chest, the lectern books) are placed by {@link #placeBlocks}
+ * and the entities (the automata, the Minotaur) by {@link #placeEntities}, one chunk at a time.
  */
 public final class LabyrinthLab {
 
@@ -285,7 +285,7 @@ public final class LabyrinthLab {
         BlockState slab = Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM);
         for (int i = 0; i < 7; i++) for (int j = 0; j < 7; j++)
             if (wall[i][j]) p.set(i - 3, 3, j - 3, slab);
-        // Map tables with candles; lecterns are placed with their books in placeContents.
+        // Map tables with candles; lecterns get their books in placeBlocks.
         for (int sx = -1; sx <= 1; sx += 2) {
             p.set(5 * sx, 2, 0, Blocks.CARTOGRAPHY_TABLE.defaultBlockState());
             p.set(5 * sx, 3, 0, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
@@ -328,7 +328,7 @@ public final class LabyrinthLab {
         return wall;
     }
 
-    /** The Hall of Automata: a ring of chained bronze figures round a dais (figures in placeContents). */
+    /** The Hall of Automata: a ring of chained bronze figures round a dais (figures in placeEntities). */
     private static void automata(Placer p) {
         dais(p);
         BlockState chain = Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
@@ -383,14 +383,14 @@ public final class LabyrinthLab {
     // ── Block entities and entities ─────────────────────────────────────────────────────────
 
     /**
-     * Place the parts of region (rx, rz)'s lab that need block entities or are entities, but
-     * only those inside chunk {@code only}. Called once per chunk: at generation (WorldGenRegion)
-     * and after a shift rebuilds the chunk (the ServerLevel).
+     * Place region (rx, rz)'s lab blocks that need BLOCK ENTITIES (the loot chest, the lecterns
+     * with their books), but only those inside chunk {@code only}. At generation this runs in
+     * the decoration step: the last world-gen step allowed to place blocks. (The later spawn
+     * step may only add entities; Minecraft refuses block writes there.)
      */
-    public static void placeContents(ServerLevelAccessor level, LabyrinthMaze m, int rx, int rz, ChunkPos only, RandomSource random) {
+    public static void placeBlocks(ServerLevelAccessor level, LabyrinthMaze m, int rx, int rz, ChunkPos only, RandomSource random) {
         int[] c = m.labCentre(rx, rz);
         int x0 = c[0], z0 = c[1];
-        Theme theme = Theme.values()[m.labTheme(rx, rz)];
 
         // The loot chest, on the dais or the model's centre cell.
         BlockPos chest = new BlockPos(x0, 3, z0);
@@ -400,12 +400,21 @@ public final class LabyrinthLab {
             RandomizableContainer.setBlockEntityLootTable(level, random, chest, LAB_LOOT);
         }
 
-        if (theme == Theme.DRAFTING) {
+        if (Theme.values()[m.labTheme(rx, rz)] == Theme.DRAFTING) {
             placeLectern(level, only, new BlockPos(x0, 2, z0 - 5), Direction.SOUTH, onWings());
             placeLectern(level, only, new BlockPos(x0, 2, z0 + 5), Direction.NORTH, onTheThread());
         }
+    }
 
-        if (theme == Theme.AUTOMATA) {
+    /**
+     * Place region (rx, rz)'s lab ENTITIES (the automata, the Minotaur) that stand inside chunk
+     * {@code only}. At generation this runs in the spawn step.
+     */
+    public static void placeEntities(ServerLevelAccessor level, LabyrinthMaze m, int rx, int rz, ChunkPos only, RandomSource random) {
+        int[] c = m.labCentre(rx, rz);
+        int x0 = c[0], z0 = c[1];
+
+        if (Theme.values()[m.labTheme(rx, rz)] == Theme.AUTOMATA) {
             for (int[] spot : AUTOMATON_SPOTS) {
                 BlockPos at = new BlockPos(x0 + spot[0], 3, z0 + spot[1]);
                 if (!in(only, at)) continue;
