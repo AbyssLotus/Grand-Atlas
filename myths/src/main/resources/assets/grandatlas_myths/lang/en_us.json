@@ -1,3 +1,17 @@
 {
-  "block.grandatlas_myths.labyrinth_stone": "Labyrinth Stone"
+  "block.grandatlas_myths.labyrinth_stone": "Labyrinth Stone",
+  "block.grandatlas_myths.labyrinth_bricks": "Labyrinth Bricks",
+  "block.grandatlas_myths.labyrinth_frieze": "Labyrinth Frieze",
+  "block.grandatlas_myths.labyrinth_trim": "Labyrinth Trim",
+  "block.grandatlas_myths.exit_hatch": "Exit Hatch",
+  "block.grandatlas_myths.ariadne_thread": "Ariadne's Thread",
+  "item.grandatlas_myths.ariadne_thread": "Ariadne's Thread",
+  "item.grandatlas_myths.labrys": "Labrys",
+  "item.grandatlas_myths.minotaur_spawn_egg": "Minotaur Spawn Egg",
+  "entity.grandatlas_myths.minotaur": "Minotaur",
+  "itemGroup.grandatlas_myths": "Myths & Legends",
+  "biome.grandatlas_myths.labyrinth": "The Labyrinth",
+  "message.grandatlas_myths.fell_in": "The stone gives way beneath you...",
+  "message.grandatlas_myths.escaped": "You climb back into the light.",
+  "block.grandatlas_myths.labyrinth_marker": "Workmen's Mark"
 }

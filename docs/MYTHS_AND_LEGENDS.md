@@ -257,10 +257,64 @@ in sooner or later. That seems to be the intent, but see the open questions.
 | **LB8** | Ariadne's thread and the labrys | items, custom behaviour, recipes and loot tables |
 | **LB9** | The Minotaur, with a vanilla stand-in until the Blockbench model is ready | entities, attributes, AI goals, renderers, the client/server split |
 
+**Built (2026-11-25, LB1–LB9 first pass).** All in `myths/`; checked by
+`gradlew :myths:runGameTestServer` (dev/LabyrinthGameTests: maze connectivity, generated blocks vs
+layout, loot). Not yet seen in a real game window. Choices made where the questions below were
+still open, all easy to change:
+
+| Question | Built as |
+|---|---|
+| After 1 day | World age, `getGameTime() >= 24000` (decided) |
+| Which stone | `#minecraft:base_stone_overworld`: stone, deepslate, granite, diorite, andesite, tuff |
+| Machines | Real players only (`FakePlayer` ignored); creative and spectator ignored too |
+| Exit Ladder destination | Back to the exact spot you fell in (saved in the player's persisted data, survives death); the Overworld spawn if unknown |
+| Cooldown | None |
+| Maze changes? | Yes: regions shift once a day when empty (see below) |
+| Minotaur | One per Daedalus's Lab, placed when the lab generates; a stronger ravager stand-in (220 health, boss bar, never despawns) until the Blockbench model exists |
+| Walls | Unbreakable (four blocks: stone floor/ceiling, tuff-brick walls, chiseled frieze, copper trim), and invisible on maps (`MapColor.NONE`, the user's call: a dungeon you can't map) |
+| Labs | A 3x3-cell room: a loot chest (Ariadne's thread, Daedalus's notes as a 5-page book, metals, rare diamonds), workshop blocks, bookshelves, lanterns, and the Minotaur |
+
+**How the infinite maze works:** 7-block cells grouped into 21x21-cell regions (147 blocks). Each
+region is a perfect maze from the seed; each region border gets two doors from a hash of the
+border, so neighbours agree and every cell is reachable. Each region has one lab and one exit,
+so both come about every 147 blocks. Corridors are 3 wide and 5 tall, walls 4 thick, between a
+2-block floor and ceiling (dimension height 32). Monsters spawn from the `grandatlas_myths:labyrinth`
+biome (zombies, skeletons, spiders, cave spiders, creepers, silverfish).
+
+**Second pass (2026-11-25): the shifting maze, finding your way, the halls.**
+
+- **It shifts** (the user: "make it shift"). Every Minecraft day the epoch goes up; a region
+  (147 x 147 blocks) catches up only when no player is in it or within 32 blocks, so walls never
+  move round anyone. Its walls, lab and exits are redrawn; it gets a fresh lab chest and
+  Minotaur. The doors between regions never move, so regions at different epochs always join up
+  (checked: every cell reachable with mixed epochs). Region epochs are saved with the world;
+  every chunk carries a stamp of the epochs it was built from, and stale chunks are re-written
+  in place a few per tick with the generator's own code (checked: a rebuilt chunk matches a
+  fresh one block for block). Daedalus's notes on the Drafting Room lectern explain it in-world.
+- **Finding exits and labs** (the user: "super hard to find"):
+  - 5 exits per region (was 1), and 12% of inner walls knocked through for loops and shortcuts.
+    Measured: a cell is on average 10 cells (71 blocks) from an exit, at worst 26 (a pure perfect
+    maze had walks of 159 cells).
+  - **Workmen's marks**: a copper arrow inlaid in the floor at every junction, pointing along the
+    maze toward the nearest exit, plus one inside the lab hall's right doorway and one at each
+    ladder's foot. Checked: from every junction, following the arrows reaches an exit.
+  - **Warm light**: within 9 cells of a lab, the lanterns are warm orange instead of blue.
+  - **Exit hatches** give full light and drift sparks down the corridor.
+- **The halls** (the user: "try your absolute best"): 17 x 17 and two storeys, vaulted to y 14.
+  Copper and verdigris Greek key mosaic floor; four red-and-black Minoan columns; a blue fresco
+  band after Knossos; copper bulbs in the upper walls; carved lintels over the doorways; shelves,
+  chiseled bookshelves and candles along every solid wall; and Daedalus's Wings hung on chains
+  over the middle. Three themes: the **Forge** (blast furnaces, lava, anvil, bronze stock), the
+  **Drafting Room** (a copper model of a maze on a table, map tables, and two lecterns holding
+  *On Wings* and *On the Thread*) and the **Hall of Automata** (eight bronze figures in chains,
+  as the myth says his statues had to be chained). Loot chest in the middle, Minotaur in the hall.
+
+**Placeholders to replace with real art:** every texture is a vanilla one (tuff, copper, string,
+netherite axe), and the Minotaur draws as a ravager.
+
 **Still open for the Labyrinth:**
-1. **"After 1 Minecraft day":** one day of the world's age, or of that player's own time in the
-   world? (proposed: the player's. Otherwise a new player on an old server can fall in on their
-   first block.)
+1. ~~"After 1 Minecraft day"~~ **Decided (2026-11-25): the world's age.** Nobody falls in until
+   the world has existed for 24,000 ticks; after that, every player can, including new ones.
 2. **What counts as stone?** Only `stone`, or deepslate, granite, diorite, andesite and tuff too?
    (proposed: the `#minecraft:base_stone_overworld` tag, which is all of those.)
 3. **Only blocks a player breaks by hand,** not Create drills or other machines? (proposed: yes.)

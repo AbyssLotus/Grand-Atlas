@@ -1,0 +1,10 @@
+{
+  "type": "grandatlas_myths:labyrinth",
+  "generator": {
+    "type": "grandatlas_myths:labyrinth",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "grandatlas_myths:labyrinth"
+    }
+  }
+}

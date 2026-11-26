@@ -100,3 +100,77 @@ dragon.
 
 - A package created directly under `java/` (`Blocks`) instead of inside `com.seaweed.grandatlas.myths`.
 - `asssets` and a missing namespace folder: a wrong path gives no error, the file just never loads.
+
+---
+
+## LB3: the empty Labyrinth dimension (JSON by you, command by Claude)
+
+**Goal:** a dark dimension with a Labyrinth Stone floor, and `/myths labyrinth` / `/myths leave`.
+
+| Idea | In one line | Where to look |
+|---|---|---|
+| **Dimension type** | The rules of physics: sky, light, height, beds | `data/grandatlas_myths/dimension_type/labyrinth.json` |
+| **Dimension** | The world itself: a type plus a chunk generator | `data/grandatlas_myths/dimension/labyrinth.json` |
+| **Chunk generator** | Fills each new chunk. `minecraft:flat` stacks layers; LB5 replaces it with the maze | same file |
+| **Nested JSON is read field by field** | Every name (`type`, `settings`, `layers`, `block`) is looked up exactly; replace values, never the shape | same file |
+| **`ResourceKey`** | How Java names a registered thing: registry + id | `MythsCommands.LABYRINTH` |
+| **`ServerLevel`** | One loaded world on the server; `server.getLevel(key)` | `MythsCommands.teleport` |
+| **Brigadier commands** | A tree of words; `.then` adds a child, `.requires` checks permission, `.executes` runs | `MythsCommands.onRegisterCommands` |
+| **`RegisterCommandsEvent`** | Game bus, fired each time a world starts | `GrandAtlasMyths` constructor |
+
+### Debugging tricks learned
+
+- Crash logs: skip the `at ...` lines, read the `Caused by` lines; the last one is usually the cause.
+- `/execute in <dimension> run tp @s x y z` tests a dimension before any Java exists.
+- IntelliJ **Local History** (right-click a file) brings back any saved version, committed or not.
+
+### Mistakes made on the way
+
+- `data/grandatlas_myth/` (missing s): the namespace IS the folder name.
+- `True` instead of `true`: JSON is lowercase only.
+- Replacing the whole generator object instead of one value inside it.
+- `.then(Commands.literal("Labyrinth"))` closed too early, so `.executes` attached to `/myths`
+  itself. And command words are case-sensitive.
+
+---
+
+## LB4–LB9: built by Claude (the learning exercise is paused)
+
+The rest of the Labyrinth was written in one go. Each file opens with a comment explaining it;
+these are the new ideas and where they live.
+
+| Idea | Where |
+|---|---|
+| Guard-clause event handlers; `getGameTime` vs `getDayTime`; `FakePlayer` | `labyrinth/LabyrinthEntry.java` |
+| Why teleporting inside BreakEvent is unsafe, and queuing work to the end of the tick | `labyrinth/Labyrinth.java` |
+| Persistent player data that survives death (`Player.PERSISTED_NBT_TAG`) | `labyrinth/Labyrinth.java` |
+| An infinite maze from coordinates: regions, a recursive backtracker, hashed doors | `labyrinth/LabyrinthMaze.java` |
+| A custom chunk generator and its codec; seeds from `RandomState`; heightmaps | `labyrinth/LabyrinthChunkGenerator.java` |
+| Registering a codec-based type (`Registries.CHUNK_GENERATOR`) | `world/MythsWorldgen.java` |
+| A biome in JSON: fog, ambient sound, monster spawns | `data/grandatlas_myths/worldgen/biome/labyrinth.json` |
+| Custom block behaviour: `useWithoutItem`, shapes, `canSurvive` / `updateShape` | `block/ExitHatchBlock.java`, `block/AriadneThreadBlock.java` |
+| Custom item behaviour: `inventoryTick`, durability | `item/AriadneThreadItem.java` |
+| Weapons from vanilla classes (`AxeItem`, tiers, attributes), spawn eggs, creative tabs | `item/MythsItems.java` |
+| Entities: types, attributes, boss bars, extending a vanilla mob | `entity/` |
+| Client-only code and renderers (`@EventBusSubscriber(value = Dist.CLIENT)`) | `client/MythsClient.java` |
+| Loot tables, including a written book built from components | `data/grandatlas_myths/loot_table/` |
+| Game tests: automated checks on a headless server | `dev/LabyrinthGameTests.java`, `gradlew :myths:runGameTestServer` |
+
+### Try it in game (new world, cheats on)
+
+- `/myths labyrinth` to go in, `/myths leave` to go home. Or wait a day and mine stone.
+- `/locate` doesn't know the labs (they're part of the maze, not structures). F3 shows the maze
+  cell you're in; labs and exits come about every 147 blocks.
+- Everything is in the creative tab **Myths & Legends**.
+
+### Added in the second pass (shifting, wayfinding, the halls)
+
+| Idea | Where |
+|---|---|
+| Saved data on a world (`SavedData`), and data attachments on chunks | `labyrinth/LabyrinthShift.java` |
+| Re-writing live chunks safely: diffing, emptying containers, spreading work over ticks | `LabyrinthShift.rebuild` |
+| Breadth-first search for distances and arrows | `LabyrinthMaze.nav` |
+| A block with a property (`FACING`), and a blockstate that rotates its model | `block/LabyrinthMarkerBlock.java`, `blockstates/labyrinth_marker.json` |
+| Building a model from elements instead of a parent | `models/block/labyrinth_marker.json` |
+| Client-only visual effects (`animateTick`, particles) | `block/ExitHatchBlock.java` |
+| Block entities with contents (lectern books), entities from NBT (posed armour stands) | `labyrinth/LabyrinthLab.java` |

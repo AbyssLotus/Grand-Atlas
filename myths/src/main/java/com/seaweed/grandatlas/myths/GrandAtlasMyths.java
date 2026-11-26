@@ -10,6 +10,13 @@ package com.seaweed.grandatlas.myths;
 // ─────────────────────────────────────────────────────────────────────────────
 import com.mojang.logging.LogUtils;
 import com.seaweed.grandatlas.myths.block.MythsBlocks;
+import com.seaweed.grandatlas.myths.command.MythsCommands;
+import com.seaweed.grandatlas.myths.entity.MythsEntities;
+import com.seaweed.grandatlas.myths.item.MythsItems;
+import com.seaweed.grandatlas.myths.labyrinth.Labyrinth;
+import com.seaweed.grandatlas.myths.labyrinth.LabyrinthEntry;
+import com.seaweed.grandatlas.myths.labyrinth.LabyrinthShift;
+import com.seaweed.grandatlas.myths.world.MythsWorldgen;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -104,7 +111,21 @@ public class GrandAtlasMyths {
         // small server inside your game.
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
 
+        // MOD bus: the registries (blocks, items, the creative tab, entities, the maze generator).
         MythsBlocks.register(modBus);
+        MythsItems.register(modBus);
+        MythsEntities.register(modBus);
+        MythsWorldgen.register(modBus);
+        // The shifting maze: its chunk stamps (a mod-bus registry) and its game-bus listeners.
+        LabyrinthShift.register(modBus);
+
+        // GAME bus: the game asks for commands each time a world starts. A static method,
+        // so the reference is Class::method (no `this`).
+        NeoForge.EVENT_BUS.addListener(MythsCommands::onRegisterCommands);
+        // GAME bus: the 0.1% chance of falling into the Labyrinth while mining stone...
+        NeoForge.EVENT_BUS.addListener(LabyrinthEntry::onBlockBreak);
+        // ...and the end-of-tick hook that does the queued trips in and out.
+        NeoForge.EVENT_BUS.addListener(Labyrinth::onServerTick);
     }
 
     /**

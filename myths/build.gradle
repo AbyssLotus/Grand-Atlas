@@ -74,6 +74,12 @@ neoForge {
             // The server's own window isn't needed; its console is in the terminal.
             programArgument '--nogui'
         }
+        // Dev checks (dev/LabyrinthGameTests): a headless server makes a fresh world, runs the
+        // add-on's game tests, prints the results and stops. gradlew :myths:runGameTestServer
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
     }
 
     // Tells NeoForge which compiled code belongs to which mod. Ours is all in
@@ -101,7 +107,7 @@ def copyGrandAtlas = tasks.register('copyGrandAtlas', Copy) {
     rename { 'grandatlas-dev.jar' }
 }
 // Run tasks are created by MDG, so we hook them as they appear.
-tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer'] }.configureEach {
     dependsOn copyGrandAtlas
 }
 

@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
-    "grandatlas_myths:labyrinth_stone"
+    "grandatlas_myths:labyrinth_stone",
+    "grandatlas_myths:labyrinth_bricks",
+    "grandatlas_myths:labyrinth_frieze",
+    "grandatlas_myths:labyrinth_trim",
+    "grandatlas_myths:exit_hatch",
+    "grandatlas_myths:labyrinth_marker"
   ]
 }
